@@ -1,4 +1,4 @@
-// netlify/functions/proxy.js
+//netlify/functions/proxy.js
 // Parser riscritti sul formato HTML reale di lottologia.com
 
 const https = require('https');
