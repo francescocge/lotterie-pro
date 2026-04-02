@@ -38,8 +38,7 @@ function parse10eLotto(html) {
     if (!dataM) continue;
     const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
-    const sabato = new Date(data+'T12:00:00').getDay() === 6;
-    if (!sabato) continue;
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue;
     const nums = [...blocco.matchAll(/\b([1-9]|[1-8][0-9]|90)\b/g)].map(m=>parseInt(m[0])).filter(n=>n>=1&&n<=90);
     const unici = [...new Set(nums)];
     if (unici.length >= 20) {
@@ -59,8 +58,7 @@ function parseMillionDay(html) {
     if (!dataM) continue;
     const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
-    const sabato = new Date(data+'T12:00:00').getDay() === 6;
-    if (!sabato) continue;
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue;
     const nums = [...blocco.matchAll(/\b([1-9]|[1-4][0-9]|5[0-5])\b/g)].map(m=>parseInt(m[0])).filter(n=>n>=1&&n<=55);
     const unici = [...new Set(nums)];
     if (unici.length >= 5) {
@@ -79,8 +77,7 @@ function parseLotto(html, ruota) {
     if (!dataM) continue;
     const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
-    const sabato = new Date(data+'T12:00:00').getDay() === 6;
-    if (!sabato) continue;
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue;
     const re = new RegExp(ruota+'[^0-9]*(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)', 'i');
     const m = blocco.match(re);
     if (m) {
@@ -107,7 +104,7 @@ exports.handler = async (event) => {
 
   const urlMap = {
     '10elotto':   'https://www.lotteria-nazionale.com/10elotto/estrazioni/archivio-' + anno,
-    'millionday': 'https://www.lotteria-nazionale.com/millionday/estrazioni/archivio-' + anno,
+    'millionday': 'https://www.leggo.it/lotterie/millionday/',
     'lotto':      'https://www.lotteria-nazionale.com/lotto/estrazioni/archivio-' + anno
   };
 
