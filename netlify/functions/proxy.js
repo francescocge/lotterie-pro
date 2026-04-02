@@ -1,6 +1,4 @@
-//netlify/functions/proxy.js
-// Parser riscritti sul formato HTML reale di lottologia.com
-
+// netlify/functions/proxy.js
 const https = require('https');
 const http = require('http');
 
@@ -50,21 +48,14 @@ function parseDataIta(str) {
   return mese ? m[3] + '-' + String(mese).padStart(2,'0') + '-' + m[1].padStart(2,'0') : null;
 }
 
-// ============================================================
-// PARSER 10eLotto
-// Formato lottologia: "28 Marzo 2026 ... 01.04.07.13.19.26.29..."
-// ============================================================
 function parse10eLotto(html) {
   const results = [];
   const testo = stripHtml(html);
   const meseRe = '(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)';
   const blocchi = testo.split(new RegExp('(?=\\d{1,2}\\s+' + meseRe + '\\s+\\d{4})', 'i'));
-
   for (const blocco of blocchi) {
     const data = parseDataIta(blocco);
     if (!data) continue;
-
-    // Cerca sequenza di almeno 15 numeri separati da punto
     const seqs = blocco.match(/(?:\d{1,2}\.){14,}\d{1,2}/g);
     if (seqs) {
       for (const seq of seqs) {
@@ -81,20 +72,14 @@ function parse10eLotto(html) {
   return results;
 }
 
-// ============================================================
-// PARSER MillionDay
-// Formato: "28 Marzo 2026 ... 08.21.34.46.53"
-// ============================================================
 function parseMillionDay(html) {
   const results = [];
   const testo = stripHtml(html);
   const meseRe = '(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)';
   const blocchi = testo.split(new RegExp('(?=\\d{1,2}\\s+' + meseRe + '\\s+\\d{4})', 'i'));
-
   for (const blocco of blocchi) {
     const data = parseDataIta(blocco);
     if (!data) continue;
-    // 5 numeri separati da punto, range 1-55
     const seqs = blocco.match(/\d{1,2}(?:\.\d{1,2}){4}/g);
     if (seqs) {
       for (const seq of seqs) {
@@ -111,20 +96,14 @@ function parseMillionDay(html) {
   return results;
 }
 
-// ============================================================
-// PARSER Lotto Classico
-// Formato: ruota + "06.19.44.67.83" per ogni estrazione
-// ============================================================
 function parseLotto(html, ruota) {
   const results = [];
   const testo = stripHtml(html);
   const meseRe = '(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)';
   const blocchi = testo.split(new RegExp('(?=\\d{1,2}\\s+' + meseRe + '\\s+\\d{4})', 'i'));
-
   for (const blocco of blocchi) {
     const data = parseDataIta(blocco);
     if (!data) continue;
-    // Cerca nome ruota seguito da 5 numeri punto-separati
     const re = new RegExp(ruota + '[^0-9]*(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})', 'i');
     const m = blocco.match(re);
     if (m) {
@@ -135,9 +114,6 @@ function parseLotto(html, ruota) {
   return results;
 }
 
-// ============================================================
-// HANDLER
-// ============================================================
 exports.handler = async (event) => {
   const headers = {
     'Content-Type': 'application/json',
@@ -153,12 +129,10 @@ exports.handler = async (event) => {
   const anno  = params.anno  || new Date().getFullYear();
   const ruota = params.ruota || 'Genova';
 
-  console.log('[proxy] tipo=' + tipo + ' anno=' + anno + ' ruota=' + ruota);
-
   const urlMap = {
-    '10elotto':   'https://www.lottologia.com/10elotto/archivio/' + anno,
-    'millionday': 'https://www.lottologia.com/millionday/archivio/' + anno,
-    'lotto':      'https://www.lottologia.com/lotto/archivio/' + anno + '/' + ruota.toLowerCase()
+    '10elotto':   'https://www.lottologia.com/10elotto/archivio-estrazioni/',
+    'millionday': 'https://www.lottologia.com/millionday/archivio-estrazioni/',
+    'lotto':      'https://www.lottologia.com/lotto/archivio-estrazioni/'
   };
 
   const url = urlMap[tipo];
@@ -166,14 +140,10 @@ exports.handler = async (event) => {
 
   try {
     const html = await fetchUrl(url);
-    console.log('[proxy] HTML: ' + html.length + ' chars');
-
     let parsed = [];
     if (tipo === '10elotto')   parsed = parse10eLotto(html);
     if (tipo === 'millionday') parsed = parseMillionDay(html);
     if (tipo === 'lotto')      parsed = parseLotto(html, ruota);
-
-    console.log('[proxy] Estratte: ' + parsed.length);
 
     return {
       statusCode: 200,
@@ -181,15 +151,12 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         ok: parsed.length > 0,
         tipo, anno,
-        ruota: tipo === 'lotto' ? ruota : undefined,
         count: parsed.length,
         estrazioni: parsed,
-        // snippet HTML per debug se parser fallisce
         debugHtml: parsed.length === 0 ? stripHtml(html).slice(0, 800) : undefined
       })
     };
   } catch (err) {
-    console.error('[proxy] Errore: ' + err.message);
     return {
       statusCode: 503,
       headers,
