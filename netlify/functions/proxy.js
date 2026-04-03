@@ -31,7 +31,6 @@ function stripHtml(str) {
 
 function parse10eLotto(html) {
   const results = [];
-  // Aggiunge sentinella finale per non perdere l'ultimo blocco
   const testo = stripHtml(html) + ' FINE_ARCHIVIO';
   const blocchi = testo.split(/(?=(?:Lunedì|Martedì|Mercoledì|Giovedì|Venerdì|Sabato|Domenica)\s+\d+)/i);
   for (const blocco of blocchi) {
@@ -51,58 +50,25 @@ function parse10eLotto(html) {
 }
 
 function parseMillionDay(html) {
-  // Parser riscritto per milliondaylotto.it/archivio/{anno}
-  // Struttura: tabella con righe "31 marzo 2026" e numeri tipo "* 9 * 22 * 26 * 28 * 46"
   const results = [];
-  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
-
-  // Estrae tutte le righe di data dalla tabella
-  // Formato nel testo: "31 marzo 2026 Concorso n. 180 (20:30) * 9 * 22 * 26 * 28 * 46 Concorso n. 179 (13:00) * 4 * 19 * 23 * 30 * 44"
-  const testo = stripHtml(html) + ' FINE_ARCHIVIO';
-
-  // Split per ogni data trovata
-  const blocchi = testo.split(/(?=\d{1,2}\s+(?:gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+\d{4})/i);
-
-  for (const blocco of blocchi) {
-    const dataM = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
-    if (!dataM) continue;
-    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
-
-    // Cerca il concorso serale (20:30) — primo concorso del giorno nell'archivio
-    // I numeri appaiono come sequenze di 5 numeri tra 1 e 55
-    const concorsiM = [...blocco.matchAll(/Concorso\s+n\.\s*\d+\s*\((\d{2}:\d{2})\)\s*((?:\*?\s*\d+\s*){5})/gi)];
-
-    for (const cm of concorsiM) {
-      const orario = cm[1]; // es. "20:30"
-      const numStr = cm[2];
-      const nums = [...numStr.matchAll(/\b(\d+)\b/g)]
-        .map(m => parseInt(m[1]))
-        .filter(n => n >= 1 && n <= 55);
-      const unici = [...new Set(nums)];
-      if (unici.length === 5) {
-        results.push({ data, numeri: unici, extra: [], orario });
-        break; // Prende solo il primo concorso valido per data (sera)
-      }
-    }
-
-    // Fallback: se il regex concorso non ha trovato nulla, cerca 5 numeri consecutivi
-    if (!results.find(r => r.data === data)) {
-      const nums = [...blocco.matchAll(/\b([1-9]|[1-4][0-9]|5[0-5])\b/g)]
-        .map(m => parseInt(m[0]))
-        .filter(n => n >= 1 && n <= 55);
-      const unici = [...new Set(nums)];
-      if (unici.length >= 5) {
-        results.push({ data, numeri: unici.slice(0,5), extra: [], orario: 'sera' });
-      }
+  const righe = html.split(/<tr[\s>]/i);
+  for (const riga of righe) {
+    const hrefM = riga.match(/\/estrazioni\/(\d{2})-(\d{2})-(\d{4})/);
+    if (!hrefM) continue;
+    const data = hrefM[3] + '-' + hrefM[2] + '-' + hrefM[1];
+    const numeriLi = [...riga.matchAll(/<li[^>]*>\s*(\d{1,2})\s*<\/li>/gi)]
+      .map(m => parseInt(m[1]))
+      .filter(n => n >= 1 && n <= 55);
+    const unici = [...new Set(numeriLi)];
+    if (unici.length >= 5) {
+      results.push({ data, numeri: unici.slice(0, 5), extra: [], orario: '20:30' });
     }
   }
-
   return results;
 }
 
 function parseLotto(html, ruota) {
   const results = [];
-  // Aggiunge sentinella finale per non perdere l'ultimo blocco (fix estrazione più recente)
   const testo = stripHtml(html) + ' FINE_ARCHIVIO';
   const blocchi = testo.split(/(?=(?:Lunedì|Martedì|Mercoledì|Giovedì|Venerdì|Sabato|Domenica)\s+\d+)/i);
   for (const blocco of blocchi) {
@@ -126,7 +92,7 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Cache-Control': 'public, max-age=300'  // abbassato da 1800 a 300 (5 min) per dati freschi
+    'Cache-Control': 'public, max-age=300'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
@@ -137,7 +103,7 @@ exports.handler = async (event) => {
 
   const urlMap = {
     '10elotto':   'https://www.lotteria-nazionale.com/10elotto/estrazioni/archivio-' + anno,
-    'millionday': 'https://milliondaylotto.it/archivio/' + anno,  // nuovo URL corretto
+    'millionday': 'https://milliondaylotto.it/archivio/' + anno,
     'lotto':      'https://www.lotteria-nazionale.com/lotto/estrazioni/archivio-' + anno
   };
 
@@ -170,3 +136,4 @@ exports.handler = async (event) => {
     };
   }
 };
+  
