@@ -1794,7 +1794,7 @@ async function loadMDData() {
     mdEstrazioni = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi && isSabatoMD(e.data) && e.orario === 'sera';
+        return d >= unAnnoFa && d <= oggi && (e.orario === 'sera' || e.orario === '20:30');
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -2319,6 +2319,23 @@ function parseLottoEstrazioni(html, ruota) {
   }
   if (current && current.numeri.length===5) results.push(current);
   return results;
+}
+
+function calcolaLottoStatistiche(estrazioni) {
+  const freq = {};
+  const ritardi = {};
+  for (let n = 1; n <= 90; n++) freq[n] = 0;
+  for (const e of estrazioni) {
+    for (const n of e.numeri) { if (freq[n] !== undefined) freq[n]++; }
+  }
+  for (let n = 1; n <= 90; n++) {
+    let found = false;
+    for (let i = 0; i < estrazioni.length; i++) {
+      if (estrazioni[i].numeri.includes(n)) { ritardi[n] = i; found = true; break; }
+    }
+    if (!found) ritardi[n] = estrazioni.length;
+  }
+  return { freq, ritardi };
 }
 
 function renderAllLotto() {
