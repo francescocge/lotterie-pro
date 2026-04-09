@@ -83,8 +83,9 @@ function parse10eLottoAnno(html) {
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
     if (new Date(data+'T12:00:00').getDay() !== 6) continue; // solo sabati
 
-    // Cerca il numero Oro
-    const oroM = blocco.match(/[Nn]umero\s+[Oo]ro[:\s]+(\d{1,2})/);
+    
+    // Numero Oro: nel formato estrazionilotto.it appare come '### Numero Oro 10eLotto\nNN'
+    const oroM = blocco.match(/Numero Oro 10eLotto[^0-9]*(\d{1,2})/);
     const oro = oroM ? parseInt(oroM[1]) : null;
 
     // Estrae tutti i numeri del blocco (1-90), prende i primi 20 unici
