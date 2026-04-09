@@ -1,4 +1,5 @@
 // netlify/functions/proxy.js
+// Fonte: estrazionilotto.it per Lotto e 10eLotto, milliondaylotto.it per MillionDay
 const https = require('https');
 
 function fetchUrl(url) {
@@ -10,7 +11,7 @@ function fetchUrl(url) {
         'Accept-Language': 'it-IT,it;q=0.9',
         'Accept-Encoding': 'identity'
       },
-      timeout: 10000
+      timeout: 12000
     }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return resolve(fetchUrl(res.headers.location));
@@ -30,102 +31,76 @@ function stripHtml(str) {
 }
 
 // ============================================================
-// PARSER LOTTO e 10eLotto — fonte: estrazioninumerilotto.com
-// Formato: "56/2026 del 7-4-2026 | 58 | 70 | 12 | 65 | 85"
+// PARSER LOTTO — fonte: estrazionilotto.it/lotto/archivio-storico/YYYY
+// Formato HTML: tabella con "Ruota 1° 2° 3° 4° 5°" per ogni estrazione
+// Ogni estrazione ha heading "Estrazione Lotto n. NNN" + data "giorno DD mese YYYY"
 // ============================================================
-function parseRuota(html) {
-  // Ritorna mappa { "2026-04-04": [86, 64, 56, 89, 60], ... }
-  const testo = stripHtml(html);
-  const mappa = {};
-  const re = /\d+\/\d{4}\s+del\s+(\d{1,2})-(\d{1,2})-(\d{4})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})\s+(\d{1,2})/g;
-  let m;
-  while ((m = re.exec(testo)) !== null) {
-    const data = m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
-    const numeri = [m[4],m[5],m[6],m[7],m[8]].map(n => parseInt(n));
-    mappa[data] = numeri;
-  }
-  return mappa;
-}
-
-// Slug per ogni ruota su estrazioninumerilotto.com
-const RUOTE_SLUG = {
-  'bari':      'bari_1',
-  'cagliari':  'cagliari_2',
-  'firenze':   'firenze_3',
-  'genova':    'genova_4',
-  'milano':    'milano_5',
-  'napoli':    'napoli_6',
-  'palermo':   'palermo_7',
-  'roma':      'roma_8',
-  'torino':    'torino_9',
-  'venezia':   'venezia_10'
-};
-
-function urlRuota(ruota) {
-  const slug = RUOTE_SLUG[ruota.toLowerCase()] || 'genova_4';
-  return 'https://www.estrazioninumerilotto.com/estrazioni_numeri_lotto_ruota_' + slug + '.php';
-}
-
-// Recupera Lotto per una ruota specifica, filtra solo sabati dell'anno richiesto
-async function fetchLotto(ruota, anno) {
-  const html = await fetchUrl(urlRuota(ruota));
-  const mappa = parseRuota(html);
-  return Object.entries(mappa)
-    .filter(([data]) => {
-      if (!data.startsWith(anno + '')) return false;
-      return new Date(data + 'T12:00:00').getDay() === 6;
-    })
-    .map(([data, numeri]) => ({ data, numeri: numeri.slice().sort((a,b) => a-b) }))
-    .sort((a, b) => new Date(b.data) - new Date(a.data));
-}
-
-// Recupera 10eLotto: prende tutte le 10 ruote, per ogni sabato
-// raccoglie il primo estratto di ogni ruota + aggiunge i successivi
-// finché non si arriva a 20 numeri unici (esattamente come funziona il gioco)
-async function fetch10eLotto(anno) {
-  const ruoteNomi = Object.keys(RUOTE_SLUG);
-  const htmls = await Promise.all(ruoteNomi.map(r => fetchUrl(urlRuota(r))));
-
-  // Per ogni ruota costruisce la mappa data -> [5 numeri]
-  const tutteRuote = htmls.map(html => parseRuota(html));
-
-  // Raccoglie tutte le date sabato presenti
-  const dateSet = new Set();
-  for (const mappa of tutteRuote) {
-    for (const data of Object.keys(mappa)) {
-      if (data.startsWith(anno + '') && new Date(data + 'T12:00:00').getDay() === 6) {
-        dateSet.add(data);
-      }
-    }
-  }
-
+function parseLottoAnno(html, ruota) {
   const results = [];
-  for (const data of [...dateSet].sort().reverse()) {
-    // Per ogni data, prende i numeri di tutte le ruote e li mette in ordine
-    // (prima i primi estratti di ogni ruota, poi i secondi, ecc.)
-    const pool = [];
-    for (let pos = 0; pos < 5; pos++) {
-      for (const mappa of tutteRuote) {
-        if (mappa[data] && mappa[data][pos] !== undefined) {
-          const n = mappa[data][pos];
-          if (!pool.includes(n) && n >= 1 && n <= 90) pool.push(n);
-        }
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+
+  // Split per ogni estrazione — separata da "Estrazione Lotto n."
+  const blocchi = testo.split(/Estrazione Lotto n\.\s*\d+/i);
+
+  for (const blocco of blocchi) {
+    // Cerca la data nel formato "sabato 4 aprile 2026" o "martedì 30 dicembre 2025"
+    const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (!dataM) continue;
+    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue; // solo sabati
+
+    // Cerca la riga della ruota: "Genova N1 N2 N3 N4 N5"
+    const re = new RegExp(ruota + '\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})', 'i');
+    const m = blocco.match(re);
+    if (m) {
+      const numeri = [m[1],m[2],m[3],m[4],m[5]].map(n=>parseInt(n)).filter(n=>n>=1&&n<=90);
+      if (numeri.length === 5) {
+        results.push({ data, numeri: numeri.sort((a,b)=>a-b) });
       }
-      if (pool.length >= 20) break;
-    }
-    if (pool.length >= 10) {
-      // Numero Oro = primo estratto di Bari
-      const bariiMappa = tutteRuote[0]; // bari è il primo
-      const oro = bariiMappa[data] ? bariiMappa[data][0] : null;
-      results.push({ data, numeri: pool.slice(0, 20).sort((a,b) => a-b), oro, extra: [] });
     }
   }
-
   return results;
 }
 
 // ============================================================
-// PARSER MillionDay — fonte: milliondaylotto.it
+// PARSER 10eLotto — fonte: estrazionilotto.it/10-e-lotto/archivio-storico/YYYY
+// Formato: blocchi con data + 20 numeri separati da spazio
+// ============================================================
+function parse10eLottoAnno(html) {
+  const results = [];
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+
+  // Split per ogni estrazione
+  const blocchi = testo.split(/Estrazione\s+(?:10\s*e\s*Lotto|10eLotto)\s+n\.\s*\d+/i);
+
+  for (const blocco of blocchi) {
+    const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (!dataM) continue;
+    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue; // solo sabati
+
+    // Cerca il numero Oro
+    const oroM = blocco.match(/[Nn]umero\s+[Oo]ro[:\s]+(\d{1,2})/);
+    const oro = oroM ? parseInt(oroM[1]) : null;
+
+    // Estrae tutti i numeri del blocco (1-90), prende i primi 20 unici
+    const nums = [...blocco.matchAll(/\b(\d{1,2})\b/g)]
+      .map(m => parseInt(m[1]))
+      .filter(n => n >= 1 && n <= 90);
+    const unici = [...new Set(nums)];
+    if (unici.length >= 20) {
+      results.push({ data, numeri: unici.slice(0,20).sort((a,b)=>a-b), oro, extra: [] });
+    }
+  }
+  return results;
+}
+
+// ============================================================
+// PARSER MillionDay — fonte: milliondaylotto.it/archivio/YYYY
 // ============================================================
 function parseMillionDay(html) {
   const results = [];
@@ -139,7 +114,7 @@ function parseMillionDay(html) {
       .filter(n => n >= 1 && n <= 55);
     const unici = [...new Set(numeriLi)];
     if (unici.length >= 5) {
-      results.push({ data, numeri: unici.slice(0, 5).sort((a,b) => a-b), extra: [], orario: "20:30" });
+      results.push({ data, numeri: unici.slice(0, 5).sort((a,b)=>a-b), extra: [], orario: '20:30' });
     }
   }
   return results;
@@ -162,18 +137,41 @@ exports.handler = async (event) => {
   const anno  = parseInt(params.anno  || new Date().getFullYear());
   const ruota = params.ruota || 'Genova';
 
+  // Carica sempre 2 anni: anno richiesto + anno precedente
+  const anni = [anno, anno - 1];
+
   try {
     let parsed = [];
 
     if (tipo === '10elotto') {
-      parsed = await fetch10eLotto(anno);
+      const htmls = await Promise.all(
+        anni.map(a => fetchUrl('https://www.estrazionilotto.it/10-e-lotto/archivio-storico/' + a)
+          .catch(() => ''))
+      );
+      for (const html of htmls) {
+        if (html) parsed = parsed.concat(parse10eLottoAnno(html));
+      }
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'millionday') {
-      const html = await fetchUrl('https://milliondaylotto.it/archivio/' + anno);
-      parsed = parseMillionDay(html);
+      const htmls = await Promise.all(
+        anni.map(a => fetchUrl('https://milliondaylotto.it/archivio/' + a)
+          .catch(() => ''))
+      );
+      for (const html of htmls) {
+        if (html) parsed = parsed.concat(parseMillionDay(html));
+      }
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'lotto') {
-      parsed = await fetchLotto(ruota, anno);
+      const htmls = await Promise.all(
+        anni.map(a => fetchUrl('https://www.estrazionilotto.it/lotto/archivio-storico/' + a)
+          .catch(() => ''))
+      );
+      for (const html of htmls) {
+        if (html) parsed = parsed.concat(parseLottoAnno(html, ruota));
+      }
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else {
       return { statusCode: 400, headers, body: JSON.stringify({ ok: false, error: 'Tipo non valido' }) };
@@ -187,7 +185,7 @@ exports.handler = async (event) => {
         tipo, anno,
         count: parsed.length,
         estrazioni: parsed,
-        debugHtml: parsed.length === 0 ? 'Nessun dato per anno ' + anno : undefined
+        debugHtml: parsed.length === 0 ? 'Nessun dato trovato' : undefined
       })
     };
   } catch (err) {
