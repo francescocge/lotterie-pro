@@ -30,26 +30,48 @@ function stripHtml(str) {
 }
 
 function parse10eLotto(html) {
+  // lotteria-nazionale.com: numeri separati da punto centrale (·)
+  // Formato testo: "Concorso 55/26 · 1 · 7 · 13 · ... · 86 · Numero Oro: 81 ..."
+  // Date nel formato: "Sabato 4 aprile 2026" oppure link con data
   const results = [];
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+
   const testo = stripHtml(html) + ' FINE_ARCHIVIO';
-  const blocchi = testo.split(/(?=(?:Lunedì|Martedì|Mercoledì|Giovedì|Venerdì|Sabato|Domenica)\s+\d+)/i);
+
+  // Split per "Concorso NNN/YY" — ogni blocco è una estrazione
+  const blocchi = testo.split(/(?=Concorso\s+\d+\/\d{2,4})/i);
+
   for (const blocco of blocchi) {
-    const dataM = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
-    if (!dataM) continue;
-    const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
-    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+    // Cerca data nel blocco precedente o nel testo circostante
+    let data = null;
+    const dataITA = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (dataITA) {
+      data = dataITA[3]+'-'+mesi[dataITA[2].toLowerCase()]+'-'+dataITA[1].padStart(2,'0');
+    }
+    const dataDMY = blocco.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if (!data && dataDMY) data = dataDMY[3]+'-'+dataDMY[2]+'-'+dataDMY[1];
+    if (!data) continue;
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    const nums = [...blocco.matchAll(/\b([1-9]|[1-8][0-9]|90)\b/g)].map(m=>parseInt(m[0])).filter(n=>n>=1&&n<=90);
+
+    // Estrae numeri dalla sequenza separata da ·
+    const segmenti = blocco.split(/\u00b7|\·/);
+    const nums = segmenti
+      .map(s => parseInt(s.trim()))
+      .filter(n => !isNaN(n) && n >= 1 && n <= 90);
     const unici = [...new Set(nums)];
+
     if (unici.length >= 20) {
-      const oroM = blocco.match(/Numero Oro:\s*(\d+)/i);
+      const oroM = blocco.match(/[Nn]umero\s+[Oo]ro[^0-9]*(\d+)/);
       results.push({ data, numeri: unici.slice(0,20), oro: oroM ? parseInt(oroM[1]) : null, extra: [] });
     }
   }
+
   return results;
 }
 
 function parseMillionDay(html) {
+  // Parser per milliondaylotto.it/archivio/{anno}
+  // Date dai link href="/estrazioni/DD-MM-YYYY", numeri nei tag <li>
   const results = [];
   const righe = html.split(/<tr[\s>]/i);
   for (const riga of righe) {
@@ -68,22 +90,51 @@ function parseMillionDay(html) {
 }
 
 function parseLotto(html, ruota) {
+  // lotteria-nazionale.com: numeri separati da · per ogni ruota
+  // Formato: "Genova · 35 · 77 · 61 · 40 · 86"
   const results = [];
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+
   const testo = stripHtml(html) + ' FINE_ARCHIVIO';
-  const blocchi = testo.split(/(?=(?:Lunedì|Martedì|Mercoledì|Giovedì|Venerdì|Sabato|Domenica)\s+\d+)/i);
+  const blocchi = testo.split(/(?=Concorso\s+\d+\/\d{2,4})/i);
+
   for (const blocco of blocchi) {
-    const dataM = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
-    if (!dataM) continue;
-    const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
-    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+    let data = null;
+    const dataITA = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (dataITA) {
+      data = dataITA[3]+'-'+mesi[dataITA[2].toLowerCase()]+'-'+dataITA[1].padStart(2,'0');
+    }
+    const dataDMY = blocco.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if (!data && dataDMY) data = dataDMY[3]+'-'+dataDMY[2]+'-'+dataDMY[1];
+    if (!data) continue;
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    const re = new RegExp(ruota+'[^0-9]*(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)', 'i');
+
+    // Cerca la ruota e prende i 5 numeri successivi separati da ·
+    const re = new RegExp(ruota + '\\s*(?:·\\s*)(\\d+)\\s*·\\s*(\\d+)\\s*·\\s*(\\d+)\\s*·\\s*(\\d+)\\s*·\\s*(\\d+)', 'i');
     const m = blocco.match(re);
     if (m) {
       const numeri = [m[1],m[2],m[3],m[4],m[5]].map(n=>parseInt(n)).filter(n=>n>=1&&n<=90);
       if (numeri.length === 5) results.push({ data, numeri });
     }
   }
+
+  // Fallback: cerca con spazi invece di ·
+  if (results.length === 0) {
+    const blocchi2 = testo.split(/(?=(?:Lunedì|Martedì|Mercoledì|Giovedì|Venerdì|Sabato|Domenica)\s+\d+)/i);
+    for (const blocco of blocchi2) {
+      const dataITA = blocco.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+      if (!dataITA) continue;
+      const data = dataITA[3]+'-'+mesi[dataITA[2].toLowerCase()]+'-'+dataITA[1].padStart(2,'0');
+      if (new Date(data+'T12:00:00').getDay() !== 6) continue;
+      const re = new RegExp(ruota+'[^0-9]*(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)[^0-9]+(\\d+)', 'i');
+      const m = blocco.match(re);
+      if (m) {
+        const numeri = [m[1],m[2],m[3],m[4],m[5]].map(n=>parseInt(n)).filter(n=>n>=1&&n<=90);
+        if (numeri.length === 5) results.push({ data, numeri });
+      }
+    }
+  }
+
   return results;
 }
 
@@ -125,7 +176,7 @@ exports.handler = async (event) => {
         tipo, anno,
         count: parsed.length,
         estrazioni: parsed,
-        debugHtml: parsed.length === 0 ? stripHtml(html).slice(0, 1000) : undefined
+        debugHtml: parsed.length === 0 ? stripHtml(html).slice(0, 1500) : undefined
       })
     };
   } catch (err) {
@@ -136,4 +187,3 @@ exports.handler = async (event) => {
     };
   }
 };
-  
