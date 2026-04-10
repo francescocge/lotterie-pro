@@ -1383,7 +1383,13 @@ function selezionaSerie(idx, numeri, nomeSerieParam) {
   document.getElementById('rie-info').innerHTML = `
     <strong>Numeri:</strong> ${numeri.join(' – ')}<br>
     <strong>Quanti:</strong> ${numeri.length}<br>
-    <div style="margin-top:10px;margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Opzioni Oro</div>
+    <div style="margin-top:10px;margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Puntata base</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <input type="number" id="rie-puntata" value="2" min="1" step="1" oninput="aggiornaCostoSerie()"
+        style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:14px;text-align:center">
+      <span style="font-size:10px;color:var(--soft)">€ per giocata</span>
+    </div>
+    <div style="margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Opzioni Oro</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:11px;color:var(--testo)">
         <input type="checkbox" id="rie-oro" onchange="aggiornaCostoSerie()" style="accent-color:var(--oro)"> 🌟 N.Oro <span style="color:var(--soft);font-size:10px">(+1€)</span>
@@ -1976,23 +1982,41 @@ function selezionaMDSerie(idx, numeri, nomeSerie) {
   document.querySelectorAll('#panel-md-gioca .serie-card').forEach(c=>c.classList.remove('selected-serie'));
   document.getElementById('md-serie-'+idx).classList.add('selected-serie');
 
-  // Salva in localStorage
-  const oggi = new Date().toISOString().split('T')[0];
-  const nuova = {id:Date.now(), data:oggi, numeri, nomeSerie, gioco:'millionday', esito:'attesa', vinto:0, speso:1};
-  const storico = getMDStorico();
-  const esiste = storico.find(g=>g.data===oggi && JSON.stringify(g.numeri)===JSON.stringify(numeri));
-  if (!esiste) { storico.unshift(nuova); salvaMDStorico(storico); }
-
   const box = document.getElementById('md-riepilogo-box');
   document.getElementById('md-rie-balls').innerHTML = numeri.map(n=>`<div class="md-rie-ball">${n}</div>`).join('');
   document.getElementById('md-rie-info').innerHTML = `
     <strong>Numeri:</strong> ${numeri.join(' – ')}<br>
-    <strong>Costo:</strong> 1€ (oppure 2€ con Extra MillionDay)<br>
-    <span style="color:var(--verde);font-size:10px">✅ Salvato nelle tue giocate MillionDay</span><br>
-    <span style="color:var(--rosso);font-size:9px">⚠️ Nessuna strategia garantisce vincite</span>`;
+    <div style="margin-top:10px;margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Puntata</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.25);border-radius:8px;font-size:11px;color:var(--testo)">
+        <input type="radio" name="md-puntata" id="md-p1" value="1" checked style="accent-color:#2ECC71"> 1€ base
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.4);border-radius:8px;font-size:11px;color:var(--testo)">
+        <input type="radio" name="md-puntata" id="md-p2" value="2" style="accent-color:#2ECC71"> 2€ con Extra
+      </label>
+    </div>
+    <button class="btn" id="md-conferma-btn" data-numeri="${numeri.join(',')}" data-nome="${(nomeSerie||'').replace(/'/g,'')}" onclick="confermaMDSerie()" style="background:linear-gradient(135deg,#2ECC71,#1A8A45);color:#fff;margin-top:4px">✅ Confermo — Salva giocata</button>
+    <span style="color:var(--rosso);font-size:9px;display:block;margin-top:8px">⚠️ Nessuna strategia garantisce vincite</span>`;
   box.classList.add('show');
   box.scrollIntoView({behavior:'smooth',block:'nearest'});
   renderMieGiocateMD();
+}
+
+function confermaMDSerie() {
+  const btn = document.getElementById('md-conferma-btn');
+  if (!btn) return;
+  const numeri = btn.dataset.numeri.split(',').map(Number);
+  const nomeSerie = btn.dataset.nome || 'Serie consigliata';
+  const speso = parseFloat(document.querySelector('input[name="md-puntata"]:checked')?.value) || 1;
+  const oggi = new Date().toISOString().split('T')[0];
+  const nuova = {id:Date.now(), data:oggi, numeri, nomeSerie, gioco:'millionday', esito:'attesa', vinto:0, speso};
+  const storico = getMDStorico();
+  const esiste = storico.find(g=>g.data===oggi && JSON.stringify(g.numeri)===JSON.stringify(numeri));
+  if (!esiste) { storico.unshift(nuova); salvaMDStorico(storico); }
+  renderMieGiocateMD();
+  btn.textContent = `✅ Salvato! ${speso}€`;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
 }
 
 function renderMDStorico() {
@@ -2616,22 +2640,37 @@ function selezionaLottoSerie(idx, numeri, nomeSerie) {
   document.querySelectorAll('#panel-lotto-gioca .serie-card').forEach(c=>c.classList.remove('selected-serie'));
   document.getElementById('lotto-serie-'+idx).classList.add('selected-serie');
 
-  const oggi=new Date().toISOString().split('T')[0];
-  const nuova={id:Date.now(),data:oggi,numeri,nomeSerie,ruota:lottoRuota,tipo:lottoTipoGiocata,esito:'attesa',vinto:0,speso:1};
-  const storico=getLottoStorico();
-  const esiste=storico.find(g=>g.data===oggi&&JSON.stringify(g.numeri)===JSON.stringify(numeri));
-  if(!esiste){storico.unshift(nuova);salvaLottoStorico(storico);}
-
   document.getElementById('lotto-rie-balls').innerHTML=numeri.map(n=>`<div class="rie-ball">${n}</div>`).join('');
   document.getElementById('lotto-rie-info').innerHTML=`
     <strong>Numeri:</strong> ${numeri.join(' – ')}<br>
     <strong>Tipo:</strong> ${lottoTipoGiocata} · Ruota ${lottoRuota}<br>
-    <strong>Puntata minima:</strong> 1€ per tipo<br>
-    <span style="color:var(--verde);font-size:10px">✅ Salvato nelle tue giocate Lotto</span><br>
-    <span style="color:var(--rosso);font-size:9px">⚠️ Nessuna strategia garantisce vincite</span>`;
+    <div style="margin-top:10px;margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Puntata per tipo (€)</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <input type="number" id="lotto-rie-puntata" value="1" min="1" step="1"
+        style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:14px;text-align:center">
+      <span style="font-size:10px;color:var(--soft)">€ per tipo di giocata</span>
+    </div>
+    <button class="btn" id="lotto-conferma-btn" data-numeri="${numeri.join(',')}" data-nome="${(nomeSerie||'').replace(/'/g,'')}" onclick="confermaLottoSerie()" style="margin-top:4px">✅ Confermo — Salva giocata</button>
+    <span style="color:var(--rosso);font-size:9px;display:block;margin-top:8px">⚠️ Nessuna strategia garantisce vincite</span>`;
   document.getElementById('lotto-riepilogo-box').classList.add('show');
   document.getElementById('lotto-riepilogo-box').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function confermaLottoSerie() {
+  const btn = document.getElementById('lotto-conferma-btn');
+  if (!btn) return;
+  const numeri = btn.dataset.numeri.split(',').map(Number);
+  const nomeSerie = btn.dataset.nome || 'Serie consigliata';
+  const speso = parseFloat(document.getElementById('lotto-rie-puntata')?.value) || 1;
+  const oggi = new Date().toISOString().split('T')[0];
+  const nuova = {id:Date.now(), data:oggi, numeri, nomeSerie, ruota:lottoRuota, tipo:lottoTipoGiocata, esito:'attesa', vinto:0, speso};
+  const storico = getLottoStorico();
+  const esiste = storico.find(g=>g.data===oggi&&JSON.stringify(g.numeri)===JSON.stringify(numeri));
+  if(!esiste){storico.unshift(nuova);salvaLottoStorico(storico);}
   renderMieGiocateLotto();
+  btn.textContent = `✅ Salvato! ${speso}€`;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
 }
 
 // Storico personale Lotto
@@ -2894,11 +2933,11 @@ function aggiornaCostoSerie() {
     document.getElementById('rie-oro').checked = false;
   }
   const extra = doppioOro > 0 ? doppioOro : oro;
-  const base = 2;
+  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 2;
   const totale = base + extra;
   const desc = doppioOro > 0 ? ' + Doppio Oro' : oro > 0 ? ' + Numero Oro' : '';
   const el = document.getElementById('rie-costo');
-  if (el) el.innerHTML = `Costo totale: <strong style="color:var(--oro)">${totale.toFixed(2)}€</strong><span style="color:var(--soft);font-size:10px"> (2€ base${desc})</span>`;
+  if (el) el.innerHTML = `Costo totale: <strong style="color:var(--oro)">${totale.toFixed(2)}€</strong><span style="color:var(--soft);font-size:10px"> (${base}€ base${desc})</span>`;
 }
 
 function confermaSerie() {
@@ -2909,7 +2948,8 @@ function confermaSerie() {
   const oro = document.getElementById('rie-oro')?.checked || false;
   const doppioOro = document.getElementById('rie-doppiooro')?.checked || false;
   const extra = doppioOro ? 2 : oro ? 1 : 0;
-  const speso = 2 + extra;
+  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 2;
+  const speso = base + extra;
   const opzioneOro = doppioOro ? 'doppio-oro' : oro ? 'oro' : 'nessuno';
   const oggi = new Date().toISOString().split('T')[0];
   const nuova = {
