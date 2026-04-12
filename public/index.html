@@ -869,8 +869,8 @@ function showPanel(id) {
   event.target.classList.add('active');
 }
 
-// Chiama la Netlify Function lato server (niente CORS)
-const NETLIFY_PROXY = '/.netlify/functions/proxy';
+// Chiama Vercel Serverless Function lato server (niente CORS)
+const NETLIFY_PROXY = '/api/proxy';
 
 async function fetchDatiReali(tipo, anno, ruota) {
   let url = NETLIFY_PROXY + '?tipo=' + tipo + '&anno=' + anno;
