@@ -93,61 +93,58 @@ function parse10eLottoAnno(html) {
 
 // ============================================================
 // PARSER MillionDay — fonte: milliondaylotto.it/archivio/YYYY
-// HTML: | Data | Concorso n. XXX (13:00) * 24 * 36 * 37 * 40 * 53 Concorso n. YYY (20:30) * ... |
-// Esclude Extra MillionDay
+// Pattern HTML reale: `| [12 aprile 2026] | Concorso n. 203 (13:00) * 24 * 36 * 37 * 40 * 53`
 // ============================================================
 function parseMillionDay(html) {
   const results = [];
-  const testo = stripHtml(html);
   const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
     luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
   
-  const righe = testo.split(/\n/);
-  let currentData = null;
+  // Regex per catturare blocchi data + concorsi
+  // Pattern: "[12 aprile 2026]" poi una o più righe di "Concorso n. XXX (HH:MM) * NUM * NUM ..."
+  const blockRegex = /\[(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})\][^\[]*?(?=\[|$)/gi;
   
-  for (const riga of righe) {
-    // Saltare righe Extra
-    if (riga.match(/Extra\s+MillionDay/i)) continue;
+  let match;
+  while ((match = blockRegex.exec(html)) !== null) {
+    const giorno = match[1].padStart(2, '0');
+    const mese = mesi[match[2].toLowerCase()];
+    const anno = match[3];
+    const data = anno + '-' + mese + '-' + giorno;
     
-    // Cercare data nella riga
-    const dataM = riga.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
-    if (dataM) {
-      const giorno = dataM[1].padStart(2, '0');
-      const mese = mesi[dataM[2].toLowerCase()];
-      const anno = dataM[3];
-      currentData = anno + '-' + mese + '-' + giorno;
-    }
+    const blockContent = match[0];
     
-    // Se abbiamo data, cercare TUTTI i concorsi nella riga (fino a Extra)
-    if (currentData) {
-      // Dividi per "Extra" per escludere quella parte
-      const parteNonExtra = riga.split(/Extra\s+MillionDay/i)[0];
+    // Dentro il blocco, cerca tutti i "Concorso n. XXX (HH:MM)"
+    // Ma SOLO quelli che NON contengono "Extra"
+    const preExtra = blockContent.split(/\*\*Extra/i)[0];
+    
+    // Regex per ogni concorso: "Concorso n. 203 (13:00) * 24 * 36 ..."
+    const concorsoRegex = /Concorso n\.\s*(\d+)\s*\((\d{2}:\d{2})\)\s*([\d\s\*]+?)(?=Concorso|$)/gi;
+    let concMatch;
+    
+    while ((concMatch = concorsoRegex.exec(preExtra)) !== null) {
+      const concorso = parseInt(concMatch[1]);
+      const orario = concMatch[2];
+      const numeriStr = concMatch[3];
       
-      // Regex: "Concorso n. 203 (13:00) * 24 * 36 * ... * 53"
-      const concorsiRegex = /Concorso n\.\s*(\d+)\s*\((\d{2}:\d{2})\)([\d\s*]+?)(?=Concorso|$)/gi;
-      let match;
-      
-      while ((match = concorsiRegex.exec(parteNonExtra)) !== null) {
-        const concorso = parseInt(match[1]);
-        const orario = match[2];
-        const numeriStr = match[3];
-        
-        // Estrarre numeri dal blocco: "* 24 * 36 * 37 * 40 * 53"
-        const numeriMatch = numeriStr.match(/\*\s*(\d{1,2})\s*(?=\*|$)/g) || [];
-        const numeri = numeriMatch
-          .map(s => parseInt(s.replace(/\*/g, '').trim()))
-          .filter(n => n >= 1 && n <= 55 && !isNaN(n));
-        
-        const unici = [...new Set(numeri)];
-        if (unici.length >= 5) {
-          results.push({
-            data: currentData,
-            numeri: unici.slice(0, 5).sort((a, b) => a - b),
-            orario,
-            concorso,
-            extra: []
-          });
+      // Estrai numeri: "* 24 * 36 * 37 * 40 * 53"
+      const numeri = [];
+      const numRegex = /\*\s*(\d{1,2})\s*/g;
+      let numMatch;
+      while ((numMatch = numRegex.exec(numeriStr)) !== null) {
+        const n = parseInt(numMatch[1]);
+        if (n >= 1 && n <= 55 && !numeri.includes(n)) {
+          numeri.push(n);
         }
+      }
+      
+      if (numeri.length >= 5) {
+        results.push({
+          data,
+          numeri: numeri.slice(0, 5).sort((a, b) => a - b),
+          orario,
+          concorso,
+          extra: []
+        });
       }
     }
   }
