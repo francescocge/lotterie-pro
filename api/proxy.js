@@ -93,22 +93,65 @@ function parse10eLottoAnno(html) {
 
 // ============================================================
 // PARSER MillionDay — fonte: milliondaylotto.it/archivio/YYYY
+// HTML: | Data | Concorso n. XXX (13:00) * 24 * 36 * 37 * 40 * 53 Concorso n. YYY (20:30) * ... |
+// Esclude Extra MillionDay
 // ============================================================
 function parseMillionDay(html) {
   const results = [];
-  const righe = html.split(/<tr[\s>]/i);
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+  
+  const righe = testo.split(/\n/);
+  let currentData = null;
+  
   for (const riga of righe) {
-    const hrefM = riga.match(/\/estrazioni\/(\d{2})-(\d{2})-(\d{4})/);
-    if (!hrefM) continue;
-    const data = hrefM[3] + '-' + hrefM[2] + '-' + hrefM[1];
-    const numeriLi = [...riga.matchAll(/<li[^>]*>\s*(\d{1,2})\s*<\/li>/gi)]
-      .map(m => parseInt(m[1]))
-      .filter(n => n >= 1 && n <= 55);
-    const unici = [...new Set(numeriLi)];
-    if (unici.length >= 5) {
-      results.push({ data, numeri: unici.slice(0, 5).sort((a,b)=>a-b), extra: [], orario: '20:30' });
+    // Saltare righe Extra
+    if (riga.match(/Extra\s+MillionDay/i)) continue;
+    
+    // Cercare data nella riga
+    const dataM = riga.match(/(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (dataM) {
+      const giorno = dataM[1].padStart(2, '0');
+      const mese = mesi[dataM[2].toLowerCase()];
+      const anno = dataM[3];
+      currentData = anno + '-' + mese + '-' + giorno;
+    }
+    
+    // Se abbiamo data, cercare TUTTI i concorsi nella riga (fino a Extra)
+    if (currentData) {
+      // Dividi per "Extra" per escludere quella parte
+      const parteNonExtra = riga.split(/Extra\s+MillionDay/i)[0];
+      
+      // Regex: "Concorso n. 203 (13:00) * 24 * 36 * ... * 53"
+      const concorsiRegex = /Concorso n\.\s*(\d+)\s*\((\d{2}:\d{2})\)([\d\s*]+?)(?=Concorso|$)/gi;
+      let match;
+      
+      while ((match = concorsiRegex.exec(parteNonExtra)) !== null) {
+        const concorso = parseInt(match[1]);
+        const orario = match[2];
+        const numeriStr = match[3];
+        
+        // Estrarre numeri dal blocco: "* 24 * 36 * 37 * 40 * 53"
+        const numeriMatch = numeriStr.match(/\*\s*(\d{1,2})\s*(?=\*|$)/g) || [];
+        const numeri = numeriMatch
+          .map(s => parseInt(s.replace(/\*/g, '').trim()))
+          .filter(n => n >= 1 && n <= 55 && !isNaN(n));
+        
+        const unici = [...new Set(numeri)];
+        if (unici.length >= 5) {
+          results.push({
+            data: currentData,
+            numeri: unici.slice(0, 5).sort((a, b) => a - b),
+            orario,
+            concorso,
+            extra: []
+          });
+        }
+      }
     }
   }
+  
   return results;
 }
 
