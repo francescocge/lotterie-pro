@@ -1,0 +1,27 @@
+name: Update MillionDay Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Ogni giorno a mezzanotte (UTC)
+  workflow_dispatch:     # Permette di triggerare manualmente
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Fetch MillionDay data
+        run: node .github/scripts/fetch-millionday.js
+      
+      - name: Commit and push
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "MillionDay Bot"
+          git add api/proxy.js
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update MillionDay data" && git push)
