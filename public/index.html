@@ -1800,7 +1800,8 @@ async function loadMDData() {
     mdEstrazioni = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi && (e.orario === 'sera' || e.orario === '20:30');
+        // Rigoroso: SOLO sera (20:30), ignora mattina (13:00)
+        return d >= unAnnoFa && d <= oggi && (e.orario === 'sera');
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -1832,7 +1833,16 @@ function parseMDEstrazioni(html) {
     if (dm) {
       if (current && current.numeri.length === 5) results.push(current);
       const orario = line.includes('20:30') || line.includes('sera') ? 'sera' : 'mattina';
-      current = { data: `${dm[3]}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`, numeri: [], extra: [], orario };
+      // Estrai il numero concorso (primo numero nella riga)
+      const concorsoMatch = line.match(/\b(\d{1,5})\b/);
+      const concorso = concorsoMatch ? parseInt(concorsoMatch[1]) : null;
+      current = { 
+        data: `${dm[3]}-${dm[2].padStart(2,'0')}-${dm[1].padStart(2,'0')}`, 
+        numeri: [], 
+        extra: [], 
+        orario,
+        concorso
+      };
     }
     if (current) {
       const nums = [...line.matchAll(/\b([1-9]|[1-4][0-9]|5[0-5])\b/g)]
@@ -1878,11 +1888,13 @@ function renderMDUltima() {
   if (!mdEstrazioni.length) return;
   const e = mdEstrazioni[0];
   const data = new Date(e.data + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const concorsoStr = e.concorso ? `<div style="font-size:10px;color:var(--soft);letter-spacing:1px">Concorso #${e.concorso}</div>` : '';
   document.getElementById('md-ultima-content').innerHTML = `
     <div class="estraz-meta">
       <div class="estraz-data">${data} — 20:30</div>
       <div class="estraz-num">MillionDay Sera</div>
     </div>
+    ${concorsoStr}
     <div class="sec-label">5 Numeri Estratti</div>
     <div class="balls-wrap">${e.numeri.map(n=>`<div class="md-ball" style="width:38px;height:38px;font-size:13px">${n}</div>`).join('')}</div>
     ${e.extra&&e.extra.length?`<div class="sec-label" style="margin-top:14px">Extra MillionDay</div><div class="balls-wrap">${e.extra.map(n=>`<div class="ball n">${n}</div>`).join('')}</div>`:''}`;
@@ -2024,7 +2036,8 @@ function renderMDStorico() {
   let html = `<p style="font-size:10px;color:var(--soft);margin-bottom:12px">${mdEstrazioni.length} sabati sera caricati</p><div class="storico-list">`;
   for (const e of mdEstrazioni) {
     const data = new Date(e.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
-    html += `<div class="storico-row"><div class="storico-data">📅 ${data} — 20:30</div><div class="storico-balls">${e.numeri.map(n=>`<div class="s-n" style="background:linear-gradient(135deg,#2ECC71,#1A8A45);color:#fff;font-weight:700">${n}</div>`).join('')}</div></div>`;
+    const concorsoStr = e.concorso ? `| Concorso #${e.concorso}` : '';
+    html += `<div class="storico-row"><div class="storico-data">📅 ${data} — 20:30 ${concorsoStr}</div><div class="storico-balls">${e.numeri.map(n=>`<div class="s-n" style="background:linear-gradient(135deg,#2ECC71,#1A8A45);color:#fff;font-weight:700">${n}</div>`).join('')}</div></div>`;
   }
   html += '</div>';
   document.getElementById('md-storico-content').innerHTML = html;
