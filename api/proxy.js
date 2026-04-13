@@ -80,10 +80,22 @@ function parse10eLottoAnno(html) {
     const oroM = blocco.match(/Numero Oro 10eLotto[^0-9]*(\d{1,2})/);
     const oro = oroM ? parseInt(oroM[1]) : null;
 
-    const nums = [...blocco.matchAll(/\b(\d{1,2})\b/g)]
+    // Cerca i 20 numeri estratti (escludendo rumore)
+    const allNums = [...blocco.matchAll(/\b(\d{1,2})\b/g)]
       .map(m => parseInt(m[1]))
       .filter(n => n >= 1 && n <= 90);
-    const unici = [...new Set(nums)];
+    
+    // Filtra numeri spuri (giorno, mese, anno della data)
+    const giorno = parseInt(dataM[1]);
+    const mese = parseInt(mesi[dataM[2].toLowerCase()]);
+    const anno = parseInt(dataM[3]);
+    
+    const filtrati = allNums.filter(n => 
+      n !== giorno && n !== mese && n !== anno && 
+      n !== (anno - 2000) && n !== (anno % 100)
+    );
+    
+    const unici = [...new Set(filtrati)];
     if (unici.length >= 20) {
       results.push({ data, numeri: unici.slice(0,20).sort((a,b)=>a-b), oro, extra: [] });
     }
