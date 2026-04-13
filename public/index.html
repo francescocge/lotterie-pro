@@ -869,8 +869,8 @@ function showPanel(id) {
   event.target.classList.add('active');
 }
 
-// Chiama Vercel Serverless Function lato server (niente CORS)
-const NETLIFY_PROXY = '/api/proxy';
+// Chiama la Netlify Function lato server (niente CORS)
+const NETLIFY_PROXY = '/.netlify/functions/proxy';
 
 async function fetchDatiReali(tipo, anno, ruota) {
   let url = NETLIFY_PROXY + '?tipo=' + tipo + '&anno=' + anno;
@@ -1801,7 +1801,7 @@ async function loadMDData() {
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
         // Rigoroso: SOLO sera (20:30), ignora mattina (13:00)
-        return d >= unAnnoFa && d <= oggi && (e.orario === 'sera');
+        return d >= unAnnoFa && d <= oggi && (e.orario === '20:30');
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
