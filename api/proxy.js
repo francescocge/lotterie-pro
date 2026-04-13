@@ -185,43 +185,37 @@ module.exports = async (req, res) => {
       parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'millionday') {
-      // Fallback hardcoded MillionDay (usato se il fetch fallisce)
-      const fallbackMD = [
+      // MillionDay — dati hardcoded stabili (aggiorna manualmente ogni settimana)
+      const millionDayData = [
+        {data:'2026-04-12',numeri:[24,36,37,40,53],orario:'13:00',concorso:203,extra:[]},
         {data:'2026-04-12',numeri:[24,36,37,40,53],orario:'13:00',concorso:203,extra:[]},
         {data:'2026-04-11',numeri:[14,16,31,33,45],orario:'20:30',concorso:202,extra:[]},
         {data:'2026-04-11',numeri:[7,11,15,27,55],orario:'13:00',concorso:201,extra:[]},
+        {data:'2026-04-10',numeri:[4,19,27,33,46],orario:'20:30',concorso:200,extra:[]},
+        {data:'2026-04-10',numeri:[7,34,36,43,46],orario:'13:00',concorso:199,extra:[]},
+        {data:'2026-04-09',numeri:[22,32,34,40,49],orario:'20:30',concorso:198,extra:[]},
+        {data:'2026-04-09',numeri:[18,34,42,52,55],orario:'13:00',concorso:197,extra:[]},
+        {data:'2026-04-08',numeri:[5,24,32,35,38],orario:'20:30',concorso:196,extra:[]},
+        {data:'2026-04-08',numeri:[3,25,35,49,50],orario:'13:00',concorso:195,extra:[]},
+        {data:'2026-04-07',numeri:[18,28,36,40,51],orario:'20:30',concorso:194,extra:[]},
+        {data:'2026-04-07',numeri:[15,27,36,41,47],orario:'13:00',concorso:193,extra:[]},
+        {data:'2026-04-06',numeri:[2,20,28,31,50],orario:'20:30',concorso:192,extra:[]},
+        {data:'2026-04-06',numeri:[7,10,28,39,51],orario:'13:00',concorso:191,extra:[]},
         {data:'2026-04-05',numeri:[13,24,32,34,55],orario:'20:30',concorso:190,extra:[]},
-        {data:'2026-03-29',numeri:[22,23,28,31,37],orario:'20:30',concorso:176,extra:[]},
-        {data:'2026-03-22',numeri:[13,25,29,48,50],orario:'20:30',concorso:162,extra:[]},
-        {data:'2026-03-15',numeri:[4,7,10,18,39],orario:'20:30',concorso:148,extra:[]},
-        {data:'2026-03-08',numeri:[13,23,28,39,53],orario:'20:30',concorso:134,extra:[]},
-        {data:'2026-03-01',numeri:[19,28,30,37,54],orario:'20:30',concorso:120,extra:[]},
-        {data:'2026-02-22',numeri:[2,10,30,48,51],orario:'20:30',concorso:106,extra:[]},
-        {data:'2026-02-15',numeri:[8,20,23,24,52],orario:'20:30',concorso:104,extra:[]},
-        {data:'2026-02-08',numeri:[18,26,34,35,37],orario:'20:30',concorso:82,extra:[]}
+        {data:'2026-04-05',numeri:[6,21,25,34,47],orario:'13:00',concorso:189,extra:[]},
+        {data:'2026-04-04',numeri:[15,23,34,40,49],orario:'20:30',concorso:188,extra:[]},
+        {data:'2026-04-04',numeri:[27,32,33,41,51],orario:'13:00',concorso:187,extra:[]},
+        {data:'2026-04-03',numeri:[1,3,43,50,52],orario:'20:30',concorso:186,extra:[]},
+        {data:'2026-04-03',numeri:[12,34,41,44,49],orario:'13:00',concorso:185,extra:[]}
       ];
       
-      // Tenta di scaricare i dati freschi da lotto-italia.it (max 5 secondi)
-      let fetchedData = null;
-      try {
-        const htmlPromise = fetchUrl('https://www.lotto-italia.it/millionday/archivio');
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 5000)
-        );
-        const html = await Promise.race([htmlPromise, timeoutPromise]);
-        const parsed_raw = parseMillionDay(html);
-        if (parsed_raw.length > 0) {
-          fetchedData = parsed_raw;
-        }
-      } catch (e) {
-        // Se fallisce, usa il fallback
-      }
-      
-      // Usa i dati freschi se disponibili, altrimenti il fallback
-      parsed = (fetchedData || fallbackMD).filter(e => {
+      parsed = millionDayData.filter(e => {
         const d = new Date(e.data + 'T12:00:00');
         return d.getFullYear() === anno;
       });
+      
+      // Log per debug
+      console.log(`MillionDay ${anno}: ${parsed.length} estrazioni trovate`);
 
     } else if (tipo === 'lotto') {
       const htmls = await Promise.all(
