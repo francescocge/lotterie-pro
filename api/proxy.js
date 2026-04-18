@@ -32,7 +32,48 @@ function stripHtml(str) {
 }
 
 // ============================================================
-// PARSER LOTTO — fonte: estrazionilotto.it/lotto/archivio-storico/YYYY
+// PARSER SuperEnalotto — fonte: estrazionilotto.it/superenalotto/archivio-storico/YYYY
+// ============================================================
+function parseSuperEnalottoAnno(html) {
+  const results = [];
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+
+  const blocchi = testo.split(/Estrazione\s+SuperEnalotto\s+n\.\s*\d+/i);
+
+  for (const blocco of blocchi) {
+    const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (!dataM) continue;
+    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+
+    const allNums = [...blocco.matchAll(/\b(\d{1,2})\b/g)]
+      .map(m => parseInt(m[1]))
+      .filter(n => n >= 1 && n <= 90);
+
+    const giorno = parseInt(dataM[1]);
+    const mese = parseInt(mesi[dataM[2].toLowerCase()]);
+    const anno = parseInt(dataM[3]);
+    
+    const filtrati = allNums.filter(n => 
+      n !== giorno && n !== mese && n !== anno && 
+      n !== (anno - 2000) && n !== (anno % 100)
+    );
+    
+    const unici = [...new Set(filtrati)];
+    if (unici.length >= 8) {
+      results.push({
+        data,
+        numeri: unici.slice(0,6).sort((a,b)=>a-b),
+        jolly: unici[6] || null,
+        superstar: unici[7] || null,
+        extra: []
+      });
+    }
+  }
+  return results;
+}
+
 // ============================================================
 function parseLottoAnno(html, ruota) {
   const results = [];
@@ -236,6 +277,16 @@ module.exports = async (req, res) => {
       );
       for (const html of htmls) {
         if (html) parsed = parsed.concat(parseLottoAnno(html, ruota));
+      }
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+    } else if (tipo === 'superenalotto') {
+      const htmls = await Promise.all(
+        anni.map(a => fetchUrl('https://www.estrazionilotto.it/superenalotto/archivio-storico/' + a)
+          .catch(() => ''))
+      );
+      for (const html of htmls) {
+        if (html) parsed = parsed.concat(parseSuperEnalottoAnno(html));
       }
       parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
