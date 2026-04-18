@@ -846,6 +846,80 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   </div>
 </div>
 
+<!-- ===== PANELS SUPERENALOTTO ===== -->
+<div class="panel panel-se" id="panel-se-ultima" style="display:none">
+  <div class="card">
+    <div class="card-title">💰 Ultima Estrazione SuperEnalotto</div>
+    <div id="se-ultima-content"><div class="loader"><div class="spinner"></div>Premi "Aggiorna dati" per caricare...</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📈 Panoramica SuperEnalotto</div>
+    <div class="stat-mini-grid">
+      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-estrazioni">—</div><div class="stat-mini-lbl">Estrazioni caricate</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-caldo" style="color:#2ECC71">—</div><div class="stat-mini-lbl">Numero più caldo</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-freddo" style="color:var(--rosso)">—</div><div class="stat-mini-lbl">Più ritardatario</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-se" id="panel-se-gioca" style="display:none">
+  <div class="card">
+    <div class="card-title">🎯 Verifica la Tua Giocata SuperEnalotto</div>
+    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
+      Inserisci i 6 numeri + Jolly + SuperStar e verifica se hai vinto. I numeri indovinati appariranno in <span style="background:#00FF00;color:#000;padding:2px 5px;border-radius:3px;font-weight:bold">VERDE</span>.
+    </p>
+
+    <div style="background:var(--bordo);padding:20px;border-radius:8px;margin-bottom:15px">
+      <div class="sec-label" style="margin-bottom:12px">I tuoi 6 numeri (1-90)</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:15px">
+        <input type="number" id="seNum1" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+        <input type="number" id="seNum2" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+        <input type="number" id="seNum3" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+        <input type="number" id="seNum4" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+        <input type="number" id="seNum5" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+        <input type="number" id="seNum6" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="sec-label" style="margin-bottom:8px">Jolly</div>
+          <input type="number" id="seJolly" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
+        </div>
+        <div>
+          <div class="sec-label" style="margin-bottom:8px">SuperStar</div>
+          <input type="number" id="seSuperstar" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
+        </div>
+      </div>
+    </div>
+
+    <button id="seVerificaBtn" class="big-btn" style="width:100%;padding:14px;font-size:16px;margin-bottom:20px">
+      ✅ Verifica Estrazione
+    </button>
+
+    <div id="seRisultato" style="display:none;background:var(--bordo);padding:20px;border-radius:8px;border-left:4px solid #00FF00;margin-bottom:15px">
+      <div style="font-size:12px;color:var(--soft);margin-bottom:10px" id="seRisultatoData"></div>
+      <div id="seResultDetails" style="font-weight:bold;color:var(--testo)"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 Storico SuperEnalotto 2026</div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;font-size:11px;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid #253550">
+            <th style="padding:10px;text-align:left;color:var(--soft)">Data</th>
+            <th style="padding:10px;text-align:center;color:var(--soft)">Numeri</th>
+            <th style="padding:10px;text-align:center;color:var(--soft)">Jolly</th>
+            <th style="padding:10px;text-align:center;color:var(--soft)">SuperStar</th>
+            <th style="padding:10px;text-align:center;color:var(--soft)">Azione</th>
+          </tr>
+        </thead>
+        <tbody id="seHistoryTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 </div><!-- end container -->
 
 <script>
@@ -1694,80 +1768,6 @@ function simula() {
   r.classList.add('show');
 }
 
-<!-- ===== PANELS SUPERENALOTTO ===== -->
-<div class="panel panel-se" id="panel-se-ultima" style="display:none">
-  <div class="card">
-    <div class="card-title">💰 Ultima Estrazione SuperEnalotto</div>
-    <div id="se-ultima-content"><div class="loader"><div class="spinner"></div>Premi "Aggiorna dati" per caricare...</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">📈 Panoramica SuperEnalotto</div>
-    <div class="stat-mini-grid">
-      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-estrazioni">—</div><div class="stat-mini-lbl">Estrazioni caricate</div></div>
-      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-caldo" style="color:#2ECC71">—</div><div class="stat-mini-lbl">Numero più caldo</div></div>
-      <div class="stat-mini"><div class="stat-mini-val" id="se-ov-freddo" style="color:var(--rosso)">—</div><div class="stat-mini-lbl">Più ritardatario</div></div>
-    </div>
-  </div>
-</div>
-
-<div class="panel panel-se" id="panel-se-gioca" style="display:none">
-  <div class="card">
-    <div class="card-title">🎯 Verifica la Tua Giocata SuperEnalotto</div>
-    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Inserisci i 6 numeri + Jolly + SuperStar e verifica se hai vinto. I numeri indovinati appariranno in <span style="background:#00FF00;color:#000;padding:2px 5px;border-radius:3px;font-weight:bold">VERDE</span>.
-    </p>
-
-    <div style="background:var(--bordo);padding:20px;border-radius:8px;margin-bottom:15px">
-      <div class="sec-label" style="margin-bottom:12px">I tuoi 6 numeri (1-90)</div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:15px">
-        <input type="number" id="seNum1" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum2" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum3" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum4" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum5" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum6" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div>
-          <div class="sec-label" style="margin-bottom:8px">Jolly</div>
-          <input type="number" id="seJolly" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
-        </div>
-        <div>
-          <div class="sec-label" style="margin-bottom:8px">SuperStar</div>
-          <input type="number" id="seSuperstar" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
-        </div>
-      </div>
-    </div>
-
-    <button id="seVerificaBtn" class="big-btn" style="width:100%;padding:14px;font-size:16px;margin-bottom:20px">
-      ✅ Verifica Estrazione
-    </button>
-
-    <div id="seRisultato" style="display:none;background:var(--bordo);padding:20px;border-radius:8px;border-left:4px solid #00FF00;margin-bottom:15px">
-      <div style="font-size:12px;color:var(--soft);margin-bottom:10px" id="seRisultatoData"></div>
-      <div id="seResultDetails" style="font-weight:bold;color:var(--testo)"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📅 Storico SuperEnalotto 2026</div>
-    <div style="overflow-x:auto">
-      <table style="width:100%;font-size:11px;border-collapse:collapse">
-        <thead>
-          <tr style="border-bottom:1px solid #253550">
-            <th style="padding:10px;text-align:left;color:var(--soft)">Data</th>
-            <th style="padding:10px;text-align:center;color:var(--soft)">Numeri</th>
-            <th style="padding:10px;text-align:center;color:var(--soft)">Jolly</th>
-            <th style="padding:10px;text-align:center;color:var(--soft)">SuperStar</th>
-            <th style="padding:10px;text-align:center;color:var(--soft)">Azione</th>
-          </tr>
-        </thead>
-        <tbody id="seHistoryTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
 
 // ============================================================
 // INIT
@@ -1817,7 +1817,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = 'none');
     showPanelMD('md-ultima');
     if (!mdEstrazioni.length) loadMDData();
-  } else {
+  } else if (gioco === 'lotto') {
     // Lotto classico
     document.getElementById('hdr-title').textContent = 'Lotto Classico';
     document.getElementById('hdr-sub').textContent = 'Previsioni & Statistiche — Ruota di Genova · Sabati';
