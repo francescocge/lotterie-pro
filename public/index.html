@@ -267,6 +267,13 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-finali')">🔢 Finali</button>
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-storico')">📅 Storico</button>
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-premi')">💰 Premi</button>
+  <!-- Tab SuperEnalotto — nascoste di default -->
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-ultima')">💰 Ultima</button>
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-gioca')">🏆 Gioca</button>
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-miegiocate')">📋 Le Mie</button>
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-freq')">📊 Frequenti</button>
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-ritard')">⏳ Ritardi</button>
+  <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-storico')">📅 Storico</button>
 </div>
 
 <!-- PANEL: ULTIMA ESTRAZIONE 10eLotto -->
@@ -900,8 +907,51 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
       <div style="font-size:12px;color:var(--soft);margin-bottom:10px" id="seRisultatoData"></div>
       <div id="seResultDetails" style="font-weight:bold;color:var(--testo)"></div>
     </div>
+    
+    <p style="font-size:10px;color:var(--soft);margin-top:20px;line-height:1.7">
+      💡 <strong>Salva la tua giocata:</strong> Inserisci i numeri qui sopra, poi vai alla sezione <strong>"📋 Le Mie"</strong> e clicca "💾 Salva giocata corrente".
+    </p>
   </div>
+</div>
 
+<!-- PANEL: MIE GIOCATE SuperEnalotto -->
+<div class="panel panel-se" id="panel-se-miegiocate" style="display:none">
+  <div class="card">
+    <div class="card-title">📋 Le Mie Giocate SuperEnalotto</div>
+    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
+      Salva le tue schedine preferite e verifica automaticamente se hai vinto alle ultime estrazioni.
+    </p>
+    
+    <button class="btn" onclick="salvaSEGiocataCorrente()" style="background:linear-gradient(135deg,#1A8A45,#0D5C2E);color:#fff;margin-bottom:20px">
+      💾 Salva giocata corrente (da sezione Gioca)
+    </button>
+    
+    <div class="riepilogo-totali">
+      <div class="rit-stat"><div class="rit-val" id="se-mg-tot-giocate" style="color:var(--oro)">0</div><div class="rit-lbl">Giocate</div></div>
+      <div class="rit-stat"><div class="rit-val" id="se-mg-tot-vinte" style="color:var(--verde)">0</div><div class="rit-lbl">Vincite</div></div>
+    </div>
+    <div id="se-mg-lista"></div>
+  </div>
+</div>
+
+<!-- PANEL: FREQUENZE SuperEnalotto -->
+<div class="panel panel-se" id="panel-se-freq" style="display:none">
+  <div class="card">
+    <div class="card-title">📊 Numeri Più Frequenti SuperEnalotto — 2026</div>
+    <div id="se-freq-content"><div class="loader"><div class="spinner"></div>Caricamento...</div></div>
+  </div>
+</div>
+
+<!-- PANEL: RITARDI SuperEnalotto -->
+<div class="panel panel-se" id="panel-se-ritard" style="display:none">
+  <div class="card">
+    <div class="card-title">⏳ Numeri Ritardatari SuperEnalotto — 2026</div>
+    <div id="se-ritard-content"><div class="loader"><div class="spinner"></div>Caricamento...</div></div>
+  </div>
+</div>
+
+<!-- PANEL: STORICO SuperEnalotto -->
+<div class="panel panel-se" id="panel-se-storico" style="display:none">
   <div class="card">
     <div class="card-title">📅 Storico SuperEnalotto 2026</div>
     <div style="overflow-x:auto">
@@ -944,8 +994,8 @@ function showPanel(id) {
   event.target.classList.add('active');
 }
 
-// Chiama la Netlify Function lato server (niente CORS)
-const NETLIFY_PROXY = '/.netlify/functions/proxy';
+// Chiama la Vercel Function lato server (niente CORS)
+const NETLIFY_PROXY = '/api/proxy';
 
 async function fetchDatiReali(tipo, anno, ruota) {
   let url = NETLIFY_PROXY + '?tipo=' + tipo + '&anno=' + anno;
@@ -1802,6 +1852,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = '');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-lotto').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.panel-se').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.nav-tab-10e').forEach(t => t.style.display = '');
     document.querySelectorAll('.nav-tab-md').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = 'none');
@@ -1812,6 +1863,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = '');
     document.querySelectorAll('.panel-lotto').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.panel-se').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.nav-tab-10e').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-md').forEach(t => t.style.display = '');
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = 'none');
@@ -1824,6 +1876,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-lotto').forEach(p => p.style.display = '');
+    document.querySelectorAll('.panel-se').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.nav-tab-10e').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-md').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = '');
@@ -1844,7 +1897,12 @@ function switchGioco(gioco) {
     document.querySelectorAll('.nav-tab-10e').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-md').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.nav-tab-se').forEach(t => t.style.display = '');
+    // Attiva prima tab manualmente
+    document.querySelectorAll('.panel-se').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab-se').forEach(t=>t.classList.remove('active'));
     document.getElementById('panel-se-ultima').classList.add('active');
+    document.querySelectorAll('.nav-tab-se')[0].classList.add('active');
     if (!seEstrazioni.length) loadSuperEnalottoTab();
   }
 }
@@ -3357,6 +3415,226 @@ function verificaSuperEnalotto() {
   document.getElementById('seRisultatoData').textContent = `Estrazione del ${dataStr}`;
   document.getElementById('seResultDetails').innerHTML = result;
   document.getElementById('seRisultato').style.display = 'block';
+}
+
+// ============================================================
+// NAVIGAZIONE PANEL SUPERENALOTTO
+// ============================================================
+function showPanelSE(id) {
+  document.querySelectorAll('.panel-se').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-se').forEach(t => t.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (event && event.target) event.target.classList.add('active');
+  
+  // Carica dati quando apro le sezioni
+  if (id === 'se-freq') displaySuperEnalottoFreq();
+  if (id === 'se-ritard') displaySuperEnalottoRitardi();
+  if (id === 'se-miegiocate') renderSEMieGiocate();
+}
+
+// ============================================================
+// FREQUENZE SUPERENALOTTO
+// ============================================================
+function displaySuperEnalottoFreq() {
+  if (seEstrazioni.length === 0) {
+    document.getElementById('se-freq-content').innerHTML = '<div class="error-box">Nessuna estrazione disponibile</div>';
+    return;
+  }
+  
+  // Calcola frequenze (conta quante volte ogni numero è uscito)
+  const freq = {};
+  for (let i = 1; i <= 90; i++) freq[i] = 0;
+  
+  seEstrazioni.forEach(e => {
+    e.numeri.forEach(n => freq[n]++);
+  });
+  
+  // Ordina per frequenza decrescente
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  const max = sorted[0][1];
+  
+  let html = `
+    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
+      Analisi delle <strong style="color:var(--testo)">${seEstrazioni.length} estrazioni</strong> caricate.
+      I numeri sono ordinati per frequenza decrescente (dal più uscito al meno uscito).
+    </p>
+  `;
+  
+  sorted.forEach(([num, cnt]) => {
+    const pct = (cnt / seEstrazioni.length * 100).toFixed(1);
+    const barWidth = max > 0 ? (cnt / max * 100) : 0;
+    html += `
+      <div class="freq-row">
+        <div class="freq-n">${num}</div>
+        <div class="freq-bg">
+          <div class="freq-bar" style="width:${barWidth}%">
+            <span class="freq-bar-txt">${cnt}x</span>
+          </div>
+        </div>
+        <div class="freq-pct">${pct}%</div>
+      </div>
+    `;
+  });
+  
+  document.getElementById('se-freq-content').innerHTML = html;
+}
+
+// ============================================================
+// RITARDI SUPERENALOTTO
+// ============================================================
+function displaySuperEnalottoRitardi() {
+  if (seEstrazioni.length === 0) {
+    document.getElementById('se-ritard-content').innerHTML = '<div class="error-box">Nessuna estrazione disponibile</div>';
+    return;
+  }
+  
+  // Calcola ritardi (quante estrazioni fa è uscito ogni numero)
+  const ritardi = {};
+  for (let i = 1; i <= 90; i++) ritardi[i] = seEstrazioni.length; // Max ritardo possibile
+  
+  seEstrazioni.forEach((e, idx) => {
+    e.numeri.forEach(n => {
+      if (ritardi[n] === seEstrazioni.length) {
+        ritardi[n] = idx; // Salva l'indice della prima volta che esce
+      }
+    });
+  });
+  
+  // Ordina per ritardo decrescente
+  const sorted = Object.entries(ritardi).sort((a, b) => b[1] - a[1]);
+  const maxRit = sorted[0][1];
+  
+  let html = `
+    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
+      Ritardo = quante estrazioni sono passate dall'ultima uscita di un numero.
+      <strong style="color:var(--rosso)">Rosso</strong> = più ritardatari, <strong style="color:var(--verde)">Verde</strong> = usciti di recente.
+    </p>
+  `;
+  
+  sorted.forEach(([num, rit]) => {
+    const barWidth = maxRit > 0 ? (rit / maxRit * 100) : 0;
+    const color = rit > seEstrazioni.length / 2 ? 'var(--rosso)' : 'var(--verde)';
+    html += `
+      <div class="freq-row">
+        <div class="freq-n" style="color:${color}">${num}</div>
+        <div class="freq-bg">
+          <div class="freq-bar" style="width:${barWidth}%;background:${color}">
+            <span class="freq-bar-txt">${rit === seEstrazioni.length ? 'Mai uscito' : rit + ' estr. fa'}</span>
+          </div>
+        </div>
+        <div class="freq-pct" style="color:${color}">${rit}</div>
+      </div>
+    `;
+  });
+  
+  document.getElementById('se-ritard-content').innerHTML = html;
+}
+
+// ============================================================
+// MIE GIOCATE SUPERENALOTTO - SALVATAGGIO
+// ============================================================
+function salvaSEGiocataCorrente() {
+  // Legge i numeri dalla sezione Gioca
+  const nums = [];
+  for (let i = 1; i <= 6; i++) {
+    const val = parseInt(document.getElementById('seNum' + i).value);
+    if (!val || val < 1 || val > 90) {
+      alert('⚠️ Inserisci 6 numeri validi (1-90) nella sezione Gioca');
+      return;
+    }
+    if (nums.includes(val)) {
+      alert('⚠️ Numeri duplicati! Ogni numero deve essere unico');
+      return;
+    }
+    nums.push(val);
+  }
+  
+  const jolly = parseInt(document.getElementById('seJolly').value);
+  const superstar = parseInt(document.getElementById('seSuperstar').value);
+  
+  if (!jolly || jolly < 1 || jolly > 90) {
+    alert('⚠️ Inserisci Jolly valido (1-90)');
+    return;
+  }
+  if (!superstar || superstar < 1 || superstar > 90) {
+    alert('⚠️ Inserisci SuperStar valido (1-90)');
+    return;
+  }
+  
+  // Salva in localStorage
+  let giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
+  giocate.push({
+    numeri: nums.sort((a,b) => a-b),
+    jolly: jolly,
+    superstar: superstar,
+    data: new Date().toISOString().split('T')[0]
+  });
+  localStorage.setItem('se_giocate', JSON.stringify(giocate));
+  
+  alert('✅ Giocata salvata! Vai alla sezione "📋 Le Mie" per vederla.');
+  renderSEMieGiocate();
+}
+
+function renderSEMieGiocate() {
+  const giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
+  
+  if (giocate.length === 0) {
+    document.getElementById('se-mg-lista').innerHTML = '<div class="error-box">Nessuna giocata salvata. Vai alla sezione Gioca e clicca "💾 Salva giocata corrente".</div>';
+    document.getElementById('se-mg-tot-giocate').textContent = '0';
+    document.getElementById('se-mg-tot-vinte').textContent = '0';
+    return;
+  }
+  
+  let html = '';
+  let totVincite = 0;
+  
+  giocate.forEach((g, idx) => {
+    // Verifica se ha vinto (solo se ci sono estrazioni)
+    let vincita = '';
+    if (seEstrazioni.length > 0) {
+      const ultima = seEstrazioni[0];
+      const indovinati = g.numeri.filter(n => ultima.numeri.includes(n)).length;
+      const jollyOk = (g.jolly === ultima.jolly);
+      const superstarOk = (g.superstar === ultima.superstar);
+      
+      if (indovinati >= 2) {
+        totVincite++;
+        vincita = `<div style="color:var(--verde);font-weight:bold;margin-top:8px">✅ ${indovinati} numeri + ${jollyOk ? 'Jolly' : ''} ${superstarOk ? '+ SuperStar' : ''}</div>`;
+      } else {
+        vincita = `<div style="color:var(--soft);margin-top:8px">❌ ${indovinati} numeri (min. 2 per vincere)</div>`;
+      }
+    }
+    
+    html += `
+      <div style="background:var(--bordo);padding:15px;border-radius:8px;margin-bottom:12px;border-left:4px solid var(--oro)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:11px;color:var(--soft)">Giocata #${idx + 1} · ${g.data}</div>
+          <button class="btn-small" onclick="eliminaSEGiocata(${idx})" style="background:var(--rosso);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;border:none;cursor:pointer">🗑️ Elimina</button>
+        </div>
+        <div style="font-size:13px;font-weight:bold;margin-bottom:5px">
+          ${g.numeri.map(n => `<span style="background:var(--fondo);padding:5px 10px;margin:2px;border-radius:4px;display:inline-block">${n}</span>`).join('')}
+        </div>
+        <div style="font-size:12px;color:var(--soft)">
+          Jolly: <span style="background:#DC3545;color:#fff;padding:3px 8px;border-radius:4px">${g.jolly}</span> | 
+          SuperStar: <span style="background:#007BFF;color:#fff;padding:3px 8px;border-radius:4px">${g.superstar}</span>
+        </div>
+        ${vincita}
+      </div>
+    `;
+  });
+  
+  document.getElementById('se-mg-lista').innerHTML = html;
+  document.getElementById('se-mg-tot-giocate').textContent = giocate.length;
+  document.getElementById('se-mg-tot-vinte').textContent = totVincite;
+}
+
+function eliminaSEGiocata(idx) {
+  if (!confirm('Eliminare questa giocata?')) return;
+  let giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
+  giocate.splice(idx, 1);
+  localStorage.setItem('se_giocate', JSON.stringify(giocate));
+  renderSEMieGiocate();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
