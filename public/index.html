@@ -1609,6 +1609,27 @@ function salvaStorico(storico) {
   catch(e) { console.warn('localStorage non disponibile'); }
 }
 
+// Trova l'estrazione più vicina (successiva o uguale) alla data di giocata
+function trovaSabatoVicino10e(dataGiocata) {
+  if (!allEstrazioni || allEstrazioni.length === 0) return null;
+  const dg = new Date(dataGiocata + 'T12:00:00');
+  let best = null;
+  let bestDiff = Infinity;
+  allEstrazioni.forEach(e => {
+    const de = new Date(e.data + 'T12:00:00');
+    const diff = de - dg;
+    if (diff >= 0 && diff < bestDiff) { bestDiff = diff; best = e; }
+  });
+  if (!best) {
+    allEstrazioni.forEach(e => {
+      const de = new Date(e.data + 'T12:00:00');
+      const diff = Math.abs(de - dg);
+      if (diff < bestDiff) { bestDiff = diff; best = e; }
+    });
+  }
+  return best;
+}
+
 function renderMieGiocate() {
   const storico = getStorico();
   const lista = document.getElementById('mg-lista');
@@ -1632,8 +1653,7 @@ function renderMieGiocate() {
     return;
   }
 
-  // Ultima estrazione disponibile per il confronto
-  const ultimaEstr = allEstrazioni.length ? allEstrazioni[0] : null;
+  // NB: il confronto ora usa l'estrazione più vicina alla data di ogni giocata
 
   let html = '';
   for (const g of storico) {
@@ -1643,33 +1663,23 @@ function renderMieGiocate() {
     const importoTxt = g.esito === 'vincente' ? `+${(g.vinto||0).toFixed(2)}€` : g.esito === 'perdente' ? `-${(g.speso||0).toFixed(2)}€` : '—';
     const importoClass = g.esito === 'vincente' ? 'pos' : g.esito === 'perdente' ? 'neg' : 'neu';
 
-    // Confronto con ultima estrazione
+    // Confronto con l'estrazione più vicina alla data di giocata
+    const estrRef = trovaSabatoVicino10e(g.data);
     let confrontoHtml = '';
-    if (ultimaEstr && ultimaEstr.data === g.data) {
-      const estratti = ultimaEstr.numeri || [];
+    if (estrRef) {
+      const estratti = estrRef.numeri || [];
       const indovinati = g.numeri.filter(n => estratti.includes(n));
       const hit = indovinati.length;
-      const isOro = ultimaEstr.oro && g.numeri.includes(ultimaEstr.oro);
+      const isOro = estrRef.oro && g.numeri.includes(estrRef.oro);
       let risultatoTxt = hit === 0 ? '0 indovinati' : hit === 1 ? '1 indovinato' : `${hit} indovinati`;
       if (isOro) risultatoTxt += ' + N.Oro! 🌟';
       const coloreHit = hit >= 3 ? 'var(--verde)' : hit >= 2 ? 'var(--oro)' : 'var(--soft)';
       confrontoHtml = `
         <div style="margin:8px 0;padding:8px 10px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:10px">
-          <span style="color:var(--soft)">Confronto estrazione ${new Date(ultimaEstr.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
+          <span style="color:var(--soft)">Estrazione del ${new Date(estrRef.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
           <strong style="color:${coloreHit};margin-left:6px">${risultatoTxt}</strong>
           ${hit > 0 ? `<span style="color:var(--soft);margin-left:6px">(${indovinati.join(', ')})</span>` : ''}
         </div>`;
-    } else if (ultimaEstr) {
-      // Mostra confronto con l'ultima disponibile se la data coincide
-      const estratti = ultimaEstr.numeri || [];
-      const indovinati = g.numeri.filter(n => estratti.includes(n));
-      if (indovinati.length > 0) {
-        confrontoHtml = `
-          <div style="margin:8px 0;padding:8px 10px;background:rgba(61,184,122,.06);border:1px solid rgba(61,184,122,.2);border-radius:8px;font-size:10px">
-            <span style="color:var(--soft)">Vs ultima estr. disponibile:</span>
-            <strong style="color:var(--verde);margin-left:6px">${indovinati.length} comuni: ${indovinati.join(', ')}</strong>
-          </div>`;
-      }
     }
 
     const badgeOro = g.opzioneOro === 'doppio-oro' ? ' ⭐⭐ Doppio Oro' : g.opzioneOro === 'oro' ? ' 🌟 N.Oro' : '';
@@ -1684,8 +1694,8 @@ function renderMieGiocate() {
         </div>
         <div class="mg-balls">
           ${g.numeri.map(n => {
-            const isHit = ultimaEstr && ultimaEstr.numeri && ultimaEstr.numeri.includes(n);
-            const isOro = ultimaEstr && ultimaEstr.oro === n;
+            const isHit = estrRef && estrRef.numeri && estrRef.numeri.includes(n);
+            const isOro = estrRef && estrRef.oro === n;
             const style = isOro ? 'background:linear-gradient(135deg,#FFD700,#C9A84C);color:#000;box-shadow:0 2px 10px rgba(255,215,0,.6)'
                         : isHit ? 'background:linear-gradient(135deg,#3DB87A,#1A8A45);color:#fff;box-shadow:0 2px 8px rgba(61,184,122,.5)'
                         : '';
@@ -2275,8 +2285,6 @@ function renderMieGiocateMD() {
   const lista=document.getElementById('md-mg-lista');
   if (!storico.length) { lista.innerHTML='<div style="font-size:11px;color:var(--soft);text-align:center;padding:30px">Nessuna giocata salvata.<br>Vai su 💎 Gioca, scegli una serie e premi "Gioco questa serie sabato".</div>'; return; }
 
-  const ultimaMD = mdEstrazioni.length ? mdEstrazioni[0] : null;
-
   let html='';
   for (const g of storico) {
     const dataFmt=new Date(g.data+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
@@ -2285,17 +2293,32 @@ function renderMieGiocateMD() {
     const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:'—';
     const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'neu';
 
-    // Confronto con ultima estrazione MD
+    // Trova estrazione più vicina alla data di giocata
+    const estrRefMD = (() => {
+      if (!mdEstrazioni.length) return null;
+      const dg = new Date(g.data+'T12:00:00');
+      let best=null, bestDiff=Infinity;
+      mdEstrazioni.forEach(e => {
+        const diff = new Date(e.data+'T12:00:00') - dg;
+        if (diff >= 0 && diff < bestDiff) { bestDiff=diff; best=e; }
+      });
+      if (!best) mdEstrazioni.forEach(e => {
+        const diff = Math.abs(new Date(e.data+'T12:00:00') - dg);
+        if (diff < bestDiff) { bestDiff=diff; best=e; }
+      });
+      return best;
+    })();
+
     let confrontoHtml='';
-    if (ultimaMD) {
-      const indovinati = g.numeri.filter(n => ultimaMD.numeri.includes(n));
+    if (estrRefMD) {
+      const indovinati = g.numeri.filter(n => estrRefMD.numeri.includes(n));
       if (indovinati.length > 0) {
         const hit = indovinati.length;
         const premi = {2:'2€',3:'50€',4:'1.000€',5:'1.000.000€'};
         const premio = premi[hit] ? ` → ${premi[hit]}!` : '';
         const col = hit>=3?'var(--verde)':hit>=2?'var(--oro)':'var(--soft)';
         confrontoHtml=`<div style="margin:8px 0;padding:8px 10px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);border-radius:8px;font-size:10px">
-          <span style="color:var(--soft)">Vs ultima estr. ${new Date(ultimaMD.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
+          <span style="color:var(--soft)">Estr. del ${new Date(estrRefMD.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
           <strong style="color:${col};margin-left:6px">${hit} indovinat${hit===1?'o':'i'}${premio}</strong>
           <span style="color:var(--soft);margin-left:4px">(${indovinati.join(', ')})</span>
         </div>`;
@@ -2305,7 +2328,7 @@ function renderMieGiocateMD() {
     html+=`<div class="mia-giocata ${g.esito}">
       <div class="mg-header"><div><div class="mg-data">📅 ${dataFmt}</div><div style="font-size:9px;color:var(--soft);margin-top:2px;letter-spacing:1px">${g.nomeSerie||''}</div></div><span class="mg-esito ${ec}">${et}</span></div>
       <div class="mg-balls">${g.numeri.map(n=>{
-        const isHit=ultimaMD&&ultimaMD.numeri.includes(n);
+        const isHit=estrRefMD&&estrRefMD.numeri.includes(n);
         const st=isHit?'background:linear-gradient(135deg,#2ECC71,#1A8A45);color:#fff;box-shadow:0 2px 8px rgba(46,204,113,.5)':'';
         return `<div class="md-mg-ball" style="${st}">${n}</div>`;
       }).join('')}</div>
@@ -2913,8 +2936,7 @@ function renderMieGiocateLotto() {
   const lista=document.getElementById('lotto-mg-lista');
   if(!storico.length){lista.innerHTML='<div style="font-size:11px;color:var(--soft);text-align:center;padding:30px">Nessuna giocata salvata.<br>Vai su 🏆 Previsioni, scegli una serie e premi "Gioco questa serie".</div>';return;}
 
-  // Ultima estrazione Lotto disponibile per la ruota corrente
-  const ultimaLotto = (lottoEstrazioni[lottoRuota]||[]).length ? lottoEstrazioni[lottoRuota][0] : null;
+  const estrLottoArr = lottoEstrazioni[lottoRuota]||[];
 
   let html='';
   for(const g of storico){
@@ -2924,16 +2946,31 @@ function renderMieGiocateLotto() {
     const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:'—';
     const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'neu';
 
-    // Confronto con ultima estrazione lotto
+    // Trova estrazione più vicina alla data di giocata
+    const estrRefLotto = (() => {
+      if (!estrLottoArr.length) return null;
+      const dg = new Date(g.data+'T12:00:00');
+      let best=null, bestDiff=Infinity;
+      estrLottoArr.forEach(e => {
+        const diff = new Date(e.data+'T12:00:00') - dg;
+        if (diff >= 0 && diff < bestDiff) { bestDiff=diff; best=e; }
+      });
+      if (!best) estrLottoArr.forEach(e => {
+        const diff = Math.abs(new Date(e.data+'T12:00:00') - dg);
+        if (diff < bestDiff) { bestDiff=diff; best=e; }
+      });
+      return best;
+    })();
+
     let confrontoHtml='';
-    if(ultimaLotto) {
-      const indovinati=g.numeri.filter(n=>ultimaLotto.numeri.includes(n));
+    if(estrRefLotto) {
+      const indovinati=g.numeri.filter(n=>estrRefLotto.numeri.includes(n));
       const hit=indovinati.length;
       if(hit>0){
         const tipoVincita=hit>=4?'Quaterna! 🏆':hit>=3?'Terno! 🎉':hit>=2?'Ambo! ✨':'Ambata';
         const col=hit>=3?'var(--verde)':hit>=2?'var(--oro)':'var(--soft)';
         confrontoHtml=`<div style="margin:8px 0;padding:8px 10px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:10px">
-          <span style="color:var(--soft)">Vs ultima estr. ${g.ruota||lottoRuota} ${new Date(ultimaLotto.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
+          <span style="color:var(--soft)">Estr. ${g.ruota||lottoRuota} del ${new Date(estrRefLotto.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span>
           <strong style="color:${col};margin-left:6px">${hit} indovinat${hit===1?'o':'i'} — ${tipoVincita}</strong>
           <span style="color:var(--soft);margin-left:4px">(${indovinati.join(', ')})</span>
         </div>`;
@@ -2945,7 +2982,7 @@ function renderMieGiocateLotto() {
       <div style="font-size:9px;color:var(--soft);margin-top:2px;letter-spacing:1px">${g.nomeSerie||''} · ${g.tipo||''} · ${g.ruota||''}</div></div>
       <span class="mg-esito ${ec}">${et}</span></div>
       <div class="mg-balls">${g.numeri.map(n=>{
-        const isHit=ultimaLotto&&ultimaLotto.numeri.includes(n);
+        const isHit=estrRefLotto&&estrRefLotto.numeri.includes(n);
         const st=isHit?'background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;box-shadow:0 2px 8px rgba(201,168,76,.5)':'';
         return `<div class="mg-ball" style="${st}">${n}</div>`;
       }).join('')}</div>
