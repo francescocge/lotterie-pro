@@ -1,18 +1,25 @@
 export default async function handler(req, res) {
+  console.log('🔧 Proxy handler chiamato:', req.method, req.url);
+  console.log('📋 Query params:', req.query);
+  
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
+    console.log('✅ OPTIONS request OK');
     return res.status(200).end();
   }
 
   const { tipo, anno, ruota } = req.query;
 
   if (!tipo || !anno) {
+    console.error('❌ Parametri mancanti:', { tipo, anno });
     return res.status(400).json({ ok: false, error: 'Parametri mancanti: tipo e anno richiesti' });
   }
+
+  console.log(`🎯 Parsing ${tipo} anno ${anno}${ruota ? ' ruota ' + ruota : ''}`);
 
   try {
     let estrazioni = [];
@@ -32,9 +39,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, error: 'Tipo non valido: ' + tipo });
     }
 
+    console.log(`✅ Trovate ${estrazioni.length} estrazioni per ${tipo}`);
     return res.status(200).json({ ok: true, estrazioni });
   } catch (err) {
-    console.error('Errore proxy:', err);
+    console.error('❌ Errore proxy:', err.message, err.stack);
     return res.status(500).json({ ok: false, error: err.message });
   }
 }

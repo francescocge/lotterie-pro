@@ -1023,11 +1023,19 @@ const NETLIFY_PROXY = '/api/proxy';
 async function fetchDatiReali(tipo, anno, ruota) {
   let url = NETLIFY_PROXY + '?tipo=' + tipo + '&anno=' + anno;
   if (ruota) url += '&ruota=' + encodeURIComponent(ruota);
-  const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const json = await r.json();
-  if (!json.ok) throw new Error(json.error || 'Errore server');
-  return json.estrazioni || [];
+  console.log('📡 Chiamata API:', url);
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    console.log('📥 Risposta HTTP:', r.status, r.statusText);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const json = await r.json();
+    console.log('📊 Dati ricevuti:', json);
+    if (!json.ok) throw new Error(json.error || 'Errore server');
+    return json.estrazioni || [];
+  } catch (err) {
+    console.error('❌ Errore fetch:', err);
+    throw err;
+  }
 }
 
 // ============================================================
@@ -1149,7 +1157,12 @@ async function loadAllData() {
     document.getElementById('badge-txt').textContent = '⚠ Errore dati';
     document.getElementById('last-upd').textContent = 'Impossibile scaricare dati reali: ' + err.message;
     document.getElementById('ultima-content').innerHTML =
-      '<div class="error-box">Dati non disponibili.<br>Assicurati che il sito sia ospitato su Netlify e riprova.<br><small>' + err.message + '</small></div>';
+      '<div class="error-box">❌ Errore caricamento dati<br>' +
+      '<strong>Possibili cause:</strong><br>' +
+      '• File proxy.js non presente in /api/proxy.js<br>' +
+      '• Deploy Vercel non completato<br>' +
+      '• Errore: ' + err.message + '<br><br>' +
+      '<small>Verifica che il file api/proxy.js sia stato caricato su Vercel</small></div>';
   }
 }
 

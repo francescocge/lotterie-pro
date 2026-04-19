@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Proxy Lotterie</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 { color: #FFD700; }
+    button {
+      background: #FFD700;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #FFA500; }
+    pre {
+      background: #0f3460;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      border-left: 4px solid #FFD700;
+    }
+    .success { color: #2ECC71; }
+    .error { color: #E74C3C; }
+    .info { color: #3498DB; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Proxy API Lotterie</h1>
+  <p>Premi i bottoni per testare le chiamate API:</p>
+  
+  <button onclick="testAPI('10elotto')">Test 10eLotto</button>
+  <button onclick="testAPI('millionday')">Test MillionDay</button>
+  <button onclick="testAPI('lotto')">Test Lotto</button>
+  <button onclick="testAPI('superenalotto')">Test SuperEnalotto</button>
+  
+  <h2>Risultati:</h2>
+  <div id="results"></div>
+  
+  <script>
+    async function testAPI(tipo) {
+      const resultsDiv = document.getElementById('results');
+      const anno = '2026';
+      let url = `/api/proxy?tipo=${tipo}&anno=${anno}`;
+      
+      if (tipo === 'lotto') {
+        url += '&ruota=genova';
+      }
+      
+      resultsDiv.innerHTML = `<p class="info">📡 Chiamata: ${url}</p>`;
+      
+      try {
+        const start = Date.now();
+        const response = await fetch(url);
+        const duration = Date.now() - start;
+        
+        resultsDiv.innerHTML += `<p class="info">⏱️ Tempo risposta: ${duration}ms</p>`;
+        resultsDiv.innerHTML += `<p class="info">📥 Status HTTP: ${response.status} ${response.statusText}</p>`;
+        
+        const data = await response.json();
+        
+        if (data.ok) {
+          resultsDiv.innerHTML += `<p class="success">✅ SUCCESS - Trovate ${data.estrazioni.length} estrazioni</p>`;
+          resultsDiv.innerHTML += `<pre>${JSON.stringify(data.estrazioni.slice(0, 3), null, 2)}</pre>`;
+        } else {
+          resultsDiv.innerHTML += `<p class="error">❌ ERRORE: ${data.error}</p>`;
+        }
+      } catch (err) {
+        resultsDiv.innerHTML += `<p class="error">❌ ERRORE FETCH: ${err.message}</p>`;
+        resultsDiv.innerHTML += `<p class="error">Possibili cause:</p>`;
+        resultsDiv.innerHTML += `<ul class="error">
+          <li>File proxy.js NON presente in /api/proxy.js</li>
+          <li>Deploy Vercel non completato</li>
+          <li>Errore di rete</li>
+        </ul>`;
+      }
+    }
+  </script>
+</body>
+</html>
