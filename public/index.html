@@ -931,10 +931,16 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
             style="background:var(--blu);color:#fff;border:2px solid #007BFF;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
         <label style="font-size:11px;color:var(--soft)">💶 Costo colonna (€):</label>
         <input type="number" id="se-costo-fantasia" value="1" min="0.5" max="100" step="0.5"
           style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid var(--oro);border-radius:6px;padding:8px;text-align:center;font-size:14px;font-weight:bold">
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label style="font-size:11px;color:var(--soft)">📅 Data giocata:</label>
+        <input type="date" id="se-data-fantasia"
+          style="background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:8px;font-size:13px;font-family:'DM Mono',monospace">
+        <span style="font-size:10px;color:var(--soft)">(lascia vuoto = oggi)</span>
       </div>
     </div>
 
@@ -3601,24 +3607,57 @@ function salvaSEColonnaFantasia() {
   if (!jolly || jolly < 1 || jolly > 90) { alert('⚠️ Jolly non valido (1-90)'); return; }
   if (!superstar || superstar < 1 || superstar > 90) { alert('⚠️ SuperStar non valido (1-90)'); return; }
   const costo = parseFloat(document.getElementById('se-costo-fantasia').value) || 1;
+  const dataInput = document.getElementById('se-data-fantasia').value;
+  const data = dataInput || new Date().toISOString().split('T')[0];
 
   let giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
   giocate.push({
     numeri: nums.sort((a,b) => a-b),
     jolly, superstar, costo,
     tipo: 'Fantasia',
-    data: new Date().toISOString().split('T')[0]
+    data
   });
   localStorage.setItem('se_giocate', JSON.stringify(giocate));
   alert('✅ Colonna salvata in "📋 Le Mie"!');
-  // Pulisci form
   for (let i = 1; i <= 6; i++) document.getElementById('seNum' + i).value = '';
   document.getElementById('seJolly').value = '';
   document.getElementById('seSuperstar').value = '';
+  document.getElementById('se-data-fantasia').value = '';
 }
 
 // Vecchia funzione mantenuta per compatibilità
 function salvaSEGiocataCorrente() { salvaSEColonnaFantasia(); }
+
+// Trova l'estrazione del sabato più vicino (successivo) alla data di giocata
+function trovaSabatoVicinoSE(dataGiocata) {
+  if (!seEstrazioni || seEstrazioni.length === 0) return null;
+  const dg = new Date(dataGiocata + 'T12:00:00');
+  // Cerca il sabato più vicino >= data giocata
+  // Prima prova successivo, poi precedente
+  let best = null;
+  let bestDiff = Infinity;
+  seEstrazioni.forEach(e => {
+    const de = new Date(e.data + 'T12:00:00');
+    const diff = de - dg; // positivo = estrazione dopo giocata
+    // Preferiamo estrazioni dopo o uguale alla data di giocata
+    if (diff >= 0 && diff < bestDiff) {
+      bestDiff = diff;
+      best = e;
+    }
+  });
+  // Se non trovato successivo, usa il precedente più vicino
+  if (!best) {
+    seEstrazioni.forEach(e => {
+      const de = new Date(e.data + 'T12:00:00');
+      const diff = Math.abs(de - dg);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        best = e;
+      }
+    });
+  }
+  return best;
+}
 
 function renderSEMieGiocate() {
   const giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
@@ -3639,24 +3678,28 @@ function renderSEMieGiocate() {
     const costo = g.costo || 1;
     totSpesa += costo;
 
+    // Trova l'estrazione del sabato più vicino alla data di questa giocata
+    const estrRef = trovaSabatoVicinoSE(g.data);
+
     let vincita = '';
     let borderColor = 'var(--bordo)';
-    if (seEstrazioni.length > 0) {
-      const ultima = seEstrazioni[0];
-      const indovinati = g.numeri.filter(n => ultima.numeri.includes(n)).length;
-      const jollyOk = g.jolly === ultima.jolly;
-      const superstarOk = g.superstar === ultima.superstar;
+    if (estrRef) {
+      const indovinati = g.numeri.filter(n => estrRef.numeri.includes(n)).length;
+      const jollyOk = g.jolly === estrRef.jolly;
+      const superstarOk = g.superstar === estrRef.superstar;
       if (indovinati >= 2 || (indovinati >= 1 && jollyOk)) {
         totVincite++;
         borderColor = 'var(--verde)';
         vincita = `<div style="color:var(--verde);font-weight:bold;margin-top:8px;font-size:12px">
-          ✅ ${indovinati} numeri indovinati${jollyOk ? ' + Jolly ✓' : ''}${superstarOk ? ' + SuperStar ✓' : ''}
+          ✅ ${indovinati} numeri${jollyOk ? ' + Jolly ✓' : ''}${superstarOk ? ' + SuperStar ✓' : ''} — estrazione ${estrRef.data}
         </div>`;
       } else {
         vincita = `<div style="color:var(--soft);margin-top:8px;font-size:11px">
-          ❌ ${indovinati} numeri (ultima estrazione ${ultima.data})
+          ❌ ${indovinati} numeri — verificato su estrazione del ${estrRef.data}
         </div>`;
       }
+    } else {
+      vincita = '<div style="color:var(--soft);margin-top:8px;font-size:11px">⏳ Nessuna estrazione disponibile per questa data</div>';
     }
 
     const tipoTag = g.tipo ? `<span style="background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;font-size:9px;margin-left:6px">${g.tipo}</span>` : '';
@@ -3665,7 +3708,7 @@ function renderSEMieGiocate() {
       <div style="background:var(--blu3);padding:15px;border-radius:10px;margin-bottom:12px;border-left:4px solid ${borderColor}">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
           <div style="font-size:11px;color:var(--soft)">
-            #${idx+1} · ${g.data}${tipoTag}
+            #${idx+1} · giocata il ${g.data}${tipoTag}
             <span style="color:var(--oro);margin-left:8px">€${costo.toFixed(2)}</span>
           </div>
           <button onclick="eliminaSEGiocata(${idx})" style="background:var(--rosso);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;border:none;cursor:pointer">🗑️</button>
