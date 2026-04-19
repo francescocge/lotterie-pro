@@ -874,92 +874,105 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 </div>
 
 <div class="panel panel-se" id="panel-se-gioca" style="display:none">
+
+  <!-- SEZIONE 1: COLONNE AUTOMATICHE DA RITARDI -->
   <div class="card">
-    <div class="card-title">🏆 Previsioni SuperEnalotto — Serie Consigliate</div>
+    <div class="card-title">🎯 Colonne Consigliate dai Ritardi</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Genera 3 serie di numeri ottimizzate con algoritmo basato su frequenze e ritardi. Ogni serie include 6 numeri + Jolly + SuperStar suggeriti.
+      3 colonne generate automaticamente dall'algoritmo. Clicca una colonna per selezionarla, poi salvala in "📋 Le Mie".
     </p>
-    
     <button class="btn" onclick="generaPrevisioniSE()" style="margin-bottom:16px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;font-weight:bold">
-      ✨ Genera Previsioni
+      ✨ Genera Colonne
     </button>
-    
     <div id="se-previsioni-content">
-      <div style="font-size:11px;color:var(--soft);text-align:center;padding:20px">
-        Premi "Genera Previsioni" per iniziare
-      </div>
+      <div style="font-size:11px;color:var(--soft);text-align:center;padding:20px">Premi "Genera Colonne" per iniziare</div>
     </div>
-    
     <div id="se-riepilogo-box" style="display:none;background:var(--bordo);padding:20px;border-radius:8px;margin-top:20px;border-left:4px solid var(--oro)">
-      <div class="card-title" style="margin-bottom:15px">📋 Riepilogo Serie Selezionata</div>
+      <div class="card-title" style="margin-bottom:15px">📋 Colonna Selezionata</div>
       <div id="se-rie-balls" style="margin-bottom:15px"></div>
       <div id="se-rie-info"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap">
+        <label style="font-size:11px;color:var(--soft)">💶 Costo colonna (€):</label>
+        <input type="number" id="se-costo-auto" value="1" min="0.5" max="100" step="0.5"
+          style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid var(--oro);border-radius:6px;padding:8px;text-align:center;font-size:14px;font-weight:bold">
+        <button class="btn" onclick="confermaSESerie()" style="background:linear-gradient(135deg,#1A8A45,#0D5C2E);color:#fff;flex:1;min-width:140px">
+          💾 Salva in Le Mie
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:20px">
-    <div class="card-title">🎯 Oppure: Verifica Giocata Manuale</div>
+  <!-- SEZIONE 2: COLONNA A FANTASIA -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title">✏️ Inserisci Colonna a Fantasia</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Inserisci i 6 numeri + Jolly + SuperStar e verifica se hai vinto. I numeri indovinati appariranno in <span style="background:#00FF00;color:#000;padding:2px 5px;border-radius:3px;font-weight:bold">VERDE</span>.
+      Scegli 6 numeri + Jolly + SuperStar, imposta il costo e salvala direttamente in "📋 Le Mie".
     </p>
 
-    <div style="background:var(--bordo);padding:20px;border-radius:8px;margin-bottom:15px">
-      <div class="sec-label" style="margin-bottom:12px">I tuoi 6 numeri (1-90)</div>
-      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:15px">
-        <input type="number" id="seNum1" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum2" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum3" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum4" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum5" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
-        <input type="number" id="seNum6" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px">
+    <div style="background:var(--bordo);padding:18px;border-radius:8px;margin-bottom:15px">
+      <div class="sec-label" style="margin-bottom:10px">6 Numeri (1–90)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <input type="number" id="seNum1" placeholder="N1" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
+        <input type="number" id="seNum2" placeholder="N2" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
+        <input type="number" id="seNum3" placeholder="N3" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
+        <input type="number" id="seNum4" placeholder="N4" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
+        <input type="number" id="seNum5" placeholder="N5" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
+        <input type="number" id="seNum6" placeholder="N6" min="1" max="90" style="background:var(--blu);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold">
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <div>
-          <div class="sec-label" style="margin-bottom:8px">Jolly</div>
-          <input type="number" id="seJolly" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
+          <div class="sec-label" style="margin-bottom:6px">Jolly (1–90)</div>
+          <input type="number" id="seJolly" placeholder="Jolly" min="1" max="90"
+            style="background:var(--blu);color:#fff;border:2px solid #DC3545;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
         <div>
-          <div class="sec-label" style="margin-bottom:8px">SuperStar</div>
-          <input type="number" id="seSuperstar" placeholder="1-90" min="1" max="90" style="background:var(--fondo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:10px;text-align:center;font-weight:bold;font-size:14px;width:100%">
+          <div class="sec-label" style="margin-bottom:6px">SuperStar (1–90)</div>
+          <input type="number" id="seSuperstar" placeholder="SS" min="1" max="90"
+            style="background:var(--blu);color:#fff;border:2px solid #007BFF;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <label style="font-size:11px;color:var(--soft)">💶 Costo colonna (€):</label>
+        <input type="number" id="se-costo-fantasia" value="1" min="0.5" max="100" step="0.5"
+          style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid var(--oro);border-radius:6px;padding:8px;text-align:center;font-size:14px;font-weight:bold">
       </div>
     </div>
 
-    <button id="seVerificaBtn" class="big-btn" style="width:100%;padding:14px;font-size:16px;margin-bottom:20px">
-      ✅ Verifica Estrazione
+    <button class="big-btn" onclick="salvaSEColonnaFantasia()" style="width:100%;padding:14px;font-size:15px;margin-bottom:12px;background:linear-gradient(135deg,#1A8A45,#0D5C2E);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold">
+      💾 Salva Colonna in Le Mie
+    </button>
+    <button id="seVerificaBtn" class="big-btn" style="width:100%;padding:12px;font-size:14px" onclick="verificaSuperEnalotto()">
+      ✅ Verifica senza salvare
     </button>
 
-    <div id="seRisultato" style="display:none;background:var(--bordo);padding:20px;border-radius:8px;border-left:4px solid #00FF00;margin-bottom:15px">
+    <div id="seRisultato" style="display:none;background:var(--bordo);padding:20px;border-radius:8px;border-left:4px solid #00FF00;margin-top:15px">
       <div style="font-size:12px;color:var(--soft);margin-bottom:10px" id="seRisultatoData"></div>
       <div id="seResultDetails" style="font-weight:bold;color:var(--testo)"></div>
     </div>
-    
-    <p style="font-size:10px;color:var(--soft);margin-top:20px;line-height:1.7">
-      💡 <strong>Salva la tua giocata:</strong> Inserisci i numeri qui sopra, poi vai alla sezione <strong>"📋 Le Mie"</strong> e clicca "💾 Salva giocata corrente".
-    </p>
   </div>
+
 </div>
+
 
 <!-- PANEL: MIE GIOCATE SuperEnalotto -->
 <div class="panel panel-se" id="panel-se-miegiocate" style="display:none">
   <div class="card">
     <div class="card-title">📋 Le Mie Giocate SuperEnalotto</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Salva le tue schedine preferite e verifica automaticamente se hai vinto alle ultime estrazioni.
+      Tutte le colonne salvate — automatiche e a fantasia. Verifica automatica sull'ultima estrazione disponibile.
     </p>
-    
-    <button class="btn" onclick="salvaSEGiocataCorrente()" style="background:linear-gradient(135deg,#1A8A45,#0D5C2E);color:#fff;margin-bottom:20px">
-      💾 Salva giocata corrente (da sezione Gioca)
-    </button>
-    
     <div class="riepilogo-totali">
-      <div class="rit-stat"><div class="rit-val" id="se-mg-tot-giocate" style="color:var(--oro)">0</div><div class="rit-lbl">Giocate</div></div>
+      <div class="rit-stat"><div class="rit-val" id="se-mg-tot-giocate" style="color:var(--oro)">0</div><div class="rit-lbl">Colonne</div></div>
       <div class="rit-stat"><div class="rit-val" id="se-mg-tot-vinte" style="color:var(--verde)">0</div><div class="rit-lbl">Vincite</div></div>
+      <div class="rit-stat"><div class="rit-val" id="se-mg-tot-spesa" style="color:var(--soft)">€0</div><div class="rit-lbl">Spesa totale</div></div>
     </div>
     <div id="se-mg-lista"></div>
+    <button onclick="svuotaSEGiocate()" style="margin-top:16px;background:transparent;border:1px solid var(--rosso);color:var(--rosso);border-radius:6px;padding:8px 16px;font-size:10px;cursor:pointer;letter-spacing:1px">
+      🗑️ ELIMINA TUTTE
+    </button>
   </div>
 </div>
+
 
 <!-- PANEL: FREQUENZE SuperEnalotto -->
 <div class="panel panel-se" id="panel-se-freq" style="display:none">
@@ -1933,7 +1946,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-lotto').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.panel-se').forEach(p => p.style.display = '');
+    document.querySelectorAll('.panel-se').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
     document.querySelectorAll('.nav-tab-10e').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-md').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.nav-tab-lotto').forEach(t => t.style.display = 'none');
@@ -1941,7 +1954,7 @@ function switchGioco(gioco) {
     // Attiva prima tab manualmente
     document.querySelectorAll('.panel-se').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.nav-tab-se').forEach(t=>t.classList.remove('active'));
-    document.getElementById('panel-se-ultima').classList.add('active');
+    document.getElementById('panel-se-ultima').style.display = 'block'; document.getElementById('panel-se-ultima').classList.add('active');
     document.querySelectorAll('.nav-tab-se')[0].classList.add('active');
     if (!seEstrazioni.length) loadSuperEnalottoTab();
   }
@@ -1954,7 +1967,7 @@ function showPanelMD(id) {
   document.querySelectorAll('.panel-md').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab-md').forEach(t => t.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
-  if (panel) panel.classList.add('active');
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
   if (event && event.target) event.target.classList.add('active');
   if (id === 'md-premi') renderPremiMD();
 }
@@ -3253,7 +3266,7 @@ function showPanelLotto(id) {
   document.querySelectorAll('.panel-lotto').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab-lotto').forEach(t => t.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
-  if (panel) panel.classList.add('active');
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
   if (event && event.target) event.target.classList.add('active');
   if (id === 'lotto-premi') renderPremiLotto();
 }
@@ -3460,10 +3473,11 @@ function verificaSuperEnalotto() {
 // NAVIGAZIONE PANEL SUPERENALOTTO
 // ============================================================
 function showPanelSE(id) {
+  document.querySelectorAll('.panel-se').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
   document.querySelectorAll('.panel-se').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab-se').forEach(t => t.classList.remove('active'));
   const panel = document.getElementById('panel-' + id);
-  if (panel) panel.classList.add('active');
+  if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
   if (event && event.target) event.target.classList.add('active');
   
   // Carica dati quando apro le sezioni
@@ -3573,108 +3587,120 @@ function displaySuperEnalottoRitardi() {
 // ============================================================
 // MIE GIOCATE SUPERENALOTTO - SALVATAGGIO
 // ============================================================
-function salvaSEGiocataCorrente() {
-  // Legge i numeri dalla sezione Gioca
+// Salva colonna a fantasia dal form
+function salvaSEColonnaFantasia() {
   const nums = [];
   for (let i = 1; i <= 6; i++) {
     const val = parseInt(document.getElementById('seNum' + i).value);
-    if (!val || val < 1 || val > 90) {
-      alert('⚠️ Inserisci 6 numeri validi (1-90) nella sezione Gioca');
-      return;
-    }
-    if (nums.includes(val)) {
-      alert('⚠️ Numeri duplicati! Ogni numero deve essere unico');
-      return;
-    }
+    if (!val || val < 1 || val > 90) { alert('⚠️ Inserisci 6 numeri validi (1-90)'); return; }
+    if (nums.includes(val)) { alert('⚠️ Numero ' + val + ' duplicato!'); return; }
     nums.push(val);
   }
-  
   const jolly = parseInt(document.getElementById('seJolly').value);
   const superstar = parseInt(document.getElementById('seSuperstar').value);
-  
-  if (!jolly || jolly < 1 || jolly > 90) {
-    alert('⚠️ Inserisci Jolly valido (1-90)');
-    return;
-  }
-  if (!superstar || superstar < 1 || superstar > 90) {
-    alert('⚠️ Inserisci SuperStar valido (1-90)');
-    return;
-  }
-  
-  // Salva in localStorage
+  if (!jolly || jolly < 1 || jolly > 90) { alert('⚠️ Jolly non valido (1-90)'); return; }
+  if (!superstar || superstar < 1 || superstar > 90) { alert('⚠️ SuperStar non valido (1-90)'); return; }
+  const costo = parseFloat(document.getElementById('se-costo-fantasia').value) || 1;
+
   let giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
   giocate.push({
     numeri: nums.sort((a,b) => a-b),
-    jolly: jolly,
-    superstar: superstar,
+    jolly, superstar, costo,
+    tipo: 'Fantasia',
     data: new Date().toISOString().split('T')[0]
   });
   localStorage.setItem('se_giocate', JSON.stringify(giocate));
-  
-  alert('✅ Giocata salvata! Vai alla sezione "📋 Le Mie" per vederla.');
-  renderSEMieGiocate();
+  alert('✅ Colonna salvata in "📋 Le Mie"!');
+  // Pulisci form
+  for (let i = 1; i <= 6; i++) document.getElementById('seNum' + i).value = '';
+  document.getElementById('seJolly').value = '';
+  document.getElementById('seSuperstar').value = '';
 }
+
+// Vecchia funzione mantenuta per compatibilità
+function salvaSEGiocataCorrente() { salvaSEColonnaFantasia(); }
 
 function renderSEMieGiocate() {
   const giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
-  
+
   if (giocate.length === 0) {
-    document.getElementById('se-mg-lista').innerHTML = '<div class="error-box">Nessuna giocata salvata. Vai alla sezione Gioca e clicca "💾 Salva giocata corrente".</div>';
+    document.getElementById('se-mg-lista').innerHTML = '<div style="text-align:center;padding:30px;font-size:11px;color:var(--soft)">Nessuna colonna salvata.<br>Vai su 🎯 Gioca e salva una colonna.</div>';
     document.getElementById('se-mg-tot-giocate').textContent = '0';
     document.getElementById('se-mg-tot-vinte').textContent = '0';
+    document.getElementById('se-mg-tot-spesa').textContent = '€0';
     return;
   }
-  
+
   let html = '';
   let totVincite = 0;
-  
+  let totSpesa = 0;
+
   giocate.forEach((g, idx) => {
-    // Verifica se ha vinto (solo se ci sono estrazioni)
+    const costo = g.costo || 1;
+    totSpesa += costo;
+
     let vincita = '';
+    let borderColor = 'var(--bordo)';
     if (seEstrazioni.length > 0) {
       const ultima = seEstrazioni[0];
       const indovinati = g.numeri.filter(n => ultima.numeri.includes(n)).length;
-      const jollyOk = (g.jolly === ultima.jolly);
-      const superstarOk = (g.superstar === ultima.superstar);
-      
-      if (indovinati >= 2) {
+      const jollyOk = g.jolly === ultima.jolly;
+      const superstarOk = g.superstar === ultima.superstar;
+      if (indovinati >= 2 || (indovinati >= 1 && jollyOk)) {
         totVincite++;
-        vincita = `<div style="color:var(--verde);font-weight:bold;margin-top:8px">✅ ${indovinati} numeri + ${jollyOk ? 'Jolly' : ''} ${superstarOk ? '+ SuperStar' : ''}</div>`;
+        borderColor = 'var(--verde)';
+        vincita = `<div style="color:var(--verde);font-weight:bold;margin-top:8px;font-size:12px">
+          ✅ ${indovinati} numeri indovinati${jollyOk ? ' + Jolly ✓' : ''}${superstarOk ? ' + SuperStar ✓' : ''}
+        </div>`;
       } else {
-        vincita = `<div style="color:var(--soft);margin-top:8px">❌ ${indovinati} numeri (min. 2 per vincere)</div>`;
+        vincita = `<div style="color:var(--soft);margin-top:8px;font-size:11px">
+          ❌ ${indovinati} numeri (ultima estrazione ${ultima.data})
+        </div>`;
       }
     }
-    
+
+    const tipoTag = g.tipo ? `<span style="background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;font-size:9px;margin-left:6px">${g.tipo}</span>` : '';
+
     html += `
-      <div style="background:var(--bordo);padding:15px;border-radius:8px;margin-bottom:12px;border-left:4px solid var(--oro)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:11px;color:var(--soft)">Giocata #${idx + 1} · ${g.data}${g.nomeSerie ? ' · ' + g.nomeSerie : ''}</div>
-          <button class="btn-small" onclick="eliminaSEGiocata(${idx})" style="background:var(--rosso);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;border:none;cursor:pointer">🗑️ Elimina</button>
+      <div style="background:var(--blu3);padding:15px;border-radius:10px;margin-bottom:12px;border-left:4px solid ${borderColor}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+          <div style="font-size:11px;color:var(--soft)">
+            #${idx+1} · ${g.data}${tipoTag}
+            <span style="color:var(--oro);margin-left:8px">€${costo.toFixed(2)}</span>
+          </div>
+          <button onclick="eliminaSEGiocata(${idx})" style="background:var(--rosso);color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;border:none;cursor:pointer">🗑️</button>
         </div>
-        <div style="font-size:13px;font-weight:bold;margin-bottom:5px">
-          ${g.numeri.map(n => `<span style="background:var(--fondo);padding:5px 10px;margin:2px;border-radius:4px;display:inline-block">${n}</span>`).join('')}
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px">
+          ${g.numeri.map(n => `<span style="background:var(--bordo);padding:5px 10px;border-radius:6px;font-weight:bold;font-size:13px">${n}</span>`).join('')}
         </div>
-        <div style="font-size:12px;color:var(--soft)">
-          Jolly: <span style="background:#DC3545;color:#fff;padding:3px 8px;border-radius:4px">${g.jolly}</span> | 
+        <div style="font-size:12px">
+          Jolly: <span style="background:#DC3545;color:#fff;padding:3px 8px;border-radius:4px;margin-right:8px">${g.jolly}</span>
           SuperStar: <span style="background:#007BFF;color:#fff;padding:3px 8px;border-radius:4px">${g.superstar}</span>
         </div>
         ${vincita}
-      </div>
-    `;
+      </div>`;
   });
-  
+
   document.getElementById('se-mg-lista').innerHTML = html;
   document.getElementById('se-mg-tot-giocate').textContent = giocate.length;
   document.getElementById('se-mg-tot-vinte').textContent = totVincite;
+  document.getElementById('se-mg-tot-spesa').textContent = '€' + totSpesa.toFixed(2);
 }
 
 function eliminaSEGiocata(idx) {
-  if (!confirm('Eliminare questa giocata?')) return;
+  if (!confirm('Eliminare questa colonna?')) return;
   let giocate = JSON.parse(localStorage.getItem('se_giocate') || '[]');
   giocate.splice(idx, 1);
   localStorage.setItem('se_giocate', JSON.stringify(giocate));
   renderSEMieGiocate();
 }
+
+function svuotaSEGiocate() {
+  if (!confirm('Eliminare TUTTE le colonne salvate?')) return;
+  localStorage.removeItem('se_giocate');
+  renderSEMieGiocate();
+}
+
 
 // ============================================================
 // PREVISIONI SUPERENALOTTO
@@ -3818,6 +3844,7 @@ function selezionaSESerie(idx, numeri, jolly, superstar, nomeSerie) {
 }
 
 function confermaSESerie() {
+  const costo = parseFloat(document.getElementById("se-costo-auto")?.value) || 1;
   const btn = document.getElementById('se-conferma-btn');
   if (!btn) return;
   
@@ -3833,7 +3860,9 @@ function confermaSESerie() {
     jolly: jolly,
     superstar: superstar,
     data: new Date().toISOString().split('T')[0],
-    nomeSerie: nomeSerie
+    nomeSerie: nomeSerie,
+    tipo: nomeSerie,
+    costo: costo
   });
   localStorage.setItem('se_giocate', JSON.stringify(giocate));
   
