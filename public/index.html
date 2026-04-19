@@ -3423,13 +3423,12 @@ function verificaSuperEnalotto() {
     return;
   }
 
-  const jolly = parseInt(document.getElementById('seJolly').value);
-  const superstar = parseInt(document.getElementById('seSuperstar').value);
-
-  if (!jolly || !superstar || jolly < 1 || jolly > 90 || superstar < 1 || superstar > 90) {
-    alert('⚠️ Inserisci Jolly e SuperStar validi (1-90)');
-    return;
-  }
+  const jollyRawV = document.getElementById('seJolly').value;
+  const superstarRawV = document.getElementById('seSuperstar').value;
+  const jolly = jollyRawV ? parseInt(jollyRawV) : null;
+  const superstar = superstarRawV ? parseInt(superstarRawV) : null;
+  if (jolly !== null && (jolly < 1 || jolly > 90)) { alert('⚠️ Jolly non valido (1-90)'); return; }
+  if (superstar !== null && (superstar < 1 || superstar > 90)) { alert('⚠️ SuperStar non valido (1-90)'); return; }
 
   if (seEstrazioni.length === 0) {
     alert('⚠️ Nessuna estrazione disponibile');
@@ -3442,8 +3441,8 @@ function verificaSuperEnalotto() {
   const estSuperstar = ultima.superstar;
 
   const indovinati = miei.filter(n => estratti.includes(n));
-  const jollyOk = (jolly === estJolly);
-  const superstarOk = (superstar === estSuperstar);
+  const jollyOk = jolly !== null && (jolly === estJolly);
+  const superstarOk = superstar !== null && (superstar === estSuperstar);
 
   let numeriHtml = miei.map(n => 
     estratti.includes(n) 
