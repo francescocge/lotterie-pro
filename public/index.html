@@ -362,6 +362,11 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
           style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:12px">
       </div>
     </div>
+    <div style="margin-bottom:12px">
+      <div class="sec-label" style="margin-bottom:6px">📅 Data giocata (opz. — default oggi)</div>
+      <input type="date" id="man10e-data"
+        style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
+    </div>
     <!-- Opzioni Oro -->
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:11px;color:var(--testo);flex:1;min-width:140px">
@@ -572,6 +577,11 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
           style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:12px">
       </div>
     </div>
+    <div style="margin-bottom:12px">
+      <div class="sec-label" style="margin-bottom:6px">📅 Data giocata (opz. — default oggi)</div>
+      <input type="date" id="manMD-data"
+        style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
+    </div>
     <div id="manMD-preview" style="min-height:38px;margin-bottom:10px"></div>
     <button class="btn" onclick="salvaManualeMarMD()" style="background:linear-gradient(135deg,#1A8A45,#0D5C2E);color:#fff">💾 Salva nelle mie giocate</button>
   </div>
@@ -744,6 +754,11 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
         <input type="number" id="manLotto-puntata" value="1" min="1" step="0.5"
           style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
       </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div class="sec-label" style="margin-bottom:6px">📅 Data giocata (opz. — default oggi)</div>
+      <input type="date" id="manLotto-data"
+        style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
     </div>
     <div id="manLotto-preview" style="min-height:38px;margin-bottom:10px"></div>
     <button class="btn" onclick="salvaManualeLotto()">💾 Salva nelle mie giocate</button>
@@ -3236,9 +3251,10 @@ function salvaManuale10e() {
   const speso = base + extra;
   const opzioneOro = doppioOro ? 'doppio-oro' : oro ? 'oro' : 'nessuno';
   const nome = document.getElementById('man10e-nome').value.trim() || 'Giocata manuale';
-  const oggi = new Date().toISOString().split('T')[0];
+  const dataInput = document.getElementById('man10e-data').value;
+  const data = dataInput || new Date().toISOString().split('T')[0];
   const nuova = {
-    id: Date.now(), data: oggi, numeri: numeri.sort((a,b)=>a-b),
+    id: Date.now(), data, numeri: numeri.sort((a,b)=>a-b),
     nomeSerie: nome, quantiNumeri: numeri.length,
     esito: 'attesa', vinto: 0, speso,
     opzioneOro, manuale: true
@@ -3249,6 +3265,7 @@ function salvaManuale10e() {
   renderMieGiocate();
   document.getElementById('man10e-numeri').value = '';
   document.getElementById('man10e-nome').value = '';
+  document.getElementById('man10e-data').value = '';
   document.getElementById('man10e-preview').innerHTML = '';
   if (document.getElementById('man10e-oro')) document.getElementById('man10e-oro').checked = false;
   if (document.getElementById('man10e-doppiooro')) document.getElementById('man10e-doppiooro').checked = false;
@@ -3263,9 +3280,10 @@ function salvaManualeMarMD() {
   if (numeri.length !== 5) { alert('Il MillionDay richiede esattamente 5 numeri tra 1 e 55.'); return; }
   const puntata = parseFloat(document.getElementById('manMD-puntata').value) || 1;
   const nome = document.getElementById('manMD-nome').value.trim() || 'Giocata manuale';
-  const oggi = new Date().toISOString().split('T')[0];
+  const dataInputMD = document.getElementById('manMD-data').value;
+  const data = dataInputMD || new Date().toISOString().split('T')[0];
   const nuova = {
-    id: Date.now(), data: oggi, numeri: numeri.sort((a,b)=>a-b),
+    id: Date.now(), data, numeri: numeri.sort((a,b)=>a-b),
     nomeSerie: nome, gioco: 'millionday',
     esito: 'attesa', vinto: 0, speso: puntata, manuale: true
   };
@@ -3275,6 +3293,7 @@ function salvaManualeMarMD() {
   renderMieGiocateMD();
   document.getElementById('manMD-numeri').value = '';
   document.getElementById('manMD-nome').value = '';
+  document.getElementById('manMD-data').value = '';
   document.getElementById('manMD-preview').innerHTML = '';
   alert(`✅ Salvato! 5 numeri MillionDay — puntata ${puntata}€`);
 }
@@ -3287,9 +3306,10 @@ function salvaManualeLotto() {
   const puntata = parseFloat(document.getElementById('manLotto-puntata').value) || 1;
   const ruota = document.getElementById('manLotto-ruota').value;
   const tipo = document.getElementById('manLotto-tipo').value;
-  const oggi = new Date().toISOString().split('T')[0];
+  const dataInputLotto = document.getElementById('manLotto-data').value;
+  const dataLotto = dataInputLotto || new Date().toISOString().split('T')[0];
   const nuova = {
-    id: Date.now(), data: oggi, numeri: numeri.sort((a,b)=>a-b),
+    id: Date.now(), data: dataLotto, numeri: numeri.sort((a,b)=>a-b),
     nomeSerie: 'Giocata manuale', ruota, tipo,
     esito: 'attesa', vinto: 0, speso: puntata, manuale: true
   };
@@ -3298,6 +3318,7 @@ function salvaManualeLotto() {
   salvaLottoStorico(storico);
   renderMieGiocateLotto();
   document.getElementById('manLotto-numeri').value = '';
+  document.getElementById('manLotto-data').value = '';
   document.getElementById('manLotto-preview').innerHTML = '';
   alert(`✅ Salvato! ${numeri.length} numeri — ${tipo} su ${ruota} — puntata ${puntata}€`);
 }
