@@ -29,10 +29,14 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .nav-tab.active{color:var(--oro);border-bottom-color:var(--oro)}
 .nav-tab:hover:not(.active){color:var(--testo)}
 
-.container{max-width:860px;margin:0 auto;padding:20px 14px 40px}
+.container{max-width:860px;margin:0 auto;padding:20px 14px 40px;overflow-x:hidden}
 .panel{display:none;animation:fadeIn .3s ease}
 .panel.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.panel-se{max-width:100%;overflow-x:hidden}
+.panel-se .card{overflow-x:hidden}
+.panel-se .balls-wrap{flex-wrap:wrap}
+.panel-se table{table-layout:fixed;word-break:break-word;width:100%}
 
 .card{background:var(--blu3);border:1px solid var(--bordo);border-radius:14px;padding:20px;margin-bottom:16px}
 .card-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--oro);letter-spacing:.5px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
@@ -211,8 +215,8 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .modal-ok{background:linear-gradient(135deg,var(--oro),var(--oro2));color:#000;font-weight:700}
 .modal-cancel{background:var(--blu);border:1px solid var(--bordo)!important;border:none;color:var(--soft)}
 /* SWITCHER GIOCO */
-.gioco-switcher{display:inline-flex;gap:8px;margin-top:12px;background:rgba(255,255,255,.05);border:1px solid var(--bordo);border-radius:24px;padding:4px}
-.gsw-btn{padding:8px 20px;border-radius:20px;border:none;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;color:var(--soft);background:none}
+.gioco-switcher{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+.gsw-btn{padding:8px 16px;border-radius:20px;border:1px solid var(--bordo);font-family:"DM Mono",monospace;font-size:11px;letter-spacing:1px;cursor:pointer;transition:all .2s;color:var(--soft);background:rgba(255,255,255,.05)}
 .gsw-btn.active{background:linear-gradient(135deg,var(--oro),var(--oro2));color:#000;font-weight:700}
 /* MillionDay balls — verde invece di oro */
 .md-ball{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2ECC71,#1A8A45);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(46,204,113,.35);transition:transform .15s}
