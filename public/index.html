@@ -1135,11 +1135,11 @@ async function loadAllData() {
       } catch(e) { console.warn('10eLotto errore anno', anno, e.message); }
     }
 
-    // Filtra: solo sabati negli ultimi 12 mesi
+    // Filtra: ultimi 12 mesi
     allEstrazioni = allEstrazioni
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi && isSabato(e.data);
+        return d >= unAnnoFa && d <= oggi;
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -1150,7 +1150,7 @@ async function loadAllData() {
     renderAll(stats);
     document.getElementById('badge-txt').textContent = 'Dati reali ✓';
     document.getElementById('last-upd').textContent =
-      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' sabati (12 mesi)';
+      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni (12 mesi)';
 
   } catch(err) {
     console.error('loadAllData errore:', err);
@@ -1980,12 +1980,11 @@ async function loadMDData() {
       } catch(e) { console.warn('MD errore anno', anno, e.message); }
     }
 
-    // Filtra solo sabati sera ultimi 12 mesi
+    // Filtra ultimi 12 mesi (tutte le estrazioni, il proxy non distingue mattina/sera)
     mdEstrazioni = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
-        // Rigoroso: SOLO sera (20:30), ignora mattina (13:00)
-        return d >= unAnnoFa && d <= oggi && (e.orario === 'sera');
+        return d >= unAnnoFa && d <= oggi;
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -1994,7 +1993,7 @@ async function loadMDData() {
     calcolaMDStatistiche();
     renderAllMD();
     document.getElementById('badge-txt').textContent = 'Dati reali MD ✓';
-    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' sabati sera (12 mesi)';
+    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' estrazioni (12 mesi)';
 
   } catch(err) {
     document.getElementById('badge-txt').textContent = '⚠ Errore MD';
@@ -2498,7 +2497,7 @@ async function loadLottoData() {
     const estr = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi && isSabato(e.data);
+        return d >= unAnnoFa && d <= oggi;
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -2507,7 +2506,7 @@ async function loadLottoData() {
     lottoEstrazioni[lottoRuota] = estr;
     renderAllLotto();
     document.getElementById('badge-txt').textContent = 'Dati reali Lotto ✓';
-    document.getElementById('last-upd').textContent = 'Lotto ' + lottoRuota + ': ' + estr.length + ' sabati (12 mesi)';
+    document.getElementById('last-upd').textContent = 'Lotto ' + lottoRuota + ': ' + estr.length + ' estrazioni (12 mesi)';
 
   } catch(err) {
     document.getElementById('badge-txt').textContent = '⚠ Errore Lotto';
