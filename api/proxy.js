@@ -1,21 +1,18 @@
 export default async function handler(req, res) {
   console.log('🔧 Proxy handler chiamato:', req.method, req.url);
   console.log('📋 Query params:', req.query);
-  
-  // CORS headers
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
-    console.log('✅ OPTIONS request OK');
     return res.status(200).end();
   }
 
   const { tipo, anno, ruota } = req.query;
 
   if (!tipo || !anno) {
-    console.error('❌ Parametri mancanti:', { tipo, anno });
     return res.status(400).json({ ok: false, error: 'Parametri mancanti: tipo e anno richiesti' });
   }
 
@@ -29,9 +26,7 @@ export default async function handler(req, res) {
     } else if (tipo === 'millionday') {
       estrazioni = await parseMillionDayAnno(anno);
     } else if (tipo === 'lotto') {
-      if (!ruota) {
-        return res.status(400).json({ ok: false, error: 'Parametro ruota mancante per tipo=lotto' });
-      }
+      if (!ruota) return res.status(400).json({ ok: false, error: 'Parametro ruota mancante' });
       estrazioni = await parseLottoAnno(anno, ruota);
     } else if (tipo === 'superenalotto') {
       estrazioni = await parseSuperEnalottoAnno(anno);
@@ -42,19 +37,41 @@ export default async function handler(req, res) {
     console.log(`✅ Trovate ${estrazioni.length} estrazioni per ${tipo}`);
     return res.status(200).json({ ok: true, estrazioni });
   } catch (err) {
-    console.error('❌ Errore proxy:', err.message, err.stack);
+    console.error('❌ Errore proxy:', err.message);
     return res.status(500).json({ ok: false, error: err.message });
   }
 }
 
 // ============================================================
+// HELPER: fetch con timeout e User-Agent
+// ============================================================
+async function fetchHtml(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const resp = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'it-IT,it;q=0.9'
+      }
+    });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return await resp.text();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ============================================================
 // PARSER 10eLOTTO
+// URL: /10elotto/risultati/archivio-10elotto-YYYY
 // ============================================================
 async function parse10eLottoAnno(anno) {
-  const url = `https://www.estrazionedellotto.it/10-e-lotto-ogni-5-minuti-di-oggi/archivio-10-e-lotto/${anno}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const html = await resp.text();
+  const url = `https://www.estrazionedellotto.it/10elotto/risultati/archivio-10elotto-${anno}`;
+  console.log('📡 10eLotto URL:', url);
+  const html = await fetchHtml(url);
 
   const regex = /(\d{2}\/\d{2}\/\d{4})[^\d]+([\d\s]+)/g;
   const results = [];
@@ -63,46 +80,35 @@ async function parse10eLottoAnno(anno) {
   while ((match = regex.exec(html)) !== null) {
     const dataRaw = match[1];
     const numeriRaw = match[2].trim();
-
-    // Converti data da DD/MM/YYYY a YYYY-MM-DD
     const [giorno, mese, annoStr] = dataRaw.split('/');
     const data = `${annoStr}-${mese}-${giorno}`;
 
-    // Estrai numeri
     const numeri = numeriRaw.split(/\s+/).map(Number).filter(n => n >= 1 && n <= 90);
-
-    // FILTRO IMPORTANTE: Rimuovi numeri spuri (giorno, mese, anno)
-    const numeriPuliti = numeri.filter(n => 
-      n !== parseInt(giorno) && 
-      n !== parseInt(mese) && 
-      n !== parseInt(annoStr)
+    const numeriPuliti = numeri.filter(n =>
+      n !== parseInt(giorno) && n !== parseInt(mese) && n !== parseInt(annoStr)
     );
 
     if (numeriPuliti.length >= 15 && numeriPuliti.length <= 20) {
-      const oro = numeriPuliti[0] || null;
-      const doppioro = numeriPuliti[1] || null;
-
       results.push({
         data,
         numeri: numeriPuliti,
-        oro,
-        doppioro,
+        oro: numeriPuliti[0] || null,
+        doppioro: numeriPuliti[1] || null,
         extra: []
       });
     }
   }
-
   return results;
 }
 
 // ============================================================
 // PARSER MILLIONDAY
+// URL: /million-day/risultati/archivio-millionday-YYYY
 // ============================================================
 async function parseMillionDayAnno(anno) {
-  const url = `https://www.estrazionedellotto.it/millionday/archivio-millionday/${anno}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const html = await resp.text();
+  const url = `https://www.estrazionedellotto.it/million-day/risultati/archivio-millionday-${anno}`;
+  console.log('📡 MillionDay URL:', url);
+  const html = await fetchHtml(url);
 
   const regex = /(\d{2}\/\d{2}\/\d{4})[^\d]+([\d\s]+)/g;
   const results = [];
@@ -111,40 +117,29 @@ async function parseMillionDayAnno(anno) {
   while ((match = regex.exec(html)) !== null) {
     const dataRaw = match[1];
     const numeriRaw = match[2].trim();
-
-    // Converti data
     const [giorno, mese, annoStr] = dataRaw.split('/');
     const data = `${annoStr}-${mese}-${giorno}`;
 
-    // Estrai numeri
     const numeri = numeriRaw.split(/\s+/).map(Number).filter(n => n >= 1 && n <= 55);
-
-    // FILTRO: Rimuovi numeri spuri (giorno, mese, anno)
-    const numeriPuliti = numeri.filter(n => 
-      n !== parseInt(giorno) && 
-      n !== parseInt(mese) && 
-      n !== parseInt(annoStr)
+    const numeriPuliti = numeri.filter(n =>
+      n !== parseInt(giorno) && n !== parseInt(mese) && n !== parseInt(annoStr)
     );
 
     if (numeriPuliti.length === 5) {
-      results.push({
-        data,
-        numeri: numeriPuliti
-      });
+      results.push({ data, numeri: numeriPuliti });
     }
   }
-
   return results;
 }
 
 // ============================================================
 // PARSER LOTTO
+// URL: /risultati/archivio-lotto-YYYY  (poi filtro per ruota)
 // ============================================================
 async function parseLottoAnno(anno, ruota) {
-  const url = `https://www.estrazionedellotto.it/estrazioni-lotto-${ruota}/${anno}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const html = await resp.text();
+  const url = `https://www.estrazionedellotto.it/risultati/archivio-lotto-${anno}`;
+  console.log('📡 Lotto URL:', url, 'ruota:', ruota);
+  const html = await fetchHtml(url);
 
   const regex = /(\d{2}\/\d{2}\/\d{4})[^\d]+([\d\s]+)/g;
   const results = [];
@@ -153,44 +148,32 @@ async function parseLottoAnno(anno, ruota) {
   while ((match = regex.exec(html)) !== null) {
     const dataRaw = match[1];
     const numeriRaw = match[2].trim();
-
-    // Converti data
     const [giorno, mese, annoStr] = dataRaw.split('/');
     const data = `${annoStr}-${mese}-${giorno}`;
 
-    // Estrai numeri
     const numeri = numeriRaw.split(/\s+/).map(Number).filter(n => n >= 1 && n <= 90);
-
-    // FILTRO: Rimuovi numeri spuri
-    const numeriPuliti = numeri.filter(n => 
-      n !== parseInt(giorno) && 
-      n !== parseInt(mese) && 
-      n !== parseInt(annoStr)
+    const numeriPuliti = numeri.filter(n =>
+      n !== parseInt(giorno) && n !== parseInt(mese) && n !== parseInt(annoStr)
     );
 
     if (numeriPuliti.length === 5) {
-      results.push({
-        data,
-        numeri: numeriPuliti,
-        ruota
-      });
+      results.push({ data, numeri: numeriPuliti, ruota });
     }
   }
-
   return results;
 }
 
 // ============================================================
 // PARSER SUPERENALOTTO
+// URL: /superenalotto/risultati/archivio-superenalotto-YYYY
 // ============================================================
 async function parseSuperEnalottoAnno(anno) {
-  const url = `https://www.estrazionedellotto.it/superenalotto/archivio-storico/${anno}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
-  const html = await resp.text();
+  const url = `https://www.estrazionedellotto.it/superenalotto/risultati/archivio-superenalotto-${anno}`;
+  console.log('📡 SuperEnalotto URL:', url);
+  const html = await fetchHtml(url);
 
-  // Pattern: data (DD/MM/YYYY) seguita da 6 numeri + Jolly + SuperStar
-  const regex = /(\d{2}\/\d{2}\/\d{4})[^\d]+((?:\d+\s*){6})[^\d]+Jolly[^\d]+(\d+)[^\d]+SuperStar[^\d]+(\d+)/gi;
+  // Prova pattern con Jolly e SuperStar espliciti
+  const regex = /(\d{2}\/\d{2}\/\d{4})[^\d]+((?:\d+\s*){6})[^\d]*(?:Jolly|J)[^\d]+(\d+)[^\d]*(?:SuperStar|SS)[^\d]+(\d+)/gi;
   const results = [];
   let match;
 
@@ -199,28 +182,43 @@ async function parseSuperEnalottoAnno(anno) {
     const numeriRaw = match[2].trim();
     const jolly = parseInt(match[3]);
     const superstar = parseInt(match[4]);
-
-    // Converti data
     const [giorno, mese, annoStr] = dataRaw.split('/');
     const data = `${annoStr}-${mese}-${giorno}`;
 
-    // Estrai 6 numeri principali
     const numeri = numeriRaw.split(/\s+/).map(Number).filter(n => n >= 1 && n <= 90).slice(0, 6);
-
-    // FILTRO: Rimuovi numeri spuri
-    const numeriPuliti = numeri.filter(n => 
-      n !== parseInt(giorno) && 
-      n !== parseInt(mese) && 
-      n !== parseInt(annoStr)
+    const numeriPuliti = numeri.filter(n =>
+      n !== parseInt(giorno) && n !== parseInt(mese) && n !== parseInt(annoStr)
     );
 
     if (numeriPuliti.length === 6 && jolly >= 1 && jolly <= 90 && superstar >= 1 && superstar <= 90) {
-      results.push({
-        data,
-        numeri: numeriPuliti,
-        jolly,
-        superstar
-      });
+      results.push({ data, numeri: numeriPuliti, jolly, superstar });
+    }
+  }
+
+  // Fallback: se regex Jolly/SS non trova nulla, prova con 8 numeri consecutivi
+  if (results.length === 0) {
+    console.log('⚠️ Pattern Jolly/SS non trovato, uso fallback 8 numeri');
+    const regex2 = /(\d{2}\/\d{2}\/\d{4})[^\d]+((?:\d+\s*){8})/g;
+    let match2;
+    while ((match2 = regex2.exec(html)) !== null) {
+      const dataRaw = match2[1];
+      const numeriRaw = match2[2].trim();
+      const [giorno, mese, annoStr] = dataRaw.split('/');
+      const data = `${annoStr}-${mese}-${giorno}`;
+
+      const tutti = numeriRaw.split(/\s+/).map(Number).filter(n => n >= 1 && n <= 90);
+      const puliti = tutti.filter(n =>
+        n !== parseInt(giorno) && n !== parseInt(mese) && n !== parseInt(annoStr)
+      );
+
+      if (puliti.length >= 8) {
+        results.push({
+          data,
+          numeri: puliti.slice(0, 6),
+          jolly: puliti[6] || null,
+          superstar: puliti[7] || null
+        });
+      }
     }
   }
 
