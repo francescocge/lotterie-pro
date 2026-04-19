@@ -922,12 +922,12 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <div>
           <div class="sec-label" style="margin-bottom:6px">Jolly (1–90)</div>
-          <input type="number" id="seJolly" placeholder="Jolly" min="1" max="90"
+          <input type="number" id="seJolly" placeholder="Jolly (opz.)" min="1" max="90"
             style="background:var(--blu);color:#fff;border:2px solid #DC3545;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
         <div>
           <div class="sec-label" style="margin-bottom:6px">SuperStar (1–90)</div>
-          <input type="number" id="seSuperstar" placeholder="SS" min="1" max="90"
+          <input type="number" id="seSuperstar" placeholder="SS (opz.)" min="1" max="90"
             style="background:var(--blu);color:#fff;border:2px solid #007BFF;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
       </div>
@@ -3602,10 +3602,12 @@ function salvaSEColonnaFantasia() {
     if (nums.includes(val)) { alert('⚠️ Numero ' + val + ' duplicato!'); return; }
     nums.push(val);
   }
-  const jolly = parseInt(document.getElementById('seJolly').value);
-  const superstar = parseInt(document.getElementById('seSuperstar').value);
-  if (!jolly || jolly < 1 || jolly > 90) { alert('⚠️ Jolly non valido (1-90)'); return; }
-  if (!superstar || superstar < 1 || superstar > 90) { alert('⚠️ SuperStar non valido (1-90)'); return; }
+  const jollyRaw = document.getElementById('seJolly').value;
+  const superstarRaw = document.getElementById('seSuperstar').value;
+  const jolly = jollyRaw ? parseInt(jollyRaw) : null;
+  const superstar = superstarRaw ? parseInt(superstarRaw) : null;
+  if (jolly !== null && (jolly < 1 || jolly > 90)) { alert('⚠️ Jolly non valido (1-90)'); return; }
+  if (superstar !== null && (superstar < 1 || superstar > 90)) { alert('⚠️ SuperStar non valido (1-90)'); return; }
   const costo = parseFloat(document.getElementById('se-costo-fantasia').value) || 1;
   const dataInput = document.getElementById('se-data-fantasia').value;
   const data = dataInput || new Date().toISOString().split('T')[0];
@@ -3685,13 +3687,15 @@ function renderSEMieGiocate() {
     let borderColor = 'var(--bordo)';
     if (estrRef) {
       const indovinati = g.numeri.filter(n => estrRef.numeri.includes(n)).length;
-      const jollyOk = g.jolly === estrRef.jolly;
-      const superstarOk = g.superstar === estrRef.superstar;
+      const jollyOk = g.jolly && g.jolly === estrRef.jolly;
+      const superstarOk = g.superstar && g.superstar === estrRef.superstar;
+      const jollyStr = g.jolly ? (jollyOk ? ' + Jolly ✓' : '') : '';
+      const superstarStr = g.superstar ? (superstarOk ? ' + SuperStar ✓' : '') : '';
       if (indovinati >= 2 || (indovinati >= 1 && jollyOk)) {
         totVincite++;
         borderColor = 'var(--verde)';
         vincita = `<div style="color:var(--verde);font-weight:bold;margin-top:8px;font-size:12px">
-          ✅ ${indovinati} numeri${jollyOk ? ' + Jolly ✓' : ''}${superstarOk ? ' + SuperStar ✓' : ''} — estrazione ${estrRef.data}
+          ✅ ${indovinati} numeri${jollyStr}${superstarStr} — estrazione ${estrRef.data}
         </div>`;
       } else {
         vincita = `<div style="color:var(--soft);margin-top:8px;font-size:11px">
@@ -3717,8 +3721,9 @@ function renderSEMieGiocate() {
           ${g.numeri.map(n => `<span style="background:var(--bordo);padding:5px 10px;border-radius:6px;font-weight:bold;font-size:13px">${n}</span>`).join('')}
         </div>
         <div style="font-size:12px">
-          Jolly: <span style="background:#DC3545;color:#fff;padding:3px 8px;border-radius:4px;margin-right:8px">${g.jolly}</span>
-          SuperStar: <span style="background:#007BFF;color:#fff;padding:3px 8px;border-radius:4px">${g.superstar}</span>
+          ${g.jolly ? `Jolly: <span style="background:#DC3545;color:#fff;padding:3px 8px;border-radius:4px;margin-right:8px">${g.jolly}</span>` : ''}
+          ${g.superstar ? `SuperStar: <span style="background:#007BFF;color:#fff;padding:3px 8px;border-radius:4px">${g.superstar}</span>` : ''}
+          ${!g.jolly && !g.superstar ? '<span style="color:var(--soft);font-size:11px">Solo 6 numeri</span>' : ''}
         </div>
         ${vincita}
       </div>`;
