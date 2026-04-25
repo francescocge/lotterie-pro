@@ -177,9 +177,10 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .rie-info strong{color:var(--testo)}
 /* LE MIE GIOCATE */
 .mia-giocata{background:var(--blu);border:1px solid var(--bordo);border-radius:12px;padding:16px;margin-bottom:12px;position:relative}
-.mia-giocata.vincente{border-color:rgba(61,184,122,.5);background:rgba(61,184,122,.04)}
-.mia-giocata.perdente{border-color:rgba(217,85,85,.3)}
+.mia-giocata.vincente{border-color:rgba(61,184,122,.5);background:rgba(61,184,122,.04);border-left:4px solid var(--verde)}
+.mia-giocata.perdente{border-color:rgba(217,85,85,.3);border-left:4px solid rgba(217,85,85,.4)}
 .mia-giocata.inattesa{border-color:rgba(201,168,76,.3)}
+.mia-giocata.attesa{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.03);border-left:4px solid var(--oro)}
 .mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px}
 .mg-data{font-size:10px;color:var(--soft);letter-spacing:1px}
 .mg-esito{font-size:10px;padding:3px 10px;border-radius:12px;font-weight:500}
@@ -215,17 +216,19 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .modal-ok{background:linear-gradient(135deg,var(--oro),var(--oro2));color:#000;font-weight:700}
 .modal-cancel{background:var(--blu);border:1px solid var(--bordo)!important;border:none;color:var(--soft)}
 /* SEZIONI GIOCATE SE */
-.mg-sez{margin-bottom:20px}
-.mg-sez-hdr{display:flex;align-items:center;gap:10px;padding:10px 0 10px;margin-bottom:12px;border-bottom:1px solid var(--bordo)}
-.mg-sez-titolo{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;font-weight:700}
-.mg-sez-badge{font-size:9px;padding:3px 10px;border-radius:10px;font-weight:700;letter-spacing:1px}
-.mg-sez-icon{font-size:14px}
-/* Sezione "da giocare" */
+.mg-sez{margin-bottom:24px}
+.mg-sez-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:14px;border-radius:10px}
+.mg-sez-titolo{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:800}
+.mg-sez-badge{font-size:9px;padding:3px 12px;border-radius:10px;font-weight:700;letter-spacing:1px;margin-left:auto}
+.mg-sez-icon{font-size:16px}
+/* Sezione "da giocare" — sfondo oro caldo */
+.sez-nuove .mg-sez-hdr{background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.06));border:1px solid rgba(201,168,76,.35)}
 .sez-nuove .mg-sez-titolo{color:var(--oro)}
-.sez-nuove .mg-sez-badge{background:rgba(201,168,76,.15);color:var(--oro);border:1px solid rgba(201,168,76,.3)}
-/* Sezione "già giocate" */
+.sez-nuove .mg-sez-badge{background:rgba(201,168,76,.2);color:var(--oro);border:1px solid rgba(201,168,76,.4)}
+/* Sezione "già giocate" — sfondo grigio neutro */
+.sez-passate .mg-sez-hdr{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
 .sez-passate .mg-sez-titolo{color:var(--soft)}
-.sez-passate .mg-sez-badge{background:rgba(122,138,170,.1);color:var(--soft);border:1px solid rgba(122,138,170,.2)}
+.sez-passate .mg-sez-badge{background:rgba(122,138,170,.12);color:var(--soft);border:1px solid rgba(122,138,170,.25)}
 /* Card nuova — più visibile */
 .mg-card-nuova{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.28);border-left:4px solid var(--oro);border-radius:12px;padding:14px 16px;margin-bottom:10px;position:relative}
 /* Card già giocata — più compatta */
