@@ -176,28 +176,32 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .rie-info{font-size:10px;color:var(--soft);line-height:1.8}
 .rie-info strong{color:var(--testo)}
 /* LE MIE GIOCATE */
-.mia-giocata{background:var(--blu);border:1px solid var(--bordo);border-radius:12px;padding:16px;margin-bottom:12px;position:relative}
-.mia-giocata.vincente{border-color:rgba(61,184,122,.5);background:rgba(61,184,122,.04);border-left:4px solid var(--verde)}
-.mia-giocata.perdente{border-color:rgba(217,85,85,.3);border-left:4px solid rgba(217,85,85,.4)}
+.mia-giocata{background:var(--blu);border:1px solid var(--bordo);border-radius:10px;padding:11px 13px;margin-bottom:0;position:relative}
+.mia-giocata.vincente{border-color:rgba(61,184,122,.35);background:rgba(22,44,33,.6)}
+.mia-giocata.perdente{border-color:rgba(217,85,85,.2);background:rgba(40,22,22,.5);opacity:.85}
 .mia-giocata.inattesa{border-color:rgba(201,168,76,.3)}
-.mia-giocata.attesa{border-color:rgba(201,168,76,.35);background:rgba(201,168,76,.03);border-left:4px solid var(--oro)}
-.mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px}
-.mg-data{font-size:10px;color:var(--soft);letter-spacing:1px}
-.mg-esito{font-size:10px;padding:3px 10px;border-radius:12px;font-weight:500}
+.mia-giocata.attesa{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05)}
+.mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:4px}
+.mg-data{font-size:9px;color:var(--soft);letter-spacing:1px}
+.mg-esito{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:500}
 .mg-esito.v{background:rgba(61,184,122,.15);color:var(--verde);border:1px solid rgba(61,184,122,.3)}
 .mg-esito.p{background:rgba(217,85,85,.1);color:var(--rosso);border:1px solid rgba(217,85,85,.2)}
 .mg-esito.a{background:rgba(201,168,76,.1);color:var(--oro);border:1px solid rgba(201,168,76,.2)}
-.mg-balls{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.mg-ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.mg-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.mg-importo{font-size:12px;font-family:'Playfair Display',serif}
+.mg-balls{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
+.mg-ball{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mg-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.mg-importo{font-size:11px;font-family:'Playfair Display',serif}
 .mg-importo.pos{color:var(--verde)}
 .mg-importo.neg{color:var(--rosso)}
 .mg-importo.neu{color:var(--soft)}
-.mg-del{background:none;border:1px solid rgba(217,85,85,.2);border-radius:6px;color:var(--rosso);font-size:9px;padding:4px 10px;cursor:pointer;transition:all .2s}
+.mg-del{background:none;border:1px solid rgba(217,85,85,.2);border-radius:5px;color:var(--rosso);font-size:8px;padding:3px 8px;cursor:pointer;transition:all .2s}
 .mg-del:hover{background:rgba(217,85,85,.1)}
-.mg-aggiungi-ris{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:6px;color:var(--oro);font-size:9px;padding:4px 12px;cursor:pointer;letter-spacing:1px;transition:all .2s}
+.mg-aggiungi-ris{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:5px;color:var(--oro);font-size:8px;padding:3px 10px;cursor:pointer;letter-spacing:1px;transition:all .2s}
 .mg-aggiungi-ris:hover{background:rgba(201,168,76,.2)}
+/* Griglia card — 1 col mobile, 2 col tablet, 3 col desktop */
+.mg-grid{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:600px){.mg-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.mg-grid{grid-template-columns:repeat(3,1fr)}}
 .riepilogo-totali{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:16px}
 .rit-stat{background:var(--blu);border:1px solid var(--bordo);border-radius:10px;padding:12px;text-align:center}
 .rit-val{font-family:'Playfair Display',serif;font-size:20px}
@@ -230,11 +234,11 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .sez-passate .mg-sez-titolo{color:var(--soft)}
 .sez-passate .mg-sez-badge{background:rgba(122,138,170,.12);color:var(--soft);border:1px solid rgba(122,138,170,.25)}
 /* Card nuova — più visibile */
-.mg-card-nuova{background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.28);border-left:4px solid var(--oro);border-radius:12px;padding:14px 16px;margin-bottom:10px;position:relative}
+.mg-card-nuova{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:11px 13px;margin-bottom:0;position:relative}
 /* Card già giocata — più compatta */
-.mg-card-passata{background:var(--blu);border:1px solid var(--bordo);border-left:4px solid var(--bordo);border-radius:10px;padding:11px 14px;margin-bottom:8px;position:relative;opacity:.88}
-.mg-card-passata.vinta{border-left-color:var(--verde);opacity:1;background:rgba(61,184,122,.03)}
-.mg-card-passata.persa{border-left-color:rgba(217,85,85,.35)}
+.mg-card-passata{background:rgba(20,28,45,.7);border:1px solid var(--bordo);border-radius:10px;padding:10px 13px;margin-bottom:0;position:relative;opacity:.88}
+.mg-card-passata.vinta{opacity:1;background:rgba(22,44,33,.65);border-color:rgba(61,184,122,.25)}
+.mg-card-passata.persa{background:rgba(40,22,22,.55);border-color:rgba(217,85,85,.2)}
 .mg-badge-nuova{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.06));border:1px solid rgba(201,168,76,.4);border-radius:8px;padding:2px 8px;font-size:8px;color:var(--oro);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-left:6px}
 /* SWITCHER GIOCO */
 .gioco-switcher{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
@@ -1722,14 +1726,14 @@ function renderMieGiocate() {
   let html = '';
 
   if (inAttesa.length > 0) {
-    html += `<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesa.length} ${inAttesa.length===1?'giocata':'giocate'}</span></div>`;
+    html += `<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesa.length} ${inAttesa.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     inAttesa.forEach(g => { html += buildCard10e(g); });
-    html += '</div>';
+    html += '</div></div>';
   }
   if (giocate.length > 0) {
-    html += `<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocate.length} ${giocate.length===1?'giocata':'giocate'}</span></div>`;
+    html += `<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocate.length} ${giocate.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     giocate.forEach(g => { html += buildCard10e(g); });
-    html += '</div>';
+    html += '</div></div>';
   }
   lista.innerHTML = html;
 }
@@ -2330,14 +2334,14 @@ function renderMieGiocateMD() {
   const giocateMD  = storico.filter(g=>g.esito!=='attesa');
   let html='';
   if(inAttesaMD.length>0){
-    html+=`<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesaMD.length} ${inAttesaMD.length===1?'giocata':'giocate'}</span></div>`;
+    html+=`<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesaMD.length} ${inAttesaMD.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     inAttesaMD.forEach(g=>{html+=buildCardMD(g);});
-    html+='</div>';
+    html+='</div></div>';
   }
   if(giocateMD.length>0){
-    html+=`<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocateMD.length} ${giocateMD.length===1?'giocata':'giocate'}</span></div>`;
+    html+=`<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocateMD.length} ${giocateMD.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     giocateMD.forEach(g=>{html+=buildCardMD(g);});
-    html+='</div>';
+    html+='</div></div>';
   }
   lista.innerHTML=html;
 }
@@ -2962,14 +2966,14 @@ function renderMieGiocateLotto() {
   const giocateL =storico.filter(g=>g.esito!=='attesa');
   let html='';
   if(inAttesaL.length>0){
-    html+=`<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesaL.length} ${inAttesaL.length===1?'giocata':'giocate'}</span></div>`;
+    html+=`<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${inAttesaL.length} ${inAttesaL.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     inAttesaL.forEach(g=>{html+=buildCardLotto(g);});
-    html+='</div>';
+    html+='</div></div>';
   }
   if(giocateL.length>0){
-    html+=`<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocateL.length} ${giocateL.length===1?'giocata':'giocate'}</span></div>`;
+    html+=`<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${giocateL.length} ${giocateL.length===1?'giocata':'giocate'}</span></div><div class="mg-grid">`;
     giocateL.forEach(g=>{html+=buildCardLotto(g);});
-    html+='</div>';
+    html+='</div></div>';
   }
   lista.innerHTML=html;
 }
@@ -3790,32 +3794,15 @@ function renderSEMieGiocate() {
   let html = '';
 
   if (nuove.length > 0) {
-    html += `
-      <div class="mg-sez sez-nuove">
-        <div class="mg-sez-hdr">
-          <span class="mg-sez-icon">🎯</span>
-          <span class="mg-sez-titolo">Da Giocare</span>
-          <span class="mg-sez-badge">${nuove.length} ${nuove.length === 1 ? 'colonna' : 'colonne'}</span>
-        </div>`;
-    nuove.forEach(({ g, idx, estrRef }) => {
-      html += buildCard(g, idx, estrRef, true);
-    });
-    html += '</div>';
+    html += `<div class="mg-sez sez-nuove"><div class="mg-sez-hdr"><span class="mg-sez-icon">🎯</span><span class="mg-sez-titolo">Da Giocare</span><span class="mg-sez-badge">${nuove.length} ${nuove.length === 1 ? 'colonna' : 'colonne'}</span></div><div class="mg-grid">`;
+    nuove.forEach(({ g, idx, estrRef }) => { html += buildCard(g, idx, estrRef, true); });
+    html += '</div></div>';
   }
 
-  // Sezione "Già Giocate"
   if (passate.length > 0) {
-    html += `
-      <div class="mg-sez sez-passate">
-        <div class="mg-sez-hdr">
-          <span class="mg-sez-icon">📅</span>
-          <span class="mg-sez-titolo">Già Giocate</span>
-          <span class="mg-sez-badge">${passate.length} ${passate.length === 1 ? 'colonna' : 'colonne'}</span>
-        </div>`;
-    passate.forEach(({ g, idx, estrRef }) => {
-      html += buildCard(g, idx, estrRef, false);
-    });
-    html += '</div>';
+    html += `<div class="mg-sez sez-passate"><div class="mg-sez-hdr"><span class="mg-sez-icon">📅</span><span class="mg-sez-titolo">Già Giocate</span><span class="mg-sez-badge">${passate.length} ${passate.length === 1 ? 'colonna' : 'colonne'}</span></div><div class="mg-grid">`;
+    passate.forEach(({ g, idx, estrRef }) => { html += buildCard(g, idx, estrRef, false); });
+    html += '</div></div>';
   }
 
   document.getElementById('se-mg-lista').innerHTML = html;
