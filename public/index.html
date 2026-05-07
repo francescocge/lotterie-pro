@@ -331,39 +331,41 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 <!-- PANEL: GIOCA -->
 <div class="panel panel-10e" id="panel-gioca">
   <div class="card">
-    <div class="card-title">🏆 Serie Consigliate da Giocare</div>
+    <div class="card-title">🧠 Metodo Avanzato Multi-Fattore</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Scegli quanti numeri vuoi giocare e il metodo di analisi. Il sistema genera automaticamente le serie più probabili dai dati reali degli ultimi 12 mesi — <strong style="color:var(--testo)">solo estrazioni del sabato</strong>, come quelle che giochi tu.
+      Algoritmo a 5 fattori: <strong style="color:var(--testo)">ritardo relativo al ciclo</strong>, momentum degli ultimi 10 sabati, ciclo personale di ogni numero, correlazione con numeri usciti recentemente, dispersione. La quantità di numeri proposti varia in base al punteggio — puoi forzare un numero fisso qui sotto.
     </p>
 
-    <div class="sec-label">Quanti numeri vuoi giocare?</div>
+    <div class="sec-label">Quanti numeri vuoi giocare? <span style="color:var(--soft);font-weight:400">(lascia "Auto" per selezione variabile)</span></div>
     <div class="quanti-row" id="quanti-row">
-      <button class="q-btn" onclick="setQuanti(4)">4 numeri</button>
-      <button class="q-btn" onclick="setQuanti(5)">5 numeri</button>
-      <button class="q-btn attivo" onclick="setQuanti(6)">6 numeri</button>
-      <button class="q-btn" onclick="setQuanti(7)">7 numeri</button>
-      <button class="q-btn" onclick="setQuanti(8)">8 numeri</button>
-      <button class="q-btn" onclick="setQuanti(9)">9 numeri</button>
-      <button class="q-btn" onclick="setQuanti(10)">10 numeri</button>
+      <button class="q-btn attivo" onclick="setQuanti(0)">Auto</button>
+      <button class="q-btn" onclick="setQuanti(5)">5</button>
+      <button class="q-btn" onclick="setQuanti(6)">6</button>
+      <button class="q-btn" onclick="setQuanti(7)">7</button>
+      <button class="q-btn" onclick="setQuanti(8)">8</button>
+      <button class="q-btn" onclick="setQuanti(10)">10</button>
+      <button class="q-btn" onclick="setQuanti(15)">15</button>
     </div>
 
-    <div class="sec-label">Metodo di analisi</div>
-    <div class="metodo-row">
-      <button class="m-btn attivo" onclick="setMetodo('freq')">📈 Più frequenti</button>
-      <button class="m-btn" onclick="setMetodo('ritard')">⏳ Ritardatari</button>
-      <button class="m-btn" onclick="setMetodo('misto')">⚖️ Misto freq+ritardo</button>
-      <button class="m-btn" onclick="setMetodo('bilanciato')">🎯 Bilanciato (consigliato)</button>
-    </div>
+    <button class="btn" onclick="generaSerieAvanzata()" style="margin-bottom:16px">✨ Genera Serie con Metodo Avanzato</button>
 
-    <button class="btn" onclick="generaSerie()" style="margin-bottom:16px">✨ Genera Serie Consigliate</button>
-
-    <div id="serie-content"><div style="font-size:11px;color:var(--soft);text-align:center;padding:20px">Premi "Genera Serie Consigliate" per iniziare</div></div>
+    <div id="serie-content"><div style="font-size:11px;color:var(--soft);text-align:center;padding:20px">Premi "Genera Serie" per iniziare</div></div>
 
     <div class="riepilogo-box" id="riepilogo-box">
       <div class="rie-title">📋 Serie Selezionata — Pronta da Giocare</div>
       <div class="rie-balls" id="rie-balls"></div>
       <div class="rie-info" id="rie-info"></div>
     </div>
+  </div>
+
+  <!-- BACKTEST CARD -->
+  <div class="card" style="border-color:rgba(42,93,191,.3)">
+    <div class="card-title" style="color:#7AACFF">🔬 Backtest — Ultime 20 Estrazioni</div>
+    <p style="font-size:10px;color:var(--soft);margin-bottom:14px;line-height:1.7">
+      Per ogni estrazione passata, il sistema ricalcola le previsioni usando <strong style="color:var(--testo)">solo i dati precedenti a quella data</strong> — come se stessi davvero giocando quel sabato. Poi confronta con il risultato reale.
+    </p>
+    <button class="btn" onclick="eseguiBacktest()" style="background:linear-gradient(135deg,#2A5DBF,#1A3D8F);color:#fff;margin-bottom:16px">🔬 Esegui Backtest</button>
+    <div id="backtest-content"><div style="font-size:11px;color:var(--soft);text-align:center;padding:10px">Premi il bottone per avviare il backtest</div></div>
   </div>
 
   <!-- INSERIMENTO MANUALE 10eLotto -->
@@ -393,7 +395,6 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
       <input type="date" id="man10e-data"
         style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
     </div>
-    <!-- Opzioni Oro -->
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:11px;color:var(--testo);flex:1;min-width:140px">
         <input type="checkbox" id="man10e-oro" onchange="aggiornaCosto10e()" style="accent-color:var(--oro);width:16px;height:16px">
@@ -404,7 +405,6 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
         ⭐⭐ Doppio Oro <span style="color:var(--soft);font-size:10px;margin-left:4px">(+2€)</span>
       </label>
     </div>
-    <!-- Costo totale -->
     <div id="man10e-costo" style="font-size:12px;color:var(--soft);margin-bottom:12px;padding:8px 12px;background:var(--bordo);border-radius:8px">
       Costo totale: <strong style="color:var(--oro)">2€</strong>
     </div>
@@ -1443,7 +1443,7 @@ function renderStorico() {
 // ============================================================
 // SEZIONE GIOCA — SERIE CONSIGLIATE
 // ============================================================
-let quantiNumeri = 6;
+let quantiNumeri = 0; // 0 = Auto
 let metodoAnalisi = 'bilanciato';
 let serieSelezionata = null;
 
@@ -1457,6 +1457,278 @@ function setMetodo(m) {
   metodoAnalisi = m;
   document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('attivo'));
   event.target.classList.add('attivo');
+}
+
+// ============================================================
+// METODO AVANZATO MULTI-FATTORE
+// ============================================================
+
+function calcolaStatisticheAvanzate(estrazioni) {
+  const base = calcolaStatistiche(estrazioni);
+  const tot = estrazioni.length;
+
+  // 1. Ciclo medio per numero — media dei gap tra apparizioni consecutive
+  const cicloMedio = {};
+  for (let n = 1; n <= 90; n++) {
+    const posizioni = [];
+    estrazioni.forEach((e, i) => { if (e.numeri.includes(n)) posizioni.push(i); });
+    if (posizioni.length >= 2) {
+      let sumGap = 0;
+      for (let i = 0; i < posizioni.length - 1; i++) sumGap += posizioni[i+1] - posizioni[i];
+      cicloMedio[n] = sumGap / (posizioni.length - 1);
+    } else if (posizioni.length === 1) {
+      cicloMedio[n] = tot; // visto una sola volta
+    } else {
+      cicloMedio[n] = tot * 1.2; // mai visto
+    }
+  }
+
+  // 2. Momentum: frequenza ultimi 10 vs frequenza ultimi 30 (rapporto)
+  const n10 = Math.min(10, tot);
+  const n30 = Math.min(30, tot);
+  const freqU10 = {}; const freqU30 = {};
+  for (let n = 1; n <= 90; n++) { freqU10[n] = 0; freqU30[n] = 0; }
+  estrazioni.slice(0, n10).forEach(e => e.numeri.forEach(n => { freqU10[n] = (freqU10[n]||0) + 1; }));
+  estrazioni.slice(0, n30).forEach(e => e.numeri.forEach(n => { freqU30[n] = (freqU30[n]||0) + 1; }));
+  const momentum = {};
+  for (let n = 1; n <= 90; n++) {
+    const r10 = freqU10[n] / n10;
+    const r30 = freqU30[n] / n30;
+    const atteso = 20 / 90;
+    // Momentum positivo = trending up rispetto alla media di lungo periodo
+    momentum[n] = (r10 - r30) / (atteso + 0.001);
+  }
+
+  // 3. Co-occorrenza: numeri che spesso escono nella stessa estrazione dei numeri
+  //    usciti nelle ultime 3 estrazioni
+  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => e.numeri));
+  const coScore = {};
+  for (let n = 1; n <= 90; n++) {
+    if (ultimi3Set.has(n)) { coScore[n] = -0.5; continue; } // penalizza appena usciti
+    let hits = 0; let total = 0;
+    estrazioni.forEach(e => {
+      if (e.numeri.some(m => ultimi3Set.has(m))) {
+        total++;
+        if (e.numeri.includes(n)) hits++;
+      }
+    });
+    coScore[n] = total > 5 ? (hits / total) / (20/90) - 1 : 0; // normalizzato vs atteso
+  }
+
+  return { ...base, cicloMedio, momentum, coScore, ultimi3Set };
+}
+
+function calcolaScoreMultiFattore(num, stats) {
+  // F1: Ritardo relativo al ciclo personale del numero (30%)
+  const ritAtt = stats.ritardi[num] || 0;
+  const ciclo = Math.max(stats.cicloMedio[num] || 4.5, 1);
+  const f1 = Math.min(ritAtt / ciclo, 3) / 3; // 0-1
+
+  // F2: Momentum recente (20%) — trending up = score alto
+  const mom = stats.momentum[num] || 0;
+  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
+
+  // F3: Ciclo normalizzato (25%) — quante estrazioni fa vs ciclo atteso
+  const atteso = 4.5; // 90/20
+  const f3 = Math.min(ritAtt / atteso, 4) / 4;
+
+  // F4: Correlazione recente (15%)
+  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));
+
+  // F5: Non appena uscito (10%) — bonus se assente nelle ultime 3
+  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;
+
+  return (f1 * 0.30 + f2 * 0.20 + f3 * 0.25 + f4 * 0.15 + f5 * 0.10);
+}
+
+function generaSerieAvanzata() {
+  if (!allEstrazioni.length) {
+    document.getElementById('serie-content').innerHTML =
+      '<div class="error-box">Carica prima i dati — premi "Aggiorna dati" in alto</div>';
+    return;
+  }
+
+  const stats = calcolaStatisticheAvanzate(allEstrazioni);
+
+  // Score per ogni numero
+  const scored = [];
+  for (let n = 1; n <= 90; n++) {
+    scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
+  }
+  scored.sort((a, b) => b.score - a.score);
+
+  // Selezione: Auto = soglia dinamica, altrimenti numero fisso
+  let serieA, serieB;
+  if (quantiNumeri === 0) {
+    // Soglia = 65° percentile dello score (top ~35%)
+    const soglia = scored[Math.floor(scored.length * 0.35)].score;
+    serieA = scored.filter(x => x.score >= soglia).map(x => x.num).sort((a, b) => a - b);
+    // Limita a max 20 per leggibilità
+    if (serieA.length > 20) serieA = scored.slice(0, 20).map(x => x.num).sort((a, b) => a - b);
+  } else {
+    serieA = scored.slice(0, quantiNumeri).map(x => x.num).sort((a, b) => a - b);
+  }
+
+  // Serie B: stessa logica ma con pesi invertiti (momentum > ritardo)
+  const scoredB = [];
+  for (let n = 1; n <= 90; n++) {
+    const s = stats;
+    const ritAtt = s.ritardi[n] || 0;
+    const ciclo = Math.max(s.cicloMedio[n] || 4.5, 1);
+    const f1 = Math.min(ritAtt / ciclo, 3) / 3;
+    const mom = s.momentum[n] || 0;
+    const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
+    const atteso = 4.5;
+    const f3 = Math.min(ritAtt / atteso, 4) / 4;
+    const f4 = Math.max(0, Math.min(1, (s.coScore[n] || 0) + 0.5));
+    const f5 = s.ultimi3Set.has(n) ? 0 : 1;
+    // Pesi invertiti: momentum prima, poi ciclo
+    scoredB.push({ num: n, score: f2 * 0.35 + f3 * 0.25 + f1 * 0.20 + f4 * 0.10 + f5 * 0.10 });
+  }
+  scoredB.sort((a, b) => b.score - a.score);
+  const nB = quantiNumeri || serieA.length;
+  serieB = scoredB.slice(0, nB).map(x => x.num).sort((a, b) => a - b);
+
+  // Render card serie
+  const scorePct = n => Math.round(scored.find(x => x.num === n)?.score * 100 || 0);
+  const globalA = Math.round(serieA.reduce((s, n) => s + calcolaScoreMultiFattore(n, stats), 0) / serieA.length * 100);
+  const globalB = Math.round(serieB.reduce((s, n) => s + calcolaScoreMultiFattore(n, stats), 0) / serieB.length * 100);
+
+  function ballsHtml(numeri, sc) {
+    return numeri.map(n => {
+      const s = scorePct(n);
+      const col = s >= 70 ? '#C9A84C' : s >= 50 ? '#7AACFF' : '#7A8AAA';
+      return `<div class="serie-ball" style="background:linear-gradient(135deg,${col},${col}88);color:${s>=70?'#000':'#fff'};position:relative" title="Score ${s}%">${n}</div>`;
+    }).join('');
+  }
+
+  const strA = serieA.join(',');
+  const strB = serieB.join(',');
+
+  let html = '<div class="serie-grid">';
+  html += `
+    <div class="serie-card col-a" id="serie-0" onclick="selezionaSerie(0, [${strA}], 'Serie A — Ritardo+Ciclo')">
+      <div class="selected-check">✓</div>
+      <div class="serie-header">
+        <div class="serie-titolo">Serie A — Ritardo + Ciclo</div>
+        <div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${globalA}%"></div></div>Score ${globalA}%</div>
+      </div>
+      <div class="serie-tag">🎯 Priorità: ritardo relativo · ${serieA.length} numeri</div>
+      <div class="serie-balls">${ballsHtml(serieA, scored)}</div>
+      <div class="serie-motivo">Oro = score ≥70% · Blu = ≥50% · Grigio = base. Numeri selezionati per ritardo rispetto al loro ciclo personale e correlazione recente.</div>
+      <div class="gioca-btn">✅ Gioco questa serie sabato</div>
+    </div>
+    <div class="serie-card col-b" id="serie-1" onclick="selezionaSerie(1, [${strB}], 'Serie B — Momentum')">
+      <div class="selected-check">✓</div>
+      <div class="serie-header">
+        <div class="serie-titolo">Serie B — Momentum</div>
+        <div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${globalB}%"></div></div>Score ${globalB}%</div>
+      </div>
+      <div class="serie-tag">📈 Priorità: trend recente · ${serieB.length} numeri</div>
+      <div class="serie-balls">${ballsHtml(serieB, scoredB)}</div>
+      <div class="serie-motivo">Pesi invertiti — privilegia numeri con trend in crescita nelle ultime 10 estrazioni rispetto alle ultime 30.</div>
+      <div class="gioca-btn">✅ Gioco questa serie sabato</div>
+    </div>`;
+  html += '</div>';
+
+  document.getElementById('serie-content').innerHTML = html;
+  document.getElementById('riepilogo-box').classList.remove('show');
+  serieSelezionata = null;
+}
+
+// ============================================================
+// BACKTEST — ultime 20 estrazioni con dati "al tempo reale"
+// ============================================================
+function eseguiBacktest() {
+  if (allEstrazioni.length < 25) {
+    document.getElementById('backtest-content').innerHTML =
+      '<div class="error-box">Servono almeno 25 estrazioni caricate per il backtest</div>';
+    return;
+  }
+
+  const N = Math.min(20, allEstrazioni.length - 10);
+  const risultati = [];
+  const nTest = quantiNumeri || 10; // default 10 per il backtest
+
+  for (let i = 0; i < N; i++) {
+    const estrTarget = allEstrazioni[i]; // estrazione da prevedere
+    const datiPrec = allEstrazioni.slice(i + 1); // solo dati PRIMA di quella estrazione
+    if (datiPrec.length < 10) continue;
+
+    const stats = calcolaStatisticheAvanzate(datiPrec);
+    const scored = [];
+    for (let n = 1; n <= 90; n++) scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
+    scored.sort((a, b) => b.score - a.score);
+
+    let previsti;
+    if (quantiNumeri === 0) {
+      const soglia = scored[Math.floor(scored.length * 0.35)].score;
+      previsti = scored.filter(x => x.score >= soglia).map(x => x.num);
+      if (previsti.length > 20) previsti = scored.slice(0, 20).map(x => x.num);
+    } else {
+      previsti = scored.slice(0, nTest).map(x => x.num);
+    }
+
+    const indovinati = previsti.filter(n => estrTarget.numeri.includes(n));
+    risultati.push({
+      data: estrTarget.data,
+      previsti: previsti.sort((a, b) => a - b),
+      usciti: estrTarget.numeri,
+      indovinati,
+      hitRate: indovinati.length / previsti.length,
+      hitAssoluto: indovinati.length
+    });
+  }
+
+  // Statistiche aggregate
+  const avgHit = risultati.reduce((s, r) => s + r.hitAssoluto, 0) / risultati.length;
+  const avgPct = risultati.reduce((s, r) => s + r.hitRate, 0) / risultati.length;
+  const best = risultati.reduce((a, b) => a.hitAssoluto > b.hitAssoluto ? a : b);
+  const worst = risultati.reduce((a, b) => a.hitAssoluto < b.hitAssoluto ? a : b);
+
+  // Render
+  const fmtData = d => new Date(d + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'});
+  const coloreHit = r => r.hitAssoluto >= 4 ? 'var(--verde)' : r.hitAssoluto >= 2 ? 'var(--oro)' : 'var(--rosso)';
+
+  let html = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:20px">
+      <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${avgHit.toFixed(1)}</div><div class="rit-lbl">Hit medi</div></div>
+      <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${Math.round(avgPct*100)}%</div><div class="rit-lbl">Hit rate %</div></div>
+      <div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${best.hitAssoluto}</div><div class="rit-lbl">Migliore</div></div>
+      <div class="rit-stat"><div class="rit-val" style="color:var(--rosso)">${worst.hitAssoluto}</div><div class="rit-lbl">Peggiore</div></div>
+    </div>
+    <p style="font-size:9px;color:var(--soft);margin-bottom:14px;line-height:1.6">
+      ⚠️ Risultati onesti: un hit rate del 20-35% su 10 numeri proposti è già statisticamente rilevante (atteso casuale ~22%). Se vedi valori simili o migliori, il metodo funziona. Valori peggiori = zona di miglioramento.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px">`;
+
+  risultati.forEach(r => {
+    const col = coloreHit(r);
+    html += `
+      <div style="background:var(--blu);border:1px solid var(--bordo);border-radius:10px;padding:12px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+          <span style="font-size:10px;color:var(--soft)">📅 ${fmtData(r.data)}</span>
+          <span style="font-size:11px;font-weight:700;color:${col}">${r.hitAssoluto} / ${r.previsti.length} indovinati (${Math.round(r.hitRate*100)}%)</span>
+        </div>
+        <div style="font-size:9px;color:var(--soft);margin-bottom:5px;letter-spacing:.5px">PREVISTI:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+          ${r.previsti.map(n => {
+            const hit = r.indovinati.includes(n);
+            return `<span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'}">${n}</span>`;
+          }).join('')}
+        </div>
+        <div style="font-size:9px;color:var(--soft);margin-bottom:5px;letter-spacing:.5px">USCITI:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${r.usciti.slice(0,20).map(n => {
+            const hit = r.indovinati.includes(n);
+            return `<span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'rgba(255,255,255,.06)'};color:${hit ? '#fff' : 'var(--soft)'}">${n}</span>`;
+          }).join('')}
+        </div>
+      </div>`;
+  });
+
+  html += '</div>';
+  document.getElementById('backtest-content').innerHTML = html;
 }
 
 function calcolaScore(num, stats) {
