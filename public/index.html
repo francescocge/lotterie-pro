@@ -1637,7 +1637,7 @@ function generaSerieAvanzata() {
 }
 
 // ============================================================
-// BACKTEST — ultime 20 estrazioni con dati "al tempo reale"
+// BACKTEST — ULTIMA ESTRAZIONE + STORICO PRECEDENTE
 // ============================================================
 function eseguiBacktest() {
   if (allEstrazioni.length < 25) {
@@ -1646,13 +1646,82 @@ function eseguiBacktest() {
     return;
   }
 
-  const N = Math.min(20, allEstrazioni.length - 10);
-  const risultati = [];
-  const nTest = quantiNumeri || 10; // default 10 per il backtest
+  // ESTRAZIONE "OGGI" = la più recente nel database
+  const estrOggi = allEstrazioni[0];
+  const dataOggi = estrOggi.data;
+  const fmtDataOggi = new Date(dataOggi + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
 
-  for (let i = 0; i < N; i++) {
-    const estrTarget = allEstrazioni[i]; // estrazione da prevedere
-    const datiPrec = allEstrazioni.slice(i + 1); // solo dati PRIMA di quella estrazione
+  // Calcola previsioni usando dati PRIMA di oggi
+  const datiPrec = allEstrazioni.slice(1);
+  let htmlOggi = '';
+
+  if (datiPrec.length >= 10) {
+    const stats = calcolaStatisticheAvanzate(datiPrec);
+    const scored = [];
+    for (let n = 1; n <= 90; n++) scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
+    scored.sort((a, b) => b.score - a.score);
+
+    const nTest = quantiNumeri || 10;
+    let previsti;
+    if (quantiNumeri === 0) {
+      const soglia = scored[Math.floor(scored.length * 0.35)].score;
+      previsti = scored.filter(x => x.score >= soglia).map(x => x.num);
+      if (previsti.length > 20) previsti = scored.slice(0, 20).map(x => x.num);
+    } else {
+      previsti = scored.slice(0, nTest).map(x => x.num);
+    }
+    previsti = previsti.sort((a, b) => a - b);
+
+    const indovinati = previsti.filter(n => estrOggi.numeri.includes(n));
+    const pct = Math.round((indovinati.length / previsti.length) * 100);
+    const col = indovinati.length >= 4 ? 'var(--verde)' : indovinati.length >= 2 ? 'var(--oro)' : 'var(--rosso)';
+
+    htmlOggi = `
+      <div style="background:linear-gradient(135deg,rgba(42,93,191,.4),rgba(42,93,191,.2));border:2px solid var(--oro);border-radius:12px;padding:16px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--oro);font-weight:700">📅 ULTIMA ESTRAZIONE — ${fmtDataOggi}</div>
+            <div style="font-size:10px;color:var(--soft);margin-top:4px">Dati precedenti: ${datiPrec.length} estrazioni</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:28px;font-weight:700;color:${col}">${indovinati.length}/${previsti.length}</div>
+            <div style="font-size:12px;color:var(--soft)">Hit Rate: <strong style="color:${col};font-size:14px">${pct}%</strong></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div>
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px">🎯 Previsti:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">
+              ${previsti.map(n => {
+                const hit = indovinati.includes(n);
+                return `<span style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'};border:${hit ? '2px solid var(--oro)' : 'none'}">${n}</span>`;
+              }).join('')}
+            </div>
+          </div>
+          <div>
+            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px">✅ Usciti:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">
+              ${estrOggi.numeri.map(n => {
+                const hit = indovinati.includes(n);
+                return `<span style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'rgba(255,255,255,.06)'};color:${hit ? '#fff' : 'var(--soft)'};border:${hit ? '2px solid var(--verde)' : 'none'}">${n}</span>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(0,0,0,.3);padding:10px 12px;border-radius:8px;font-size:9px;color:var(--soft);line-height:1.6">
+          <strong style="color:${pct >= 50 ? 'var(--verde)' : pct >= 30 ? 'var(--oro)' : 'var(--rosso)'}">${pct >= 50 ? '✅ OTTIMO!' : pct >= 30 ? '⚠️ NELLA MEDIA' : '❌ SOTTO ATTESA'}</strong> — Hit rate al ${pct}% (atteso casuale ~22%). ${pct >= 22 ? 'Il metodo sta batendo il caso!' : 'Spazio per miglioramenti.'}
+        </div>
+      </div>`;
+  }
+
+  // STORICO — ultime 19 estrazioni PRECEDENTI
+  const N = Math.min(19, allEstrazioni.length - 1);
+  const risultati = [];
+  const nTest = quantiNumeri || 10;
+
+  for (let i = 1; i <= N; i++) {
+    const estrTarget = allEstrazioni[i];
+    const datiPrec = allEstrazioni.slice(i + 1);
     if (datiPrec.length < 10) continue;
 
     const stats = calcolaStatisticheAvanzate(datiPrec);
@@ -1681,25 +1750,28 @@ function eseguiBacktest() {
   }
 
   // Statistiche aggregate
-  const avgHit = risultati.reduce((s, r) => s + r.hitAssoluto, 0) / risultati.length;
-  const avgPct = risultati.reduce((s, r) => s + r.hitRate, 0) / risultati.length;
-  const best = risultati.reduce((a, b) => a.hitAssoluto > b.hitAssoluto ? a : b);
-  const worst = risultati.reduce((a, b) => a.hitAssoluto < b.hitAssoluto ? a : b);
+  const avgHit = risultati.reduce((s, r) => s + r.hitAssoluto, 0) / Math.max(risultati.length, 1);
+  const avgPct = risultati.reduce((s, r) => s + r.hitRate, 0) / Math.max(risultati.length, 1);
+  const best = risultati.length > 0 ? risultati.reduce((a, b) => a.hitAssoluto > b.hitAssoluto ? a : b) : null;
+  const worst = risultati.length > 0 ? risultati.reduce((a, b) => a.hitAssoluto < b.hitAssoluto ? a : b) : null;
 
-  // Render
   const fmtData = d => new Date(d + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'});
   const coloreHit = r => r.hitAssoluto >= 4 ? 'var(--verde)' : r.hitAssoluto >= 2 ? 'var(--oro)' : 'var(--rosso)';
 
-  let html = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:20px">
-      <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${avgHit.toFixed(1)}</div><div class="rit-lbl">Hit medi</div></div>
-      <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${Math.round(avgPct*100)}%</div><div class="rit-lbl">Hit rate %</div></div>
-      <div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${best.hitAssoluto}</div><div class="rit-lbl">Migliore</div></div>
-      <div class="rit-stat"><div class="rit-val" style="color:var(--rosso)">${worst.hitAssoluto}</div><div class="rit-lbl">Peggiore</div></div>
+  let html = htmlOggi;
+  html += `
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bordo)">📊 Storico Precedenti ${risultati.length} Sabati</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:14px">
+        <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${avgHit.toFixed(1)}</div><div class="rit-lbl">Hit medi</div></div>
+        <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${Math.round(avgPct*100)}%</div><div class="rit-lbl">Hit rate %</div></div>
+        ${best ? `<div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${best.hitAssoluto}</div><div class="rit-lbl">Migliore</div></div>` : ''}
+        ${worst ? `<div class="rit-stat"><div class="rit-val" style="color:var(--rosso)">${worst.hitAssoluto}</div><div class="rit-lbl">Peggiore</div></div>` : ''}
+      </div>
+      <p style="font-size:9px;color:var(--soft);margin-bottom:12px;line-height:1.6">
+        <strong>Atteso casuale ~22%</strong> con 10 numeri. Se vedi ${Math.round(avgPct*100)}% il metodo ${Math.round(avgPct*100) >= 22 ? '✅ batte il caso' : '❌ è sotto il caso'}.
+      </p>
     </div>
-    <p style="font-size:9px;color:var(--soft);margin-bottom:14px;line-height:1.6">
-      ⚠️ Risultati onesti: un hit rate del 20-35% su 10 numeri proposti è già statisticamente rilevante (atteso casuale ~22%). Se vedi valori simili o migliori, il metodo funziona. Valori peggiori = zona di miglioramento.
-    </p>
     <div style="display:flex;flex-direction:column;gap:8px">`;
 
   risultati.forEach(r => {
