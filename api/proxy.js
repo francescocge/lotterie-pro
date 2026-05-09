@@ -28,6 +28,7 @@ function stripHtml(str) {
   return str.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// 10eLotto
 function parse10eLottoAnno(html) {
   const results = [];
   const testo = stripHtml(html);
@@ -50,6 +51,7 @@ function parse10eLottoAnno(html) {
   return results;
 }
 
+// MillionDay
 function parseMillionDay(html) {
   const results = [];
   const righe = html.split(/<tr[\s>]/i);
@@ -66,6 +68,7 @@ function parseMillionDay(html) {
   return results;
 }
 
+// Lotto
 function parseLottoAnno(html, ruota) {
   const results = [];
   const testo = stripHtml(html);
@@ -84,6 +87,32 @@ function parseLottoAnno(html, ruota) {
       if (numeri.length === 5) {
         results.push({ data, numeri: numeri.sort((a,b)=>a-b) });
       }
+    }
+  }
+  return results;
+}
+
+// SuperEnalotto — NUOVO
+function parseSuperEnalottoAnno(html) {
+  const results = [];
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+  const blocchi = testo.split(/Estrazione\s+(?:SuperEnalotto|Super\s*Enalotto)\s+n\.\s*\d+/i);
+  for (const blocco of blocchi) {
+    const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (!dataM) continue;
+    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
+    if (new Date(data+'T12:00:00').getDay() !== 6) continue;
+    const nums = [...blocco.matchAll(/\b(\d{1,2})\b/g)].map(m => parseInt(m[1])).filter(n => n >= 1 && n <= 90);
+    const unici = [...new Set(nums)];
+    if (unici.length >= 6) {
+      const numeri = unici.slice(0,6).sort((a,b)=>a-b);
+      const jollyM = blocco.match(/Jolly[^0-9]*(\d{1,2})/i);
+      const jolly = jollyM ? parseInt(jollyM[1]) : null;
+      const superstarM = blocco.match(/SuperStar[^0-9]*(\d{1,2})/i);
+      const superstar = superstarM ? parseInt(superstarM[1]) : null;
+      results.push({ data, numeri, jolly, superstar });
     }
   }
   return results;
@@ -108,14 +137,22 @@ export default async function handler(req, res) {
       const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/10-e-lotto/archivio-storico/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parse10eLottoAnno(html));
       parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
+
     } else if (tipo === 'millionday') {
       const htmls = await Promise.all(anni.map(a => fetchUrl('https://milliondaylotto.it/archivio/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parseMillionDay(html));
       parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
+
     } else if (tipo === 'lotto') {
       const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/lotto/archivio-storico/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parseLottoAnno(html, ruota));
       parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
+
+    } else if (tipo === 'superenalotto') {
+      const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/superenalotto/archivio-storico/' + a).catch(() => '')));
+      for (const html of htmls) if (html) parsed = parsed.concat(parseSuperEnalottoAnno(html));
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
+
     } else {
       return res.status(400).json({ ok: false, error: 'Tipo non valido' });
     }
