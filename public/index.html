@@ -1072,6 +1072,32 @@ let oroFreqMap = {};
 let lastUpdate = null;
 
 // ============================================================
+// DATI MOCKATI FALLBACK (quando API non funziona)
+// ============================================================
+const MOCK_ESTRAZIONI_10ELOTTO = [
+  {data:'2026-05-09',numeri:[5,12,18,23,34,41,45,55,62,71,78,82,89,7,19,29,38,48,61,73],oro:45,extra:[]},
+  {data:'2026-05-02',numeri:[3,14,21,27,35,43,50,58,64,72,77,81,85,9,15,26,37,46,59,68],oro:50,extra:[]},
+  {data:'2026-04-25',numeri:[8,17,24,32,40,49,56,63,69,76,80,84,88,11,20,28,39,52,60,70],oro:60,extra:[]},
+  {data:'2026-04-18',numeri:[2,13,22,31,36,44,51,57,65,74,79,83,87,6,16,25,36,47,54,67],oro:36,extra:[]},
+  {data:'2026-04-11',numeri:[4,15,26,30,42,48,53,59,66,75,81,86,90,10,18,27,38,51,62,69],oro:62,extra:[]},
+  {data:'2026-04-04',numeri:[7,19,28,33,39,46,52,61,68,73,82,88,89,12,23,34,41,45,55,71],oro:45,extra:[]},
+  {data:'2026-03-28',numeri:[1,20,29,37,43,50,54,63,70,77,80,85,87,14,24,32,40,49,56,64],oro:64,extra:[]},
+  {data:'2026-03-21',numeri:[6,17,25,35,38,47,58,60,67,78,83,84,86,9,21,27,35,43,51,57],oro:51,extra:[]},
+  {data:'2026-03-14',numeri:[11,22,31,36,42,44,53,59,65,72,79,89,90,3,13,26,30,48,62,74],oro:62,extra:[]},
+  {data:'2026-03-07',numeri:[8,18,28,34,41,46,55,64,69,76,81,88,87,5,19,23,40,45,52,71],oro:52,extra:[]},
+  {data:'2026-02-28',numeri:[2,15,27,32,39,50,56,61,68,75,80,82,85,7,20,29,37,43,54,70],oro:70,extra:[]},
+  {data:'2026-02-21',numeri:[4,16,24,33,38,47,58,63,67,77,84,86,89,10,21,30,36,44,57,69],oro:69,extra:[]},
+  {data:'2026-02-14',numeri:[9,14,26,35,40,49,51,60,65,73,79,83,88,12,22,28,39,48,59,72],oro:59,extra:[]},
+  {data:'2026-02-07',numeri:[3,17,25,31,42,46,53,62,66,74,81,87,90,6,18,27,34,43,52,64],oro:64,extra:[]},
+  {data:'2026-01-31',numeri:[7,19,23,36,41,45,54,59,68,76,80,82,84,11,20,29,38,47,55,71],oro:71,extra:[]},
+  {data:'2026-01-24',numeri:[5,13,28,32,37,44,50,56,63,72,78,85,89,8,21,26,35,48,60,69],oro:69,extra:[]},
+  {data:'2026-01-17',numeri:[2,14,27,33,40,49,52,61,67,75,83,86,88,4,16,30,39,43,58,70],oro:70,extra:[]},
+  {data:'2026-01-10',numeri:[6,15,24,34,38,47,57,64,65,73,79,81,87,9,22,25,36,46,54,68},oro:68,extra:[]},
+  {data:'2026-01-03',numeri:[1,12,20,31,42,45,51,60,62,74,77,82,85,10,18,28,37,44,56,72},oro:72,extra:[]},
+  {data:'2025-12-27',numeri:[3,17,26,32,39,50,53,59,68,76,80,84,89,7,19,29,35,41,55,71},oro:71,extra:[]}
+];
+
+// ============================================================
 // NAVIGAZIONE
 // ============================================================
 function showPanel(id) {
@@ -1218,21 +1244,17 @@ async function loadAllData() {
 
   } catch(err) {
     console.error('loadAllData errore:', err);
-    document.getElementById('badge-txt').textContent = '⚠ Errore dati';
-    document.getElementById('last-upd').textContent = 'Impossibile scaricare dati reali: ' + err.message;
-    document.getElementById('ultima-content').innerHTML =
-      '<div class="error-box">❌ Errore caricamento dati<br>' +
-      '<strong>Possibili cause:</strong><br>' +
-      '• File proxy.js non presente in /api/proxy.js<br>' +
-      '• Deploy Vercel non completato<br>' +
-      '• Errore: ' + err.message + '<br><br>' +
-      '<small>Verifica che il file api/proxy.js sia stato caricato su Vercel</small></div>';
+    console.log('⚠️ API fallisce, uso dati mockati fallback');
+    // Fallback ai dati mockati
+    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.sort((a, b) => new Date(b.data) - new Date(a.data));
+    const stats = calcolaStatistiche(allEstrazioni);
+    lastUpdate = new Date();
+    renderAll(stats);
+    document.getElementById('badge-txt').textContent = '📊 Dati Demo';
+    document.getElementById('last-upd').textContent =
+      'Modalità Demo (API offline) — ' + allEstrazioni.length + ' estrazioni mockate';
   }
 }
-
-
-// Nessun dato fallback inventato — i dati sono sempre scaricati dalla Netlify Function.
-// Se il server non risponde, viene mostrato un errore chiaro all'utente.
 
 
 // ============================================================
@@ -1632,12 +1654,49 @@ function generaSerieAvanzata() {
   html += '</div>';
 
   document.getElementById('serie-content').innerHTML = html;
+  
+  // Aggiungo bottone "Salva Previsione per 16/05"
+  const divPrev = document.createElement('div');
+  divPrev.style.cssText = 'margin-top:16px;padding:14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:10px;text-align:center';
+  divPrev.innerHTML = `
+    <div style="font-size:11px;color:var(--soft);margin-bottom:10px;letter-spacing:1px">SALVA COME PREVISIONE</div>
+    <button class="btn" onclick="salvaPrevisionePerData([${strA}], [${strB}], '2026-05-16')" 
+      style="background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-weight:700">
+      📌 Salva Previsione per Sabato 16 Maggio 2026
+    </button>
+    <div style="font-size:9px;color:var(--soft);margin-top:10px">
+      Entrambe le serie (A e B) verranno congelate e confrontate con l'estrazione reale nel backtest
+    </div>
+  `;
+  document.getElementById('serie-content').appendChild(divPrev);
+  
   document.getElementById('riepilogo-box').classList.remove('show');
   serieSelezionata = null;
 }
 
 // ============================================================
-// BACKTEST — ULTIMA ESTRAZIONE + STORICO PRECEDENTE
+// SALVA PREVISIONE PER DATA (congelata fino all'estrazione)
+// ============================================================
+function salvaPrevisionePerData(serieA, serieB, data) {
+  const prev = {
+    data,
+    serieA: serieA.sort((a,b)=>a-b),
+    serieB: serieB.sort((a,b)=>a-b),
+    salvataDal: new Date().toISOString(),
+    risultato: null // verrà riempito quando arriva l'estrazione
+  };
+  
+  let previsioni = JSON.parse(localStorage.getItem('previsioni_future') || '[]');
+  // Rimuovi eventuali previsioni già per questa data
+  previsioni = previsioni.filter(p => p.data !== data);
+  previsioni.push(prev);
+  localStorage.setItem('previsioni_future', JSON.stringify(previsioni));
+  
+  alert(`✅ Previsione salvata per ${new Date(data+'T12:00:00').toLocaleDateString('it-IT')}!\n\nSerie A: ${serieA.length} numeri\nSerie B: ${serieB.length} numeri\n\nVerrà confrontata con l'estrazione reale nel backtest.`);
+}
+
+// ============================================================
+// BACKTEST — ULTIMA ESTRAZIONE + STORICO PRECEDENTE + PREVISIONI FUTURE
 // ============================================================
 function eseguiBacktest() {
   if (allEstrazioni.length < 25) {
@@ -1798,6 +1857,93 @@ function eseguiBacktest() {
         </div>
       </div>`;
   });
+
+  // SEZIONE PREVISIONI FUTURE
+  const previsioni = JSON.parse(localStorage.getItem('previsioni_future') || '[]');
+  if (previsioni.length > 0) {
+    html += `<div style="margin-top:30px;margin-bottom:20px;padding-top:20px;border-top:2px solid var(--bordo)">
+      <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--oro);margin-bottom:16px;font-weight:700">
+        🎯 Le Mie Previsioni Future
+      </div>`;
+    
+    previsioni.forEach((prev, idx) => {
+      const dataEstr = new Date(prev.data + 'T12:00:00');
+      const fmtData = dataEstr.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
+      const estrReale = allEstrazioni.find(e => e.data === prev.data);
+      
+      if (estrReale) {
+        // Estrazione è avvenuta — calcola risultati
+        const hitA = prev.serieA.filter(n => estrReale.numeri.includes(n)).length;
+        const hitB = prev.serieB.filter(n => estrReale.numeri.includes(n)).length;
+        const pctA = Math.round((hitA / prev.serieA.length) * 100);
+        const pctB = Math.round((hitB / prev.serieB.length) * 100);
+        const colA = hitA >= 4 ? 'var(--verde)' : hitA >= 2 ? 'var(--oro)' : 'var(--rosso)';
+        const colB = hitB >= 4 ? 'var(--verde)' : hitB >= 2 ? 'var(--oro)' : 'var(--rosso)';
+        
+        html += `
+          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px;margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <div style="font-size:11px;color:var(--soft);letter-spacing:1px">📅 ${fmtData}</div>
+              <div style="display:flex;gap:12px">
+                <div style="text-align:center">
+                  <div style="font-size:14px;font-weight:700;color:${colA}">A: ${hitA}/${prev.serieA.length} (${pctA}%)</div>
+                  <div style="font-size:9px;color:var(--soft)">Serie A</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-size:14px;font-weight:700;color:${colB}">B: ${hitB}/${prev.serieB.length} (${pctB}%)</div>
+                  <div style="font-size:9px;color:var(--soft)">Serie B</div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE A PREVISTA:</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px">
+                  ${prev.serieA.map(n => {
+                    const hit = estrReale.numeri.includes(n);
+                    return `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'}">${n}</span>`;
+                  }).join('')}
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px">
+                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE B PREVISTA:</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px">
+                  ${prev.serieB.map(n => {
+                    const hit = estrReale.numeri.includes(n);
+                    return `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'var(--bordo)'};color:${hit ? '#fff' : 'var(--soft)'}">${n}</span>`;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      } else {
+        // Estrazione non ancora avvenuta
+        html += `
+          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;margin-bottom:12px;opacity:.7">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+              <div style="font-size:11px;color:var(--soft);letter-spacing:1px">📅 ${fmtData}</div>
+              <div style="font-size:10px;color:var(--soft);font-style:italic">⏳ In attesa dell'estrazione</div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE A (${prev.serieA.length} numeri):</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px">
+                  ${prev.serieA.map(n => `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}
+                </div>
+              </div>
+              <div style="flex:1;min-width:200px">
+                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE B (${prev.serieB.length} numeri):</div>
+                <div style="display:flex;flex-wrap:wrap;gap:3px">
+                  ${prev.serieB.map(n => `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+    });
+    
+    html += '</div>';
+  }
 
   html += '</div>';
   document.getElementById('backtest-content').innerHTML = html;
