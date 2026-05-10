@@ -1715,247 +1715,235 @@ function eseguiBacktest() {
     return;
   }
 
-  // ESTRAZIONE "OGGI" = la più recente nel database
-  const estrOggi = allEstrazioni[0];
-  const dataOggi = estrOggi.data;
-  const fmtDataOggi = new Date(dataOggi + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const nSerie = quantiNumeri || 6; // default 6, non 10
 
-  // Calcola previsioni usando dati PRIMA di oggi
-  const datiPrec = allEstrazioni.slice(1);
+  // Funzione che calcola ENTRAMBE le serie per un set di dati
+  function calcolaSerieAB(dati, n) {
+    const stats = calcolaStatisticheAvanzate(dati);
+
+    // Serie A: ritardo + ciclo (pesi originali)
+    const scoredA = [];
+    for (let num = 1; num <= 90; num++) scoredA.push({ num, score: calcolaScoreMultiFattore(num, stats) });
+    scoredA.sort((a, b) => b.score - a.score);
+    const serieA = scoredA.slice(0, n).map(x => x.num).sort((a, b) => a - b);
+
+    // Serie B: momentum prima (pesi invertiti)
+    const scoredB = [];
+    for (let num = 1; num <= 90; num++) {
+      const s = stats;
+      const ritAtt = s.ritardi[num] || 0;
+      const ciclo = Math.max(s.cicloMedio[num] || 4.5, 1);
+      const f1 = Math.min(ritAtt / ciclo, 3) / 3;
+      const mom = s.momentum[num] || 0;
+      const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
+      const atteso = 4.5;
+      const f3 = Math.min(ritAtt / atteso, 4) / 4;
+      const f4 = Math.max(0, Math.min(1, (s.coScore[num] || 0) + 0.5));
+      const f5 = s.ultimi3Set.has(num) ? 0 : 1;
+      scoredB.push({ num, score: f2 * 0.35 + f3 * 0.25 + f1 * 0.20 + f4 * 0.10 + f5 * 0.10 });
+    }
+    scoredB.sort((a, b) => b.score - a.score);
+    const serieB = scoredB.slice(0, n).map(x => x.num).sort((a, b) => a - b);
+
+    return { serieA, serieB };
+  }
+
+  // Funzione render balls con highlight
+  function renderBalls(numeri, usciti, size = 26) {
+    return numeri.map(n => {
+      const hit = usciti.includes(n);
+      return `<span style="width:${size}px;height:${size}px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;
+        background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};
+        color:${hit ? '#000' : 'var(--soft)'};
+        border:${hit ? '2px solid var(--oro)' : 'none'}">${n}</span>`;
+    }).join('');
+  }
+
+  function renderBallsUsciti(usciti, indA, indB, size = 26) {
+    return usciti.slice(0, 20).map(n => {
+      const hitA = indA.includes(n);
+      const hitB = indB.includes(n);
+      const bg = hitA && hitB ? 'linear-gradient(135deg,#C9A84C,#7A5C10)'
+                : hitA ? 'linear-gradient(135deg,#2A5DBF,#1A3D8F)'
+                : hitB ? 'linear-gradient(135deg,#7A3DBF,#4A1D8F)'
+                : 'rgba(255,255,255,.06)';
+      const col = (hitA || hitB) ? '#fff' : 'var(--soft)';
+      return `<span style="width:${size}px;height:${size}px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${bg};color:${col}">${n}</span>`;
+    }).join('');
+  }
+
+  // ULTIMA ESTRAZIONE
+  const estrOggi = allEstrazioni[0];
+  const fmtDataOggi = new Date(estrOggi.data + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
+  const datiPrec0 = allEstrazioni.slice(1);
   let htmlOggi = '';
 
-  if (datiPrec.length >= 10) {
-    const stats = calcolaStatisticheAvanzate(datiPrec);
-    const scored = [];
-    for (let n = 1; n <= 90; n++) scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
-    scored.sort((a, b) => b.score - a.score);
-
-    const nTest = quantiNumeri || 10;
-    let previsti;
-    if (quantiNumeri === 0) {
-      const soglia = scored[Math.floor(scored.length * 0.35)].score;
-      previsti = scored.filter(x => x.score >= soglia).map(x => x.num);
-      if (previsti.length > 20) previsti = scored.slice(0, 20).map(x => x.num);
-    } else {
-      previsti = scored.slice(0, nTest).map(x => x.num);
-    }
-    previsti = previsti.sort((a, b) => a - b);
-
-    const indovinati = previsti.filter(n => estrOggi.numeri.includes(n));
-    const pct = Math.round((indovinati.length / previsti.length) * 100);
-    const col = indovinati.length >= 4 ? 'var(--verde)' : indovinati.length >= 2 ? 'var(--oro)' : 'var(--rosso)';
+  if (datiPrec0.length >= 10) {
+    const { serieA, serieB } = calcolaSerieAB(datiPrec0, nSerie);
+    const indA = serieA.filter(n => estrOggi.numeri.includes(n));
+    const indB = serieB.filter(n => estrOggi.numeri.includes(n));
+    const pctA = Math.round(indA.length / serieA.length * 100);
+    const pctB = Math.round(indB.length / serieB.length * 100);
+    const colA = indA.length >= 3 ? 'var(--verde)' : indA.length >= 1 ? 'var(--oro)' : 'var(--rosso)';
+    const colB = indB.length >= 3 ? 'var(--verde)' : indB.length >= 1 ? 'var(--oro)' : 'var(--rosso)';
 
     htmlOggi = `
-      <div style="background:linear-gradient(135deg,rgba(42,93,191,.4),rgba(42,93,191,.2));border:2px solid var(--oro);border-radius:12px;padding:16px;margin-bottom:20px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
-          <div>
-            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--oro);font-weight:700">📅 ULTIMA ESTRAZIONE — ${fmtDataOggi}</div>
-            <div style="font-size:10px;color:var(--soft);margin-top:4px">Dati precedenti: ${datiPrec.length} estrazioni</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-size:28px;font-weight:700;color:${col}">${indovinati.length}/${previsti.length}</div>
-            <div style="font-size:12px;color:var(--soft)">Hit Rate: <strong style="color:${col};font-size:14px">${pct}%</strong></div>
-          </div>
+      <div style="background:linear-gradient(135deg,rgba(42,93,191,.3),rgba(42,93,191,.15));border:2px solid var(--oro);border-radius:12px;padding:16px;margin-bottom:20px">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--oro);font-weight:700;margin-bottom:14px">
+          📅 ULTIMA ESTRAZIONE — ${fmtDataOggi} (${nSerie} numeri per serie)
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-          <div>
-            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px">🎯 Previsti:</div>
-            <div style="display:flex;flex-wrap:wrap;gap:3px">
-              ${previsti.map(n => {
-                const hit = indovinati.includes(n);
-                return `<span style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'};border:${hit ? '2px solid var(--oro)' : 'none'}">${n}</span>`;
-              }).join('')}
+          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;padding:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:10px;font-weight:700;color:var(--testo)">SERIE A</span>
+              <span style="font-size:13px;font-weight:700;color:${colA}">${indA.length}/${nSerie} — ${pctA}%</span>
             </div>
+            <div style="font-size:8px;color:var(--soft);margin-bottom:5px">Ritardo + Ciclo</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">${renderBalls(serieA, estrOggi.numeri, 26)}</div>
           </div>
-          <div>
-            <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:8px">✅ Usciti:</div>
-            <div style="display:flex;flex-wrap:wrap;gap:3px">
-              ${estrOggi.numeri.map(n => {
-                const hit = indovinati.includes(n);
-                return `<span style="width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'rgba(255,255,255,.06)'};color:${hit ? '#fff' : 'var(--soft)'};border:${hit ? '2px solid var(--verde)' : 'none'}">${n}</span>`;
-              }).join('')}
+          <div style="background:rgba(122,61,191,.06);border:1px solid rgba(122,61,191,.2);border-radius:8px;padding:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:10px;font-weight:700;color:var(--testo)">SERIE B</span>
+              <span style="font-size:13px;font-weight:700;color:${colB}">${indB.length}/${nSerie} — ${pctB}%</span>
             </div>
+            <div style="font-size:8px;color:var(--soft);margin-bottom:5px">Momentum</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px">${renderBalls(serieB, estrOggi.numeri, 26)}</div>
           </div>
         </div>
-        <div style="background:rgba(0,0,0,.3);padding:10px 12px;border-radius:8px;font-size:9px;color:var(--soft);line-height:1.6">
-          <strong style="color:${pct >= 50 ? 'var(--verde)' : pct >= 30 ? 'var(--oro)' : 'var(--rosso)'}">${pct >= 50 ? '✅ OTTIMO!' : pct >= 30 ? '⚠️ NELLA MEDIA' : '❌ SOTTO ATTESA'}</strong> — Hit rate al ${pct}% (atteso casuale ~22%). ${pct >= 22 ? 'Il metodo sta batendo il caso!' : 'Spazio per miglioramenti.'}
-        </div>
+        <div style="font-size:9px;color:var(--soft);margin-bottom:6px">NUMERI USCITI <span style="color:var(--oro)">●oro=indov.A</span> <span style="color:#9B7DBF">●viola=indov.B</span>:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:3px">${renderBallsUsciti(estrOggi.numeri, indA, indB, 26)}</div>
       </div>`;
   }
 
-  // STORICO — ultime 19 estrazioni PRECEDENTI
+  // STORICO — ultime 19 estrazioni precedenti
   const N = Math.min(19, allEstrazioni.length - 1);
   const risultati = [];
-  const nTest = quantiNumeri || 10;
 
   for (let i = 1; i <= N; i++) {
     const estrTarget = allEstrazioni[i];
     const datiPrec = allEstrazioni.slice(i + 1);
     if (datiPrec.length < 10) continue;
 
-    const stats = calcolaStatisticheAvanzate(datiPrec);
-    const scored = [];
-    for (let n = 1; n <= 90; n++) scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
-    scored.sort((a, b) => b.score - a.score);
+    const { serieA, serieB } = calcolaSerieAB(datiPrec, nSerie);
+    const indA = serieA.filter(n => estrTarget.numeri.includes(n));
+    const indB = serieB.filter(n => estrTarget.numeri.includes(n));
 
-    let previsti;
-    if (quantiNumeri === 0) {
-      const soglia = scored[Math.floor(scored.length * 0.35)].score;
-      previsti = scored.filter(x => x.score >= soglia).map(x => x.num);
-      if (previsti.length > 20) previsti = scored.slice(0, 20).map(x => x.num);
-    } else {
-      previsti = scored.slice(0, nTest).map(x => x.num);
-    }
-
-    const indovinati = previsti.filter(n => estrTarget.numeri.includes(n));
     risultati.push({
       data: estrTarget.data,
-      previsti: previsti.sort((a, b) => a - b),
+      serieA, serieB, indA, indB,
       usciti: estrTarget.numeri,
-      indovinati,
-      hitRate: indovinati.length / previsti.length,
-      hitAssoluto: indovinati.length
+      hitA: indA.length, hitB: indB.length,
+      pctA: Math.round(indA.length / nSerie * 100),
+      pctB: Math.round(indB.length / nSerie * 100)
     });
   }
 
   // Statistiche aggregate
-  const avgHit = risultati.reduce((s, r) => s + r.hitAssoluto, 0) / Math.max(risultati.length, 1);
-  const avgPct = risultati.reduce((s, r) => s + r.hitRate, 0) / Math.max(risultati.length, 1);
-  const best = risultati.length > 0 ? risultati.reduce((a, b) => a.hitAssoluto > b.hitAssoluto ? a : b) : null;
-  const worst = risultati.length > 0 ? risultati.reduce((a, b) => a.hitAssoluto < b.hitAssoluto ? a : b) : null;
-
+  const avgA = risultati.reduce((s, r) => s + r.hitA, 0) / Math.max(risultati.length, 1);
+  const avgB = risultati.reduce((s, r) => s + r.hitB, 0) / Math.max(risultati.length, 1);
+  const bestA = risultati.length ? Math.max(...risultati.map(r => r.hitA)) : 0;
+  const bestB = risultati.length ? Math.max(...risultati.map(r => r.hitB)) : 0;
   const fmtData = d => new Date(d + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'});
-  const coloreHit = r => r.hitAssoluto >= 4 ? 'var(--verde)' : r.hitAssoluto >= 2 ? 'var(--oro)' : 'var(--rosso)';
 
   let html = htmlOggi;
   html += `
-    <div style="margin-bottom:20px">
-      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bordo)">📊 Storico Precedenti ${risultati.length} Sabati</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-bottom:14px">
-        <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${avgHit.toFixed(1)}</div><div class="rit-lbl">Hit medi</div></div>
-        <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${Math.round(avgPct*100)}%</div><div class="rit-lbl">Hit rate %</div></div>
-        ${best ? `<div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${best.hitAssoluto}</div><div class="rit-lbl">Migliore</div></div>` : ''}
-        ${worst ? `<div class="rit-stat"><div class="rit-val" style="color:var(--rosso)">${worst.hitAssoluto}</div><div class="rit-lbl">Peggiore</div></div>` : ''}
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--soft);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bordo)">
+        📊 Storico ${risultati.length} Sabati Precedenti — ${nSerie} numeri per serie
       </div>
-      <p style="font-size:9px;color:var(--soft);margin-bottom:12px;line-height:1.6">
-        <strong>Atteso casuale ~22%</strong> con 10 numeri. Se vedi ${Math.round(avgPct*100)}% il metodo ${Math.round(avgPct*100) >= 22 ? '✅ batte il caso' : '❌ è sotto il caso'}.
-      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px">
+        <div class="rit-stat"><div class="rit-val" style="color:var(--oro)">${avgA.toFixed(1)}</div><div class="rit-lbl">Hit medi A</div></div>
+        <div class="rit-stat"><div class="rit-val" style="color:#9B7DBF">${avgB.toFixed(1)}</div><div class="rit-lbl">Hit medi B</div></div>
+        <div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${bestA}</div><div class="rit-lbl">Migliore A</div></div>
+        <div class="rit-stat"><div class="rit-val" style="color:var(--verde)">${bestB}</div><div class="rit-lbl">Migliore B</div></div>
+      </div>
     </div>
-    <div style="display:flex;flex-direction:column;gap:8px">`;
+    <div style="display:flex;flex-direction:column;gap:10px">`;
 
   risultati.forEach(r => {
-    const col = coloreHit(r);
+    const colA = r.hitA >= 3 ? 'var(--verde)' : r.hitA >= 1 ? 'var(--oro)' : 'var(--rosso)';
+    const colB = r.hitB >= 3 ? 'var(--verde)' : r.hitB >= 1 ? 'var(--oro)' : 'var(--rosso)';
     html += `
       <div style="background:var(--blu);border:1px solid var(--bordo);border-radius:10px;padding:12px 14px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
-          <span style="font-size:10px;color:var(--soft)">📅 ${fmtData(r.data)}</span>
-          <span style="font-size:11px;font-weight:700;color:${col}">${r.hitAssoluto} / ${r.previsti.length} indovinati (${Math.round(r.hitRate*100)}%)</span>
+        <div style="font-size:10px;color:var(--soft);margin-bottom:10px">📅 ${fmtData(r.data)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div style="background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);border-radius:6px;padding:8px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:9px;color:var(--soft)">Serie A</span>
+              <span style="font-size:11px;font-weight:700;color:${colA}">${r.hitA}/${nSerie} (${r.pctA}%)</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:2px">${renderBalls(r.serieA, r.usciti, 24)}</div>
+          </div>
+          <div style="background:rgba(122,61,191,.04);border:1px solid rgba(122,61,191,.15);border-radius:6px;padding:8px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:9px;color:var(--soft)">Serie B</span>
+              <span style="font-size:11px;font-weight:700;color:${colB}">${r.hitB}/${nSerie} (${r.pctB}%)</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:2px">${renderBalls(r.serieB, r.usciti, 24)}</div>
+          </div>
         </div>
-        <div style="font-size:9px;color:var(--soft);margin-bottom:5px;letter-spacing:.5px">PREVISTI:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-          ${r.previsti.map(n => {
-            const hit = r.indovinati.includes(n);
-            return `<span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'}">${n}</span>`;
-          }).join('')}
-        </div>
-        <div style="font-size:9px;color:var(--soft);margin-bottom:5px;letter-spacing:.5px">USCITI:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">
-          ${r.usciti.slice(0,20).map(n => {
-            const hit = r.indovinati.includes(n);
-            return `<span style="width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'rgba(255,255,255,.06)'};color:${hit ? '#fff' : 'var(--soft)'}">${n}</span>`;
-          }).join('')}
-        </div>
+        <div style="font-size:8px;color:var(--soft);margin-bottom:4px">USCITI:</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px">${renderBallsUsciti(r.usciti, r.indA, r.indB, 24)}</div>
       </div>`;
   });
 
-  // SEZIONE PREVISIONI FUTURE
+  html += '</div>';
+
+  // Sezione previsioni future
   const previsioni = JSON.parse(localStorage.getItem('previsioni_future') || '[]');
   if (previsioni.length > 0) {
-    html += `<div style="margin-top:30px;margin-bottom:20px;padding-top:20px;border-top:2px solid var(--bordo)">
-      <div style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--oro);margin-bottom:16px;font-weight:700">
-        🎯 Le Mie Previsioni Future
-      </div>`;
-    
-    previsioni.forEach((prev, idx) => {
-      const dataEstr = new Date(prev.data + 'T12:00:00');
-      const fmtData = dataEstr.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
+    html += `<div style="margin-top:24px;padding-top:16px;border-top:2px solid var(--bordo)">
+      <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--oro);margin-bottom:14px;font-weight:700">🎯 Le Mie Previsioni Future</div>`;
+
+    previsioni.forEach(prev => {
+      const fmtP = new Date(prev.data + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'numeric'});
       const estrReale = allEstrazioni.find(e => e.data === prev.data);
-      
+
       if (estrReale) {
-        // Estrazione è avvenuta — calcola risultati
-        const hitA = prev.serieA.filter(n => estrReale.numeri.includes(n)).length;
-        const hitB = prev.serieB.filter(n => estrReale.numeri.includes(n)).length;
-        const pctA = Math.round((hitA / prev.serieA.length) * 100);
-        const pctB = Math.round((hitB / prev.serieB.length) * 100);
-        const colA = hitA >= 4 ? 'var(--verde)' : hitA >= 2 ? 'var(--oro)' : 'var(--rosso)';
-        const colB = hitB >= 4 ? 'var(--verde)' : hitB >= 2 ? 'var(--oro)' : 'var(--rosso)';
-        
+        const hitA = prev.serieA.filter(n => estrReale.numeri.includes(n));
+        const hitB = prev.serieB.filter(n => estrReale.numeri.includes(n));
+        const pctA = Math.round(hitA.length / prev.serieA.length * 100);
+        const pctB = Math.round(hitB.length / prev.serieB.length * 100);
+        const colA = hitA.length >= 3 ? 'var(--verde)' : hitA.length >= 1 ? 'var(--oro)' : 'var(--rosso)';
+        const colB = hitB.length >= 3 ? 'var(--verde)' : hitB.length >= 1 ? 'var(--oro)' : 'var(--rosso)';
+
         html += `
-          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px;margin-bottom:12px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-              <div style="font-size:11px;color:var(--soft);letter-spacing:1px">📅 ${fmtData}</div>
-              <div style="display:flex;gap:12px">
-                <div style="text-align:center">
-                  <div style="font-size:14px;font-weight:700;color:${colA}">A: ${hitA}/${prev.serieA.length} (${pctA}%)</div>
-                  <div style="font-size:9px;color:var(--soft)">Serie A</div>
+          <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px;margin-bottom:10px">
+            <div style="font-size:11px;color:var(--soft);margin-bottom:10px">📅 ${fmtP} — Risultato reale</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                  <span style="font-size:9px;color:var(--soft)">Serie A</span>
+                  <span style="font-size:11px;font-weight:700;color:${colA}">${hitA.length}/${prev.serieA.length} (${pctA}%)</span>
                 </div>
-                <div style="text-align:center">
-                  <div style="font-size:14px;font-weight:700;color:${colB}">B: ${hitB}/${prev.serieB.length} (${pctB}%)</div>
-                  <div style="font-size:9px;color:var(--soft)">Serie B</div>
-                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px">${renderBalls(prev.serieA, estrReale.numeri, 24)}</div>
               </div>
-            </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE A PREVISTA:</div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px">
-                  ${prev.serieA.map(n => {
-                    const hit = estrReale.numeri.includes(n);
-                    return `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#C9A84C,#7A5C10)' : 'var(--bordo)'};color:${hit ? '#000' : 'var(--soft)'}">${n}</span>`;
-                  }).join('')}
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                  <span style="font-size:9px;color:var(--soft)">Serie B</span>
+                  <span style="font-size:11px;font-weight:700;color:${colB}">${hitB.length}/${prev.serieB.length} (${pctB}%)</span>
                 </div>
-              </div>
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE B PREVISTA:</div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px">
-                  ${prev.serieB.map(n => {
-                    const hit = estrReale.numeri.includes(n);
-                    return `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:${hit ? 'linear-gradient(135deg,#3DB87A,#1A8A45)' : 'var(--bordo)'};color:${hit ? '#fff' : 'var(--soft)'}">${n}</span>`;
-                  }).join('')}
-                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:2px">${renderBalls(prev.serieB, estrReale.numeri, 24)}</div>
               </div>
             </div>
           </div>`;
       } else {
-        // Estrazione non ancora avvenuta
         html += `
-          <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;margin-bottom:12px;opacity:.7">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-              <div style="font-size:11px;color:var(--soft);letter-spacing:1px">📅 ${fmtData}</div>
-              <div style="font-size:10px;color:var(--soft);font-style:italic">⏳ In attesa dell'estrazione</div>
+          <div style="background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px;margin-bottom:10px;opacity:.7">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--soft)">📅 ${fmtP}</span>
+              <span style="font-size:10px;color:var(--soft);font-style:italic">⏳ In attesa dell'estrazione</span>
             </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap">
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE A (${prev.serieA.length} numeri):</div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px">
-                  ${prev.serieA.map(n => `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}
-                </div>
-              </div>
-              <div style="flex:1;min-width:200px">
-                <div style="font-size:9px;color:var(--soft);margin-bottom:6px;letter-spacing:.5px">SERIE B (${prev.serieB.length} numeri):</div>
-                <div style="display:flex;flex-wrap:wrap;gap:3px">
-                  ${prev.serieB.map(n => `<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}
-                </div>
-              </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+              <div><div style="font-size:9px;color:var(--soft);margin-bottom:6px">Serie A (${prev.serieA.length} num.):</div><div style="display:flex;flex-wrap:wrap;gap:2px">${prev.serieA.map(n=>`<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}</div></div>
+              <div><div style="font-size:9px;color:var(--soft);margin-bottom:6px">Serie B (${prev.serieB.length} num.):</div><div style="display:flex;flex-wrap:wrap;gap:2px">${prev.serieB.map(n=>`<span style="width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--bordo);color:var(--soft)">${n}</span>`).join('')}</div></div>
             </div>
           </div>`;
       }
     });
-    
     html += '</div>';
   }
 
-  html += '</div>';
   document.getElementById('backtest-content').innerHTML = html;
 }
 
