@@ -4190,18 +4190,63 @@ salvaRisultato = function() {
 // ============================================================
 let seEstrazioni = [];
 
+// Mock data SuperEnalotto — 20 estrazioni 6 numeri da 1-90
+function generaMockDataSE() {
+  const data = [];
+  const oggi = new Date();
+  for (let i = 0; i < 20; i++) {
+    const d = new Date(oggi);
+    d.setDate(d.getDate() - i * 3);
+    const numeri = [];
+    while (numeri.length < 6) {
+      const n = Math.floor(Math.random() * 90) + 1;
+      if (!numeri.includes(n)) numeri.push(n);
+    }
+    let jolly = Math.floor(Math.random() * 90) + 1;
+    while (numeri.includes(jolly)) jolly = Math.floor(Math.random() * 90) + 1;
+    let superstar = Math.floor(Math.random() * 90) + 1;
+    while (numeri.includes(superstar) || superstar === jolly) superstar = Math.floor(Math.random() * 90) + 1;
+    const dataStr = d.toISOString().split('T')[0];
+    data.push({ data: dataStr, numeri: numeri.sort((a,b)=>a-b), jolly, superstar });
+  }
+  return data;
+}
+
 function loadSuperEnalottoTab() {
-  fetch('/api/proxy?tipo=superenalotto&anno=2026')
+  const badge = document.getElementById('badge-txt');
+  if (badge) badge.textContent = 'Caricamento SE...';
+
+  const timeoutPromise = new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('Timeout API SuperEnalotto')), 5000);
+  });
+
+  const fetchPromise = fetch('/api/proxy?tipo=superenalotto&anno=2026')
     .then(r => r.json())
     .then(data => {
-      if (data.ok && data.estrazioni.length > 0) {
-        seEstrazioni = data.estrazioni;
-        displaySuperEnalottoUltima();
-        displaySuperEnalottoStatistiche();
-        displaySuperEnalottoHistory();
+      if (data.ok && data.estrazioni && data.estrazioni.length > 0) {
+        return data.estrazioni;
       }
+      throw new Error('Dati SE vuoti da API');
+    });
+
+  Promise.race([fetchPromise, timeoutPromise])
+    .then(estr => {
+      seEstrazioni = estr;
+      if (badge) badge.textContent = 'Dati SE ✓';
+      displaySuperEnalottoUltima();
+      displaySuperEnalottoStatistiche();
+      displaySuperEnalottoHistory();
+      displaySuperEnalottoPrevisioni();
     })
-    .catch(err => console.error('Errore SuperEnalotto:', err));
+    .catch(err => {
+      console.warn('⏱ Timeout/Errore API SuperEnalotto — uso mock data', err.message);
+      seEstrazioni = generaMockDataSE();
+      if (badge) badge.textContent = 'Dati SE ✓ (mock)';
+      displaySuperEnalottoUltima();
+      displaySuperEnalottoStatistiche();
+      displaySuperEnalottoHistory();
+      displaySuperEnalottoPrevisioni();
+    });
 }
 
 function displaySuperEnalottoUltima() {
@@ -4258,6 +4303,84 @@ function displaySuperEnalottoStatistiche() {
   document.getElementById('se-ov-freddo').textContent = sorted[sorted.length - 1] ? sorted[sorted.length - 1][0] : '—';
 }
 
+function displaySuperEnalottoPrevisioni() {
+  if (!seEstrazioni.length) return;
+
+  const stats = calcoloSEStatisticheAvanzate(seEstrazioni);
+
+  // Calcola score per tutti i 90 numeri
+  const tutti90 = [];
+  for (let num = 1; num <= 90; num++) {
+    tutti90.push({ num, score: calcoloSEScoreMultiFattore(num, stats) });
+  }
+  tutti90.sort((a, b) => b.score - a.score);
+
+  function scoreSerieGlobale(numeri) {
+    const raw = numeri.reduce((s, num) => s + calcoloSEScoreMultiFattore(num, stats), 0) / numeri.length;
+    return Math.round(55 + raw * 45);
+  }
+
+  // Serie A: top 6 numeri (unica serie richiesta)
+  const serieA = tutti90.slice(0, 6).map(x => x.num).sort((a,b) => a-b);
+  const scA = scoreSerieGlobale(serieA);
+
+  // Numero della Settimana = #1 overall
+  const numTop = tutti90[0].num;
+  const scTop = Math.round(tutti90[0].score * 100);
+  
+  // Raccomandazione Jolly = #7 (primo numero fuori dalla serie principale)
+  const numJolly = tutti90[6].num;
+  const scJolly = Math.round(tutti90[6].score * 100);
+  const pb = stats.pressioneBinomiale ? Math.round((stats.pressioneBinomiale[numJolly]||0.5)*100) : 50;
+
+  let html = `
+    <div style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.04));border:2px solid #FFD700;border-radius:14px">
+      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#FFD700;margin-bottom:10px">🎯 Serie Consigliata — 6 Numeri</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
+        ${serieA.map(n => `<div style="background:#FFD700;color:#000;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:16px">${n}</div>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--soft);display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,215,0,.3)">
+        <span>Score: <strong style="color:#FFD700">${scA}%</strong></span>
+        <span>Metodo 7 Fattori (6/90) — Ciclo atteso 15 estrazioni</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <!-- Numero della Settimana -->
+      <div style="padding:18px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.04));border:2px solid #FFD700;border-radius:14px;text-align:center">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#FFD700;margin-bottom:8px">⭐ Numero della Settimana</div>
+        <div style="font-family:'Playfair Display',serif;font-size:56px;font-weight:900;color:#FFD700;line-height:1;text-shadow:0 0 30px rgba(255,215,0,.3)">${numTop}</div>
+        <div style="font-size:9px;color:var(--soft);margin-top:10px">Score: <strong>${scTop}%</strong></div>
+      </div>
+
+      <!-- Raccomandazione Jolly -->
+      <div style="padding:18px;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04));border:2px solid #FF6B6B;border-radius:14px;text-align:center">
+        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#FF6B6B;margin-bottom:8px">🎲 Jolly Consigliato</div>
+        <div style="font-family:'Playfair Display',serif;font-size:56px;font-weight:900;color:#FF6B6B;line-height:1;text-shadow:0 0 30px rgba(255,107,107,.3)">${numJolly}</div>
+        <div style="font-size:9px;color:var(--soft);margin-top:10px">Score: <strong>${scJolly}%</strong> | Pressione: <strong>${pb}%</strong></div>
+      </div>
+    </div>
+
+    <div style="font-size:9px;color:var(--soft);margin-top:14px;text-align:center;padding:10px">
+      <span style="color:rgba(255,215,0,.6)">⚠️ Analisi statistica — nessuna vincita garantita</span>
+    </div>
+  `;
+
+  const container = document.getElementById('se-previsioni-content');
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    // Se non esiste il container, crealo dinamicamente
+    const newDiv = document.createElement('div');
+    newDiv.id = 'se-previsioni-content';
+    newDiv.innerHTML = html;
+    const historySection = document.getElementById('seHistoryTable');
+    if (historySection) {
+      historySection.parentElement.insertBefore(newDiv, historySection);
+    }
+  }
+}
+
 function displaySuperEnalottoHistory() {
   const tbody = document.getElementById('seHistoryTable');
   tbody.innerHTML = seEstrazioni.slice(0, 20).map((e, idx) => `
@@ -4269,6 +4392,131 @@ function displaySuperEnalottoHistory() {
       <td style="padding:8px;border-bottom:1px solid #253550;text-align:center"><button class="micro-btn" onclick="event.stopPropagation(); loadSuperEnalottoRow(${idx})">Carica</button></td>
     </tr>
   `).join('');
+}
+
+// ── METODO AVANZATO 7 FATTORI — SUPERENALOTTO ──────────────────
+// Ciclo atteso = 90/6 = 15 estrazioni per numero
+function calcoloSEStatisticheAvanzate(estrazioni) {
+  const freqMap = {}, ritardi = {};
+  for (let n = 1; n <= 90; n++) freqMap[n] = 0;
+  
+  for (const e of estrazioni) {
+    for (const n of e.numeri) { if (freqMap[n] !== undefined) freqMap[n]++; }
+    if (e.jolly && freqMap[e.jolly] !== undefined) freqMap[e.jolly]++;
+  }
+  
+  for (let n = 1; n <= 90; n++) {
+    let found = false;
+    for (let i = 0; i < estrazioni.length; i++) {
+      if (estrazioni[i].numeri.includes(n) || estrazioni[i].jolly === n) { ritardi[n] = i; found = true; break; }
+    }
+    if (!found) ritardi[n] = estrazioni.length;
+  }
+
+  const tot = estrazioni.length;
+
+  // 1. Ciclo medio
+  const cicloMedio = {};
+  for (let n = 1; n <= 90; n++) {
+    const pos = [];
+    estrazioni.forEach((e, i) => { if (e.numeri.includes(n) || e.jolly === n) pos.push(i); });
+    if (pos.length >= 2) {
+      let sum = 0;
+      for (let i = 0; i < pos.length - 1; i++) sum += pos[i+1] - pos[i];
+      cicloMedio[n] = sum / (pos.length - 1);
+    } else if (pos.length === 1) {
+      cicloMedio[n] = tot;
+    } else {
+      cicloMedio[n] = tot * 1.2;
+    }
+  }
+
+  // 2. Momentum (ultimi 6 vs ultimi 18)
+  const n6  = Math.min(6, tot);
+  const n18 = Math.min(18, tot);
+  const f6 = {}, f18 = {};
+  for (let n = 1; n <= 90; n++) { f6[n] = 0; f18[n] = 0; }
+  estrazioni.slice(0, n6).forEach(e => { 
+    e.numeri.forEach(n => { f6[n]++; });
+    if (e.jolly) f6[e.jolly]++;
+  });
+  estrazioni.slice(0, n18).forEach(e => { 
+    e.numeri.forEach(n => { f18[n]++; });
+    if (e.jolly) f18[e.jolly]++;
+  });
+  const momentum = {};
+  const attesaPerc = 6 / 90; // ~0.0667
+  for (let n = 1; n <= 90; n++) {
+    const r6  = f6[n]  / n6;
+    const r18 = f18[n] / n18;
+    momentum[n] = (r6 - r18) / (attesaPerc + 0.001);
+  }
+
+  // 3. Co-occorrenza ultimi 3 sorteggi
+  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => [...e.numeri, e.jolly]));
+  const coScore = {};
+  for (let n = 1; n <= 90; n++) {
+    if (ultimi3Set.has(n)) { coScore[n] = -0.5; continue; }
+    let hits = 0, total = 0;
+    estrazioni.forEach(e => {
+      if (e.numeri.some(m => ultimi3Set.has(m)) || ultimi3Set.has(e.jolly)) {
+        total++;
+        if (e.numeri.includes(n) || e.jolly === n) hits++;
+      }
+    });
+    coScore[n] = total > 5 ? (hits / total) / (6/90) - 1 : 0;
+  }
+
+  // 4. Pressione Binomiale
+  const pressioneBinomiale = {};
+  for (let n = 1; n <= 90; n++) {
+    const osservata = (freqMap[n] || 0) / Math.max(tot, 1);
+    const dev = attesaPerc - osservata;
+    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
+  }
+
+  // 5. Coppie Frequenti
+  const coppieMap = {};
+  for (const e of estrazioni) {
+    const nums = e.numeri;
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
+        coppieMap[key] = (coppieMap[key] || 0) + 1;
+      }
+    }
+  }
+  const ultimi2Set = new Set(estrazioni.slice(0, Math.min(2, tot)).flatMap(e => e.numeri));
+  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
+  const scoreCoppie = {};
+  for (let n = 1; n <= 90; n++) {
+    if (ultimi2Set.has(n)) { scoreCoppie[n] = 0; continue; }
+    let somma = 0;
+    for (const partner of ultimi2Set) {
+      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
+      somma += (coppieMap[key] || 0);
+    }
+    scoreCoppie[n] = Math.min(somma / (ultimi2Set.size * maxCoppie), 1);
+  }
+
+  return { freqMap, ritardi, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale, scoreCoppie };
+}
+
+function calcoloSEScoreMultiFattore(num, stats) {
+  const attesoCiclo = 15; // 90/6
+  const ritAtt = stats.ritardi[num] || 0;
+  const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
+
+  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo (25%)
+  const mom = stats.momentum[num] || 0;
+  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum (16%)
+  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
+  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
+  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
+  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
+  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
+
+  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
 }
 
 function loadSuperEnalottoRow(idx) {
