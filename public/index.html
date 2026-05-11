@@ -725,7 +725,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <div class="card">
     <div class="card-title">🏆 Previsioni — Ruota di <span id="lotto-gioca-ruota-nome">Genova</span></div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Serie consigliate generate con <strong style="color:var(--testo)">Metodo Avanzato 6 Fattori</strong> adattato al Lotto (5 numeri su 90, ciclo atteso 18 estrazioni). Ritardo relativo, momentum, ciclo personale, correlazione, dispersione e pressione binomiale.
+      Serie consigliate generate con <strong style="color:var(--testo)">Metodo Avanzato 7 Fattori</strong> adattato al Lotto (5 numeri su 90, ciclo atteso 18 estrazioni). Ritardo relativo, momentum, ciclo personale, correlazione, dispersione, pressione binomiale e <strong style="color:var(--oro)">coppie frequenti</strong>.
     </p>
     <div class="sec-label">Tipo di giocata</div>
     <div class="metodo-row" style="margin-bottom:18px">
@@ -3190,7 +3190,33 @@ function calcolaLottoStatisticheAvanzate(estrazioni) {
     pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
   }
 
-  return { ...base, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale };
+  // 5. Coppie Frequenti — numeri che escono spesso insieme nella stessa estrazione
+  // Costruisco mappa coppia → quante volte sono usciti insieme
+  const coppieMap = {};
+  for (const e of estrazioni) {
+    const nums = e.numeri;
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
+        coppieMap[key] = (coppieMap[key] || 0) + 1;
+      }
+    }
+  }
+  // Per ogni numero calcolo quanto "tende a uscire insieme" ai numeri caldi recenti (ultimi 5 sorteggi)
+  const ultimi5Set = new Set(estrazioni.slice(0, Math.min(5, tot)).flatMap(e => e.numeri));
+  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
+  const scoreCoppie = {};
+  for (let n = 1; n <= 90; n++) {
+    if (ultimi5Set.has(n)) { scoreCoppie[n] = 0; continue; } // già uscito di recente
+    let somma = 0;
+    for (const partner of ultimi5Set) {
+      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
+      somma += (coppieMap[key] || 0);
+    }
+    scoreCoppie[n] = Math.min(somma / (ultimi5Set.size * maxCoppie), 1);
+  }
+
+  return { ...base, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale, scoreCoppie };
 }
 
 function calcolaLottoScoreMultiFattore(num, stats) {
@@ -3198,15 +3224,16 @@ function calcolaLottoScoreMultiFattore(num, stats) {
   const ritAtt = stats.ritardi[num] || 0;
   const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
 
-  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                    // Ritardo relativo (28%)
+  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo al ciclo (25%)
   const mom = stats.momentum[num] || 0;
-  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                            // Momentum (18%)
-  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                              // Ciclo normalizzato (22%)
-  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));          // Correlazione (12%)
-  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;                                  // Non appena uscito (8%)
-  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (12%)
+  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum recente (16%)
+  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
+  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
+  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
+  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
+  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
 
-  return (f1 * 0.28 + f2 * 0.18 + f3 * 0.22 + f4 * 0.12 + f5 * 0.08 + f6 * 0.12);
+  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
 }
 
 function renderAllLotto() {
