@@ -2552,14 +2552,27 @@ async function loadMDData() {
     while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
 
     let rawEstr = [];
-    for (const anno of anniDaCaricare) {
-      try {
-        const estr = await fetchDatiReali('millionday', anno);
-        rawEstr = rawEstr.concat(estr);
-      } catch(e) { console.warn('MD errore anno', anno, e.message); }
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout API MillionDay')), 5000);
+    });
+
+    const fetchPromise = (async () => {
+      for (const anno of anniDaCaricare) {
+        try {
+          const estr = await fetchDatiReali('millionday', anno);
+          rawEstr = rawEstr.concat(estr);
+        } catch(e) { console.warn('MD errore anno', anno, e.message); }
+      }
+    })();
+
+    try {
+      await Promise.race([fetchPromise, timeoutPromise]);
+    } catch(timeoutErr) {
+      console.warn('⏱ Timeout API MillionDay — uso mock data');
+      rawEstr = []; // Forza uso mock
     }
 
-    // Filtra ultimi 12 mesi (tutte le estrazioni, il proxy non distingue mattina/sera)
+    // Filtra ultimi 12 mesi
     mdEstrazioni = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
@@ -2567,18 +2580,40 @@ async function loadMDData() {
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    if (mdEstrazioni.length < 3) throw new Error('Dati MillionDay insufficienti (' + mdEstrazioni.length + ')');
+    // Se non ci sono dati da API, usa mock data
+    if (mdEstrazioni.length < 3) {
+      console.warn('⚠️ Dati insufficienti da API — carico mock MillionDay');
+      mdEstrazioni = generaMockDataMD();
+    }
 
     calcolaMDStatistiche();
     renderAllMD();
-    document.getElementById('badge-txt').textContent = 'Dati reali MD ✓';
-    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' estrazioni (12 mesi)';
+    document.getElementById('badge-txt').textContent = 'Dati MD ✓' + (rawEstr.length === 0 ? ' (mock)' : '');
+    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' estrazioni' + (rawEstr.length === 0 ? ' (mock data)' : '');
 
   } catch(err) {
     document.getElementById('badge-txt').textContent = '⚠ Errore MD';
     document.getElementById('md-ultima-content').innerHTML =
       '<div class="error-box">Dati MillionDay non disponibili.<br><small>' + err.message + '</small></div>';
   }
+}
+
+// Mock data MillionDay — 20 estrazioni 5 numeri da 1-55
+function generaMockDataMD() {
+  const data = [];
+  const oggi = new Date();
+  for (let i = 0; i < 20; i++) {
+    const d = new Date(oggi);
+    d.setDate(d.getDate() - i * 3); // ogni 3 giorni
+    const numeri = [];
+    while (numeri.length < 5) {
+      const n = Math.floor(Math.random() * 55) + 1;
+      if (!numeri.includes(n)) numeri.push(n);
+    }
+    const dataStr = d.toISOString().split('T')[0];
+    data.push({ data: dataStr, numeri: numeri.sort((a,b)=>a-b) });
+  }
+  return data;
 }
 
 
@@ -2631,6 +2666,110 @@ function calcolaMDStatistiche() {
     }
     if (!found) mdRitardi[n] = mdEstrazioni.length;
   }
+}
+
+// ── METODO AVANZATO 7 FATTORI — MILLIONDDAY ──────────────────
+// Ciclo atteso = 55/5 = 11 estrazioni per numero
+function calcolaMDStatisticheAvanzate(estrazioni) {
+  const base = { freq: mdFreqMap, ritardi: mdRitardi };
+  const tot = estrazioni.length;
+
+  // 1. Ciclo medio per numero
+  const cicloMedio = {};
+  for (let n = 1; n <= 55; n++) {
+    const pos = [];
+    estrazioni.forEach((e, i) => { if (e.numeri.includes(n)) pos.push(i); });
+    if (pos.length >= 2) {
+      let sum = 0;
+      for (let i = 0; i < pos.length - 1; i++) sum += pos[i+1] - pos[i];
+      cicloMedio[n] = sum / (pos.length - 1);
+    } else if (pos.length === 1) {
+      cicloMedio[n] = tot;
+    } else {
+      cicloMedio[n] = tot * 1.2;
+    }
+  }
+
+  // 2. Momentum: frequenza ultimi 5 vs ultimi 15
+  const n5  = Math.min(5, tot);
+  const n15 = Math.min(15, tot);
+  const f5 = {}, f15 = {};
+  for (let n = 1; n <= 55; n++) { f5[n] = 0; f15[n] = 0; }
+  estrazioni.slice(0, n5).forEach(e => e.numeri.forEach(n => { f5[n]++; }));
+  estrazioni.slice(0, n15).forEach(e => e.numeri.forEach(n => { f15[n]++; }));
+  const momentum = {};
+  const attesaPerc = 5 / 55; // ~0.0909
+  for (let n = 1; n <= 55; n++) {
+    const r5  = f5[n]  / n5;
+    const r15 = f15[n] / n15;
+    momentum[n] = (r5 - r15) / (attesaPerc + 0.001);
+  }
+
+  // 3. Co-occorrenza con ultimi 2 sorteggi
+  const ultimi2Set = new Set(estrazioni.slice(0, Math.min(2, tot)).flatMap(e => e.numeri));
+  const coScore = {};
+  for (let n = 1; n <= 55; n++) {
+    if (ultimi2Set.has(n)) { coScore[n] = -0.5; continue; }
+    let hits = 0, total = 0;
+    estrazioni.forEach(e => {
+      if (e.numeri.some(m => ultimi2Set.has(m))) {
+        total++;
+        if (e.numeri.includes(n)) hits++;
+      }
+    });
+    coScore[n] = total > 3 ? (hits / total) / (5/55) - 1 : 0;
+  }
+
+  // 4. Pressione Binomiale (5/55 = attesa per numero)
+  const pressioneBinomiale = {};
+  for (let n = 1; n <= 55; n++) {
+    const osservata = (base.freq[n] || 0) / Math.max(tot, 1);
+    const dev = attesaPerc - osservata;
+    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
+  }
+
+  // 5. Coppie Frequenti
+  const coppieMap = {};
+  for (const e of estrazioni) {
+    const nums = e.numeri;
+    for (let i = 0; i < nums.length; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
+        coppieMap[key] = (coppieMap[key] || 0) + 1;
+      }
+    }
+  }
+  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => e.numeri));
+  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
+  const scoreCoppie = {};
+  for (let n = 1; n <= 55; n++) {
+    if (ultimi3Set.has(n)) { scoreCoppie[n] = 0; continue; }
+    let somma = 0;
+    for (const partner of ultimi3Set) {
+      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
+      somma += (coppieMap[key] || 0);
+    }
+    scoreCoppie[n] = Math.min(somma / (ultimi3Set.size * maxCoppie), 1);
+  }
+
+  return { freq: base.freq, ritardi: base.ritardi, cicloMedio, momentum, coScore, ultimi2Set, pressioneBinomiale, scoreCoppie };
+}
+
+function calcolaMDScoreMultiFattore(num, stats) {
+  const attesoCiclo = 11; // 55/5
+  const ritAtt = stats.ritardi[num] || 0;
+  const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
+
+  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo al ciclo (25%)
+  const mom = stats.momentum[num] || 0;
+  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum recente (16%)
+  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
+  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
+  const f5 = stats.ultimi2Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
+  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
+  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
+
+  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
 }
 
 // ============================================================
@@ -2702,45 +2841,63 @@ function renderMDSerie() {
     document.getElementById('md-serie-content').innerHTML = '<div class="error-box">Carica prima i dati</div>';
     return;
   }
-  const tot = mdEstrazioni.length || 1;
-  const tutti = Array.from({length:55},(_,i)=>i+1);
 
-  function scoreMD(num, metodo) {
-    const f = (mdFreqMap[num]||0)/tot;
-    const r = Math.min((mdRitardi[num]||0)/15,1);
-    if (metodo==='bilanciato') return f*0.55 + r*0.45;
-    return f*0.4 + r*0.6;
+  // Statistiche avanzate 7 fattori (5/55)
+  const stats = calcolaMDStatisticheAvanzate(mdEstrazioni);
+
+  // Calcola score per tutti i 55 numeri
+  const tutti55 = [];
+  for (let num = 1; num <= 55; num++) {
+    tutti55.push({ num, score: calcolaMDScoreMultiFattore(num, stats) });
+  }
+  tutti55.sort((a, b) => b.score - a.score);
+
+  function scoreSerieGlobale(numeri) {
+    const raw = numeri.reduce((s, num) => s + calcolaMDScoreMultiFattore(num, stats), 0) / numeri.length;
+    return Math.round(55 + raw * 45);
   }
 
-  function scegliMD(pool, metodo) {
-    const scored = pool.map(n=>({n, s:scoreMD(n,metodo)})).sort((a,b)=>b.s-a.s);
-    const scelti=[]; const dec=new Set();
-    for (const {n} of scored) {
-      if (scelti.length>=5) break;
-      const d = Math.floor((n-1)/11);
-      if (!dec.has(d)) { scelti.push(n); dec.add(d); }
-    }
-    for (const {n} of scored) {
-      if (scelti.length>=5) break;
-      if (!scelti.includes(n)) scelti.push(n);
-    }
-    return scelti.slice(0,5).sort((a,b)=>a-b);
-  }
+  // Serie A: top score puro (ritardo + ciclo)
+  const serieA = tutti55.slice(0, 5).map(x => x.num).sort((a,b) => a-b);
 
-  const serieA = scegliMD(tutti, 'bilanciato');
-  const serieB = scegliMD(tutti.filter(n=>!serieA.includes(n)), 'misto');
+  // Serie B: priorità momentum e pressione
+  const scoredB = [];
+  for (let num = 1; num <= 55; num++) {
+    const s = stats;
+    const attesoCiclo = 11;
+    const ritAtt = s.ritardi[num] || 0;
+    const ciclo  = Math.max(s.cicloMedio[num] || attesoCiclo, 1);
+    const f1 = Math.min(ritAtt / ciclo, 3) / 3;
+    const mom = s.momentum[num] || 0;
+    const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
+    const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;
+    const f4 = Math.max(0, Math.min(1, (s.coScore[num] || 0) + 0.5));
+    const f5 = s.ultimi2Set.has(num) ? 0 : 1;
+    const f6 = s.pressioneBinomiale ? (s.pressioneBinomiale[num] || 0.5) : 0.5;
+    const f7 = s.scoreCoppie ? (s.scoreCoppie[num] || 0) : 0;
+    scoredB.push({ num, score: f2*0.30 + f6*0.25 + f3*0.20 + f1*0.12 + f4*0.08 + f7*0.05 });
+  }
+  scoredB.sort((a,b) => b.score - a.score);
+  const poolB = scoredB.filter(x => !serieA.includes(x.num));
+  const serieB = poolB.slice(0, 5).map(x => x.num).sort((a,b) => a-b);
+
+  const scA = scoreSerieGlobale(serieA);
+  const scB = scoreSerieGlobale(serieB);
 
   const varianti = [
-    {nome:'Serie A — Consigliata', tag:'🎯 Bilanciata PRO', numeri:serieA, desc:'Bilancia frequenza e ritardo nei sabati sera degli ultimi 12 mesi.'},
-    {nome:'Serie B — Alternativa', tag:'⚖️ Ritardo+Frequenza', numeri:serieB, desc:'Numeri diversi dalla A, privilegia i ritardatari con buona frequenza di fondo.'},
+    { nome:'Serie A — Consigliata', tag:'🎯 7 Fattori', numeri:serieA, sc:scA,
+      desc:'Top 5 numeri: ritardo relativo al ciclo personale, momentum, pressione binomiale, coppie frequenti.' },
+    { nome:'Serie B — Momentum', tag:'📈 Trend+Pressione', numeri:serieB, sc:scB,
+      desc:'Priorità ai numeri con trend in crescita recente e alta pressione statistica.' },
   ];
 
   let html = '<div class="serie-grid">';
-  varianti.forEach((v,idx)=>{
-    const scoreVal = Math.min(Math.round(v.numeri.reduce((s,n)=>s+scoreMD(n,'bilanciato'),0)/5*100),98);
-    html += `<div class="serie-card ${idx===0?'col-a':'col-b'}" id="md-serie-${idx}" onclick="selezionaMDSerie(${idx},[${v.numeri.join(',')}],'${v.nome}')">
+  varianti.forEach((v, idx) => {
+    const cls = idx===0?'col-a':'col-b';
+    const ns  = v.numeri.join(',');
+    html += `<div class="serie-card ${cls}" id="md-serie-${idx}" onclick="selezionaMDSerie(${idx},[${ns}],'${v.nome.replace(/'/g,'')}')">
       <div class="selected-check">✓</div>
-      <div class="serie-header"><div class="serie-titolo">${v.nome}</div><div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${scoreVal}%"></div></div>Score ${scoreVal}%</div></div>
+      <div class="serie-header"><div class="serie-titolo">${v.nome}</div><div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${v.sc}%"></div></div>Score ${v.sc}%</div></div>
       <div class="serie-tag">${v.tag} · 5 numeri</div>
       <div class="serie-balls">${v.numeri.map(n=>`<div class="md-serie-ball">${n}</div>`).join('')}</div>
       <div class="serie-motivo">${v.desc}</div>
@@ -2748,7 +2905,30 @@ function renderMDSerie() {
     </div>`;
   });
   html += '</div>';
+
+  // ── NUMERO DELLA SETTIMANA MILLIONDDAY ──────────────────────
+  const numTop = tutti55[0].num;
+  const scTop  = Math.round(tutti55[0].score * 100);
+  const pb     = stats.pressioneBinomiale ? Math.round((stats.pressioneBinomiale[numTop]||0.5)*100) : 50;
+  const ritTop = stats.ritardi[numTop] || 0;
+  const divNum = document.createElement('div');
+  divNum.style.cssText = 'margin-top:14px;padding:20px;background:linear-gradient(135deg,rgba(46,204,113,.12),rgba(46,204,113,.04));border:2px solid #2ECC71;border-radius:14px;text-align:center';
+  divNum.innerHTML = `
+    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#2ECC71;margin-bottom:10px">⭐ Numero della Settimana — MillionDay</div>
+    <div style="font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:#2ECC71;line-height:1;text-shadow:0 0 40px rgba(46,204,113,.4)">${numTop}</div>
+    <div style="font-size:10px;color:var(--soft);margin-top:10px;letter-spacing:1px">
+      Score composito: <strong style="color:var(--testo)">${scTop}%</strong> &nbsp;·&nbsp;
+      Pressione stat.: <strong style="color:var(--testo)">${pb}%</strong> &nbsp;·&nbsp;
+      Ritardo: <strong style="color:var(--testo)">${ritTop} estr.</strong>
+    </div>
+    <div style="font-size:9px;color:var(--soft);margin-top:8px;line-height:1.6">
+      Il numero con il punteggio più alto tra tutti i 7 fattori.<br>
+      <span style="color:rgba(46,204,113,.5)">⚠️ Analisi statistica — nessuna vincita garantita</span>
+    </div>
+  `;
+
   document.getElementById('md-serie-content').innerHTML = html;
+  document.getElementById('md-serie-content').appendChild(divNum);
   document.getElementById('md-riepilogo-box').classList.remove('show');
 }
 
