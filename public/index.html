@@ -6407,7 +6407,12 @@ setInterval(updateAdvancedStats, 1000);
 // AUTO-LOAD DATA ON PAGE START
 window.addEventListener('load', () => {
   console.log('✅ Pagina caricata, carico dati automaticamente...');
-  setTimeout(() => loadAllData(), 1000);
+  setTimeout(() => {
+    loadAllData();      // 10eLotto
+    loadMDData();       // MillionDay
+    loadLottoData();    // Lotto
+    loadSuperEnalottoTab(); // SuperEnalotto
+  }, 800);
 });
 
 </script>
