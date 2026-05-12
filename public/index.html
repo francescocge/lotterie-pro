@@ -1259,19 +1259,32 @@ async function loadAllData() {
     // CARICA DIRETTAMENTE I DATI MOCK (nessuna API)
     allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
       .sort((a, b) => new Date(b.data) - new Date(a.data))
-      .slice(0, 50); // Ultimi 50
+      .slice(0, 50);
+
+    console.log('✅ allEstrazioni caricato:', allEstrazioni.length, 'estrazioni');
+    console.log('Prima estrazione:', allEstrazioni[0]);
+
+    // Delay per assicurare che il DOM sia pronto
+    await new Promise(r => setTimeout(r, 200));
 
     const stats = calcolaStatistiche(allEstrazioni);
+    console.log('✅ Stats calcolate');
+
+    // Delay prima di render
+    await new Promise(r => setTimeout(r, 100));
+    
     renderAll(stats);
+    console.log('✅ Render completato');
     
     document.getElementById('badge-txt').textContent = '✅ Caricato';
     document.getElementById('last-upd').textContent = 
       'Dati caricati: ' + allEstrazioni.length + ' estrazioni';
     
-    console.log('✅ Dati 10eLotto caricati:', allEstrazioni.length);
+    console.log('✅ Dati 10eLotto caricati completamente');
 
   } catch(err) {
-    console.error('❌ Errore:', err);
+    console.error('❌ Errore:', err.message);
+    console.error('Stack:', err.stack);
     document.getElementById('badge-txt').textContent = '❌ Errore';
   }
 }
@@ -1294,26 +1307,42 @@ function renderAll(stats) {
 // RENDER ULTIMA ESTRAZIONE
 // ============================================================
 function renderUltima() {
-  if (!allEstrazioni.length) return;
-  const e = allEstrazioni[0];
-  const data = new Date(e.data).toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  try {
+    if (!allEstrazioni || !allEstrazioni.length) {
+      console.warn('⚠️ renderUltima: allEstrazioni is empty');
+      return;
+    }
+    
+    const e = allEstrazioni[0];
+    console.log('renderUltima: prima estrazione data=', e.data, 'numeri=', e.numeri.length);
+    
+    const data = new Date(e.data).toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-  let html = `
-    <div class="estraz-meta">
-      <div class="estraz-data">${data}</div>
-      <div class="estraz-num">Concorso serale</div>
-    </div>
-    <div class="sec-label">20 Numeri Estratti</div>
-    <div class="balls-wrap">
-      ${e.numeri.map(n => `<div class="ball ${e.oro===n?'oro-b':'n'}">${n}</div>`).join('')}
-    </div>`;
+    let html = `
+      <div class="estraz-meta">
+        <div class="estraz-data">${data}</div>
+        <div class="estraz-num">Concorso serale</div>
+      </div>
+      <div class="sec-label">20 Numeri Estratti</div>
+      <div class="balls-wrap">
+        ${e.numeri.map(n => `<div class="ball ${e.oro===n?'oro-b':'n'}">${n}</div>`).join('')}
+      </div>`;
 
-  if (e.oro) {
-    html += `<div class="sec-label" style="margin-top:14px">🌟 Numero Oro</div>
-    <div class="balls-wrap"><div class="ball oro-b">${e.oro}</div></div>`;
+    if (e.oro) {
+      html += `<div class="sec-label" style="margin-top:14px">🌟 Numero Oro</div>
+      <div class="balls-wrap"><div class="ball oro-b">${e.oro}</div></div>`;
+    }
+
+    const element = document.getElementById('ultima-content');
+    if (element) {
+      element.innerHTML = html;
+      console.log('✅ renderUltima: HTML scritto correttamente');
+    } else {
+      console.error('❌ renderUltima: elemento ultima-content non trovato!');
+    }
+  } catch(err) {
+    console.error('❌ renderUltima error:', err.message, err.stack);
   }
-
-  document.getElementById('ultima-content').innerHTML = html;
 }
 
 // ============================================================
