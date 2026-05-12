@@ -1251,64 +1251,50 @@ function isSabato(dataStr) {
 }
 
 async function loadAllData() {
-  document.getElementById('badge-txt').textContent = 'Caricamento... (max 5 sec)';
-  document.getElementById('last-upd').textContent = 'Connessione al server...';
+  console.log('🔄 loadAllData() iniziato');
+  document.getElementById('badge-txt').textContent = 'Caricamento...';
+  document.getElementById('last-upd').textContent = 'In corso...';
 
   try {
-    const oggi = new Date();
-    const unAnnoFa = new Date(oggi);
-    unAnnoFa.setFullYear(unAnnoFa.getFullYear() - 1);
+    // Timeout aggressivo: 3 secondi
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
 
-    const anniDaCaricare = new Set();
-    let y = unAnnoFa.getFullYear();
-    while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
-
-    allEstrazioni = [];
-    
-    // TIMEOUT AGGRESSIVO: 5 secondi max
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout 5sec')), 5000);
+    const response = await fetch('/api/proxy?tipo=10elotto&anno=2026', {
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
-    const fetchPromise = (async () => {
-      for (const anno of anniDaCaricare) {
-        try {
-          const estr = await fetchDatiReali('10elotto', anno);
-          allEstrazioni = allEstrazioni.concat(estr);
-        } catch(e) { console.warn('10eLotto errore anno', anno, e.message); }
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.length > 0) {
+        allEstrazioni = data.sort((a, b) => new Date(b.data) - new Date(a.data));
+        const stats = calcolaStatistiche(allEstrazioni);
+        renderAll(stats);
+        document.getElementById('badge-txt').textContent = '✅ Dati Reali';
+        document.getElementById('last-upd').textContent = 
+          'Aggiornato: ' + new Date().toLocaleString('it-IT');
+        console.log('✅ Dati reali caricati:', allEstrazioni.length);
+        return;
       }
-    })();
+    }
+  } catch(e) {
+    console.log('⚠️ API errore:', e.message);
+  }
 
-    await Promise.race([fetchPromise, timeoutPromise]);
-
-    // Filtra: ultimi 12 mesi
-    allEstrazioni = allEstrazioni
-      .filter(e => {
-        const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi;
-      })
-      .sort((a, b) => new Date(b.data) - new Date(a.data));
-
-    if (allEstrazioni.length < 3) throw new Error('Dati insufficienti dal server (' + allEstrazioni.length + ' estrazioni)');
-
-    const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
-    renderAll(stats);
-    document.getElementById('badge-txt').textContent = 'Dati reali ✓';
-    document.getElementById('last-upd').textContent =
-      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni (12 mesi)';
-
-  } catch(err) {
-    console.error('loadAllData errore:', err.message);
-    console.log('⚠️ API offline o timeout — uso dati mockati');
-    // Fallback IMMEDIATO ai dati mockati
+  // FALLBACK AUTOMATICO: dati mock
+  try {
+    console.log('📊 Uso dati mockati (API offline)');
     allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.sort((a, b) => new Date(b.data) - new Date(a.data));
     const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
     renderAll(stats);
-    document.getElementById('badge-txt').textContent = '📊 Dati Demo (API offline)';
-    document.getElementById('last-upd').textContent =
-      'Fallback mockati — ' + allEstrazioni.length + ' estrazioni (da usare come test)';
+    document.getElementById('badge-txt').textContent = '📊 Dati Demo';
+    document.getElementById('last-upd').textContent = 
+      'Fallback mockati — ' + allEstrazioni.length + ' estrazioni';
+    console.log('✅ Dati demo caricati:', allEstrazioni.length);
+  } catch(err) {
+    console.error('❌ Errore critico:', err);
+    document.getElementById('badge-txt').textContent = '❌ Errore';
   }
 }
 
@@ -6459,6 +6445,12 @@ function updateAdvancedStats() {
 
 // Call this after data loads
 setInterval(updateAdvancedStats, 1000);
+
+// AUTO-LOAD DATA ON PAGE START
+window.addEventListener('load', () => {
+  console.log('✅ Pagina caricata, carico dati automaticamente...');
+  setTimeout(() => loadAllData(), 1000);
+});
 
 </script>
 </body>
