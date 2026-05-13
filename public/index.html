@@ -280,7 +280,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <button class="nav-tab nav-tab-10e" onclick="showPanel('sim')">🧪 Simulatore</button>
   <button class="nav-tab nav-tab-10e" onclick="showPanel('storico')">📅 Storico</button>
   <button class="nav-tab nav-tab-10e" onclick="showPanel('premi')">💰 Premi</button>
-  <button class="nav-tab nav-tab-10e" onclick="showPanel('advanced')" style="background:linear-gradient(135deg,var(--oro),#C9A84C);color:#000;font-weight:700">🔬 Advanced Stats</button>
+  <button class="nav-tab nav-tab-10e" onclick="showPanel('advanced')" style="background:linear-gradient(135deg,#C9A84C,#a07828);color:#000;font-weight:700">🔬 Advanced Stats</button>
   <!-- Tab MillionDay — nascoste di default -->
   <button class="nav-tab nav-tab-md" style="display:none" onclick="showPanelMD('md-ultima')">💎 Ultima</button>
   <button class="nav-tab nav-tab-md" style="display:none" onclick="showPanelMD('md-gioca')">🏆 Gioca</button>
@@ -334,17 +334,17 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <div class="card">
     <div class="card-title">🧠 Metodo Avanzato Multi-Fattore</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Algoritmo a 6 fattori: <strong style="color:var(--testo)">ritardo relativo al ciclo</strong>, momentum degli ultimi 10 sabati, ciclo personale di ogni numero, correlazione con numeri usciti recentemente, dispersione e <strong style="color:var(--oro)">pressione binomiale</strong> (numeri usciti meno del previsto statisticamente).
+      Algoritmo a 5 fattori: <strong style="color:var(--testo)">ritardo relativo al ciclo</strong>, momentum degli ultimi 10 sabati, ciclo personale di ogni numero, correlazione con numeri usciti recentemente, dispersione. La quantità di numeri proposti varia in base al punteggio — puoi forzare un numero fisso qui sotto.
     </p>
 
     <div class="sec-label">Quanti numeri vuoi giocare? <span style="color:var(--soft);font-weight:400">(lascia "Auto" per selezione variabile)</span></div>
     <div class="quanti-row" id="quanti-row">
-      <button class="q-btn" onclick="setQuanti(0)">Auto</button>
+      <button class="q-btn attivo" onclick="setQuanti(0)">Auto</button>
       <button class="q-btn" onclick="setQuanti(5)">5</button>
       <button class="q-btn" onclick="setQuanti(6)">6</button>
       <button class="q-btn" onclick="setQuanti(7)">7</button>
       <button class="q-btn" onclick="setQuanti(8)">8</button>
-      <button class="q-btn attivo" onclick="setQuanti(10)">10</button>
+      <button class="q-btn" onclick="setQuanti(10)">10</button>
       <button class="q-btn" onclick="setQuanti(15)">15</button>
     </div>
 
@@ -550,46 +550,17 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   </div>
 </div>
 
-<!-- ADVANCED STATISTICAL ANALYSIS PANEL -->
+<!-- ===== PANEL ADVANCED STATS ===== -->
 <div class="panel panel-10e" id="panel-advanced" style="display:none">
   <div class="card">
-    <div class="card-title">🔬 Professional Statistical Analysis Engine</div>
-    <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Advanced statistical analysis with 9 specialized modules: frequency analysis, delay patterns, hot/cold/warming numbers, pair correlation, triple statistics, Monte Carlo simulation (50K iterations), pattern cycle detection, and combination realism scoring.
-    </p>
-
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-      <button class="btn" onclick="showAdvancedAnalysisDashboard()" style="background:linear-gradient(135deg,var(--oro),#C9A84C);color:#000;font-weight:700;border:none">
-        📊 Generate Full Dashboard
-      </button>
-      <button class="btn" onclick="downloadAnalysisReport()" style="background:var(--accent);border:none">
-        📥 Export JSON Report
-      </button>
-      <button class="btn" onclick="exportAnalysisAsText()" style="background:#3DB87A;border:none">
-        📄 Export Text Report
-      </button>
+    <div class="card-title">🔬 Advanced Statistical Analysis</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0">
+      <button class="btn" onclick="runAdvancedAnalysis()" style="background:linear-gradient(135deg,#C9A84C,#a07828);color:#000;font-weight:700;border:none">📊 Genera Dashboard</button>
+      <button class="btn" onclick="exportAdvancedJSON()" style="border:none">📥 Export JSON</button>
     </div>
-
-    <div id="advanced-dashboard-content" style="margin-top:20px;min-height:200px">
+    <div id="advanced-result">
       <div style="text-align:center;color:var(--soft);padding:40px">
-        <div style="font-size:14px;margin-bottom:10px">Click "Generate Full Dashboard" to analyze current dataset</div>
-        <div style="font-size:11px">Requires at least 10 draws for accurate analysis</div>
-      </div>
-    </div>
-
-    <!-- QUICK STATS CARDS -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px">
-      <div style="background:var(--blu2);border-radius:8px;padding:14px;border-left:4px solid #FF6B6B">
-        <div style="font-size:9px;color:var(--soft);text-transform:uppercase;letter-spacing:1px">Total Draws</div>
-        <div style="font-size:20px;color:#FF6B6B;font-weight:700;margin-top:4px" id="stat-total-draws">0</div>
-      </div>
-      <div style="background:var(--blu2);border-radius:8px;padding:14px;border-left:4px solid #FFD700">
-        <div style="font-size:9px;color:var(--soft);text-transform:uppercase;letter-spacing:1px">Status</div>
-        <div style="font-size:14px;color:#FFD700;font-weight:700;margin-top:4px" id="stat-status">Ready</div>
-      </div>
-      <div style="background:var(--blu2);border-radius:8px;padding:14px;border-left:4px solid var(--accent)">
-        <div style="font-size:9px;color:var(--soft);text-transform:uppercase;letter-spacing:1px">Updated</div>
-        <div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:4px" id="stat-updated">—</div>
+        Premi "Genera Dashboard" per analizzare i dati correnti
       </div>
     </div>
   </div>
@@ -771,7 +742,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <div class="card">
     <div class="card-title">🏆 Previsioni — Ruota di <span id="lotto-gioca-ruota-nome">Genova</span></div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:18px;line-height:1.7">
-      Serie consigliate generate con <strong style="color:var(--testo)">Metodo Avanzato 7 Fattori</strong> adattato al Lotto (5 numeri su 90, ciclo atteso 18 estrazioni). Ritardo relativo, momentum, ciclo personale, correlazione, dispersione, pressione binomiale e <strong style="color:var(--oro)">coppie frequenti</strong>.
+      Serie consigliate generate dai dati reali degli ultimi 12 sabati. Basate su frequenze e ritardi della ruota selezionata.
     </p>
     <div class="sec-label">Tipo di giocata</div>
     <div class="metodo-row" style="margin-bottom:18px">
@@ -1251,43 +1222,64 @@ function isSabato(dataStr) {
 }
 
 async function loadAllData() {
-  document.getElementById('badge-txt').textContent = 'Caricamento...';
-  document.getElementById('last-upd').textContent = 'Caricamento dati...';
+  document.getElementById('badge-txt').textContent = 'Caricamento... (max 5 sec)';
+  document.getElementById('last-upd').textContent = 'Connessione al server...';
 
-  // STEP 1: Carica SUBITO i mock data — nessuna attesa
-  allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
-    .sort((a, b) => new Date(b.data) - new Date(a.data));
-
-  const stats = calcolaStatistiche(allEstrazioni);
-  lastUpdate = new Date();
-  renderAll(stats);
-  document.getElementById('badge-txt').textContent = '✅ Caricato';
-  document.getElementById('last-upd').textContent =
-    'Ultima estrazione: ' + allEstrazioni[0].data + ' — ' + allEstrazioni.length + ' estrazioni';
-
-  // STEP 2: Prova l'API in background (non blocca la UI)
   try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 3000);
-
     const oggi = new Date();
-    const anno = oggi.getFullYear();
-    const r = await fetch('/api/proxy?tipo=10elotto&anno=' + anno, { signal: controller.signal });
-    if (r.ok) {
-      const data = await r.json();
-      if (data && data.length > 0) {
-        allEstrazioni = data.sort((a, b) => new Date(b.data) - new Date(a.data));
-        const statsReali = calcolaStatistiche(allEstrazioni);
-        lastUpdate = new Date();
-        renderAll(statsReali);
-        document.getElementById('badge-txt').textContent = '✅ Dati Reali';
-        document.getElementById('last-upd').textContent =
-          'Aggiornato: ' + lastUpdate.toLocaleString('it-IT');
+    const unAnnoFa = new Date(oggi);
+    unAnnoFa.setFullYear(unAnnoFa.getFullYear() - 1);
+
+    const anniDaCaricare = new Set();
+    let y = unAnnoFa.getFullYear();
+    while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
+
+    allEstrazioni = [];
+    
+    // TIMEOUT AGGRESSIVO: 5 secondi max
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Timeout 5sec')), 5000);
+    });
+
+    const fetchPromise = (async () => {
+      for (const anno of anniDaCaricare) {
+        try {
+          const estr = await fetchDatiReali('10elotto', anno);
+          allEstrazioni = allEstrazioni.concat(estr);
+        } catch(e) { console.warn('10eLotto errore anno', anno, e.message); }
       }
-    }
-  } catch(e) {
-    // API offline — mock data già mostrati, nessun problema
-    console.log('API offline, uso mock data');
+    })();
+
+    await Promise.race([fetchPromise, timeoutPromise]);
+
+    // Filtra: ultimi 12 mesi
+    allEstrazioni = allEstrazioni
+      .filter(e => {
+        const d = new Date(e.data + 'T12:00:00');
+        return d >= unAnnoFa && d <= oggi;
+      })
+      .sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    if (allEstrazioni.length < 3) throw new Error('Dati insufficienti dal server (' + allEstrazioni.length + ' estrazioni)');
+
+    const stats = calcolaStatistiche(allEstrazioni);
+    lastUpdate = new Date();
+    renderAll(stats);
+    document.getElementById('badge-txt').textContent = 'Dati reali ✓';
+    document.getElementById('last-upd').textContent =
+      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni (12 mesi)';
+
+  } catch(err) {
+    console.error('loadAllData errore:', err.message);
+    console.log('⚠️ API offline o timeout — uso dati mockati');
+    // Fallback IMMEDIATO ai dati mockati
+    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.sort((a, b) => new Date(b.data) - new Date(a.data));
+    const stats = calcolaStatistiche(allEstrazioni);
+    lastUpdate = new Date();
+    renderAll(stats);
+    document.getElementById('badge-txt').textContent = '📊 Dati Demo (API offline)';
+    document.getElementById('last-upd').textContent =
+      'Fallback mockati — ' + allEstrazioni.length + ' estrazioni (da usare come test)';
   }
 }
 
@@ -1500,7 +1492,7 @@ function renderStorico() {
 // ============================================================
 // SEZIONE GIOCA — SERIE CONSIGLIATE
 // ============================================================
-let quantiNumeri = 10; // default 10 numeri
+let quantiNumeri = 0; // 0 = Auto
 let metodoAnalisi = 'bilanciato';
 let serieSelezionata = null;
 
@@ -1572,677 +1564,141 @@ function calcolaStatisticheAvanzate(estrazioni) {
     coScore[n] = total > 5 ? (hits / total) / (20/90) - 1 : 0; // normalizzato vs atteso
   }
 
-  // 4. Pressione Binomiale: ogni numero dovrebbe uscire il 22.2% delle estrazioni (20/90).
-  //    Se è uscito MENO del previsto → pressione alta → score alto.
-  const attesaPerc = 20 / 90;
-  const pressioneBinomiale = {};
-  for (let n = 1; n <= 90; n++) {
-    const osservata = (base.freqMap[n] || 0) / Math.max(tot, 1);
-    // Deviazione normalizzata: 0 = uscito troppo spesso, 1 = mai uscito
-    const deviazione = attesaPerc - osservata;
-    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + deviazione / attesaPerc));
-  }
-
-  return { ...base, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale };
+  return { ...base, cicloMedio, momentum, coScore, ultimi3Set };
 }
 
-// ============================================================
-// STATISTICAL ENGINE AVANZATO — FASE 2, 3, 4, 5, 6, 7, 8
-// ============================================================
-// Questo modulo POTENZIA l'analisi senza modificare funzioni
-// esistenti. È completamente modulare e ottimizzato.
-// ============================================================
+function calcolaScoreMultiFattore(num, stats) {
+  // F1: Ritardo relativo al ciclo personale del numero (30%)
+  const ritAtt = stats.ritardi[num] || 0;
+  const ciclo = Math.max(stats.cicloMedio[num] || 4.5, 1);
+  const f1 = Math.min(ritAtt / ciclo, 3) / 3; // 0-1
 
-const StatisticalEngine = (() => {
-  'use strict';
+  // F2: Momentum recente (20%) — trending up = score alto
+  const mom = stats.momentum[num] || 0;
+  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
 
-  // CACHE PER PERFORMANCE
-  const cache = new Map();
-  
-  const clearCache = () => cache.clear();
+  // F3: Ciclo normalizzato (25%) — quante estrazioni fa vs ciclo atteso
+  const atteso = 4.5; // 90/20
+  const f3 = Math.min(ritAtt / atteso, 4) / 4;
 
-  // ────────────────────────────────────────────────────────
-  // FASE 2: FREQUENZE MULTI-FINESTRA
-  // ────────────────────────────────────────────────────────
-  // Calcola frequenze su 4 finestre temporali diverse
-  // Utile per identificare trend a breve/medio/lungo termine
-  
-  const calculateMultiWindowFrequencies = (estrazioni) => {
-    const cacheKey = 'freq_' + estrazioni.length;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
+  // F4: Correlazione recente (15%)
+  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));
 
-    const maxNum = 90;
-    const windows = {
-      freq20: new Uint32Array(maxNum + 1),    // Ultime 20
-      freq50: new Uint32Array(maxNum + 1),    // Ultime 50
-      freq100: new Uint32Array(maxNum + 1),   // Ultime 100
-      freqTotal: new Uint32Array(maxNum + 1)  // Tutto lo storico
-    };
+  // F5: Non appena uscito (10%) — bonus se assente nelle ultime 3
+  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;
 
-    const n20 = Math.min(20, estrazioni.length);
-    const n50 = Math.min(50, estrazioni.length);
-    const n100 = Math.min(100, estrazioni.length);
+  return (f1 * 0.30 + f2 * 0.20 + f3 * 0.25 + f4 * 0.15 + f5 * 0.10);
+}
 
-    // Conteggio multifinestra in una sola passata (performance)
-    for (let i = 0; i < estrazioni.length; i++) {
-      const e = estrazioni[i];
-      for (const num of e.numeri) {
-        windows.freqTotal[num]++;
-        if (i < n100) windows.freq100[num]++;
-        if (i < n50) windows.freq50[num]++;
-        if (i < n20) windows.freq20[num]++;
-      }
-    }
-
-    // Normalizza su lunghezza finestra (frequenza relativa)
-    const normalized = {
-      freq20: {},
-      freq50: {},
-      freq100: {},
-      freqTotal: {},
-      freq20Rel: {},    // Percentuale sulla finestra
-      freq50Rel: {},
-      freq100Rel: {},
-      freqTotalRel: {}
-    };
-
-    for (let n = 1; n <= maxNum; n++) {
-      normalized.freq20[n] = windows.freq20[n];
-      normalized.freq50[n] = windows.freq50[n];
-      normalized.freq100[n] = windows.freq100[n];
-      normalized.freqTotal[n] = windows.freqTotal[n];
-
-      // Relative (%)
-      normalized.freq20Rel[n] = (windows.freq20[n] / Math.max(n20, 1)) * 100;
-      normalized.freq50Rel[n] = (windows.freq50[n] / Math.max(n50, 1)) * 100;
-      normalized.freq100Rel[n] = (windows.freq100[n] / Math.max(n100, 1)) * 100;
-      normalized.freqTotalRel[n] = (windows.freqTotal[n] / Math.max(estrazioni.length, 1)) * 100;
-    }
-
-    cache.set(cacheKey, normalized);
-    return normalized;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 2: MOMENTUM DETTAGLIATO
-  // Identifica numeri che stanno "accelerando" in uscita
-  // ────────────────────────────────────────────────────────
-  
-  const calculateDetailedMomentum = (estrazioni) => {
-    const cacheKey = 'momentum_' + estrazioni.length;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const freq = calculateMultiWindowFrequencies(estrazioni);
-    const momentum = {};
-    const expectedFreq = 20 / 90; // Frequenza attesa per numero
-
-    // Momentum = rapporto tra frequenza recente e lunga
-    for (let n = 1; n <= 90; n++) {
-      const rec = freq.freq20Rel[n] / 100;      // Recente normalizzato
-      const long = freq.freqTotalRel[n] / 100;  // Lungo periodo normalizzato
-      const ratio = long > 0.001 ? rec / long : 1;
-      
-      // Score momentum: >1 = accelerando, <1 = decelerando
-      momentum[n] = {
-        ratio: ratio,
-        acceleration: ratio - 1,  // Percentuale di accelerazione
-        trend: rec > expectedFreq ? 'up' : rec < expectedFreq * 0.5 ? 'down' : 'stable'
-      };
-    }
-
-    cache.set(cacheKey, momentum);
-    return momentum;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 2: RITARDO NORMALIZZATO
-  // Confronta ritardo attuale con ritardo medio storico
-  // ────────────────────────────────────────────────────────
-  
-  const calculateNormalizedDelay = (estrazioni) => {
-    const cacheKey = 'delay_' + estrazioni.length;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const delayStats = {};
-    const maxNum = 90;
-
-    // Calcola tutti i ritardi storici per ogni numero
-    for (let n = 1; n <= maxNum; n++) {
-      const allDelays = [];
-      let lastPos = -1;
-      
-      for (let i = 0; i < estrazioni.length; i++) {
-        if (estrazioni[i].numeri.includes(n)) {
-          if (lastPos >= 0) {
-            allDelays.push(i - lastPos);
-          }
-          lastPos = i;
-        }
-      }
-      
-      // Ritardo attuale (da ultima apparizione)
-      const currentDelay = lastPos >= 0 ? estrazioni.length - 1 - lastPos : estrazioni.length;
-      
-      // Media e deviazione standard dei ritardi storici
-      const avgDelay = allDelays.length > 0 
-        ? allDelays.reduce((a, b) => a + b, 0) / allDelays.length 
-        : estrazioni.length / 2;
-      
-      const stdDev = allDelays.length > 1
-        ? Math.sqrt(allDelays.reduce((s, d) => s + Math.pow(d - avgDelay, 2), 0) / (allDelays.length - 1))
-        : avgDelay;
-
-      // Z-score: quante deviazioni standard al di sopra della media
-      const zScore = stdDev > 0.1 ? (currentDelay - avgDelay) / stdDev : 0;
-
-      delayStats[n] = {
-        currentDelay,
-        avgDelay: Math.round(avgDelay * 10) / 10,
-        stdDev: Math.round(stdDev * 10) / 10,
-        zScore: Math.round(zScore * 100) / 100,
-        normalizedDelay: Math.min(currentDelay / avgDelay, 5) // Capped a 5x
-      };
-    }
-
-    cache.set(cacheKey, delayStats);
-    return delayStats;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 2: SCORE COMPOSITO MIGLIORATO
-  // Unisce frequenze multi-finestra + momentum + ritardo normalizzato
-  // ────────────────────────────────────────────────────────
-  
-  const calculateCompositeScore = (num, estrazioni) => {
-    const freq = calculateMultiWindowFrequencies(estrazioni);
-    const momentum = calculateDetailedMomentum(estrazioni);
-    const delay = calculateNormalizedDelay(estrazioni);
-
-    // Pesi per i componenti
-    const w = {
-      freq20: 0.25,      // Frequenza ultime 20 (recente)
-      freq50: 0.18,      // Frequenza ultime 50
-      freq100: 0.12,     // Frequenza ultime 100
-      momentum: 0.18,    // Trend momentum
-      delay: 0.15,       // Ritardo normalizzato
-      pressure: 0.12     // Pressione binomiale
-    };
-
-    // Normalizza frequenze a 0-1
-    const maxFreq20 = Math.max(...Object.values(freq.freq20)) || 1;
-    const maxFreq50 = Math.max(...Object.values(freq.freq50)) || 1;
-    const maxFreq100 = Math.max(...Object.values(freq.freq100)) || 1;
-
-    const n_f20 = Math.min(freq.freq20[num] / maxFreq20, 1);
-    const n_f50 = Math.min(freq.freq50[num] / maxFreq50, 1);
-    const n_f100 = Math.min(freq.freq100[num] / maxFreq100, 1);
-
-    // Momentum: trasforma ratio in 0-1
-    const mom = momentum[num].ratio;
-    const n_momentum = Math.max(0, Math.min(1, (mom - 0.5) / 2 + 0.5));
-
-    // Ritardo: normalizzato già calcolato
-    const n_delay = Math.min(delay[num].normalizedDelay / 5, 1);
-
-    // Score finale ponderato
-    const score = (
-      n_f20 * w.freq20 +
-      n_f50 * w.freq50 +
-      n_f100 * w.freq100 +
-      n_momentum * w.momentum +
-      n_delay * w.delay
-    );
-
-    return {
-      score: Math.min(score, 1),
-      components: {
-        freq20: n_f20,
-        freq50: n_f50,
-        freq100: n_f100,
-        momentum: n_momentum,
-        delay: n_delay
-      }
-    };
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 3: MATRICE CO-OCCORRENZA COPPIE NUMERICHE
-  // Identifica quali numeri escono frequentemente insieme
-  // ────────────────────────────────────────────────────────
-  
-  const calculatePairMatrix = (estrazioni) => {
-    const cacheKey = 'pairs_' + estrazioni.length;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const pairMatrix = {};
-    const pairStats = [];
-
-    // Costruisci matrice di co-occorrenza
-    for (let i = 1; i <= 90; i++) {
-      pairMatrix[i] = {};
-      for (let j = i + 1; j <= 90; j++) {
-        pairMatrix[i][j] = 0;
-      }
-    }
-
-    // Conta coppie
-    for (const e of estrazioni) {
-      for (let i = 0; i < e.numeri.length; i++) {
-        for (let j = i + 1; j < e.numeri.length; j++) {
-          const a = Math.min(e.numeri[i], e.numeri[j]);
-          const b = Math.max(e.numeri[i], e.numeri[j]);
-          pairMatrix[a][b]++;
-        }
-      }
-    }
-
-    // Calcola correlazione per ogni coppia
-    for (let i = 1; i <= 90; i++) {
-      for (let j = i + 1; j <= 90; j++) {
-        const cooccurrence = pairMatrix[i][j];
-        // Frequenza attesa se indipendenti = (freq[i] * freq[j]) / estrazioni.length
-        // Per 10eLotto: 20 numeri su 90 = C(20,2)/C(90,2) = 190/4005 ≈ 4.7% per coppia
-        const expectedPairs = (20 / 90) * (19 / 89); // Approssimazione
-        const percentCorrelation = (cooccurrence / Math.max(estrazioni.length * expectedPairs, 1)) * 100;
-
-        pairStats.push({
-          pair: [i, j],
-          cooccurrence,
-          correlation: Math.round(percentCorrelation)
-        });
-      }
-    }
-
-    // Ordina per cooccorrenza
-    pairStats.sort((a, b) => b.cooccurrence - a.cooccurrence);
-
-    const result = { matrix: pairMatrix, stats: pairStats.slice(0, 100) }; // Top 100 coppie
-    cache.set(cacheKey, result);
-    return result;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 4: FILTRI STATISTICI SULLE COMBINAZIONI
-  // Scarta combinazioni anomale per qualità migliore
-  // ────────────────────────────────────────────────────────
-  
-  const filterCombinations = (combination, params = {}) => {
-    const defaults = {
-      allowConsecutive: true,      // Se false, scarta numeri consecutivi
-      maxPerDecade: 20,            // Max numeri per decade (1-10, 11-20, ecc)
-      minSum: 50,
-      maxSum: 450,
-      avoidLinearPatterns: true    // Scarta pattern aritmetici
-    };
-    const p = { ...defaults, ...params };
-
-    let valid = true;
-
-    // 1. Controlla numeri consecutivi
-    if (!p.allowConsecutive) {
-      for (let i = 0; i < combination.length - 1; i++) {
-        if (combination[i + 1] - combination[i] === 1) {
-          valid = false;
-          break;
-        }
-      }
-    }
-
-    // 2. Controlla distribuzione per decade
-    if (valid && p.maxPerDecade < 20) {
-      const decades = {};
-      for (let i = 1; i <= 9; i++) decades[i] = 0;
-      for (const num of combination) {
-        const decade = Math.ceil(num / 10);
-        decades[decade]++;
-        if (decades[decade] > p.maxPerDecade) {
-          valid = false;
-          break;
-        }
-      }
-    }
-
-    // 3. Controlla somma totale
-    if (valid) {
-      const sum = combination.reduce((a, b) => a + b, 0);
-      valid = sum >= p.minSum && sum <= p.maxSum;
-    }
-
-    // 4. Evita pattern lineari (progressione aritmetica)
-    if (valid && p.avoidLinearPatterns && combination.length >= 3) {
-      // Controlla se almeno 3 numeri sono in progressione aritmetica
-      for (let i = 0; i < combination.length - 2; i++) {
-        const diff = combination[i + 1] - combination[i];
-        if (combination[i + 2] - combination[i + 1] === diff) {
-          // Trovato pattern: penalizza ma non scarta (è comunque raro)
-          valid = false;
-          break;
-        }
-      }
-    }
-
-    return valid;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 5: SIMULAZIONE MONTE CARLO WEIGHTED
-  // 50.000+ iterazioni con pesi per identificare combinazioni frequenti
-  // ────────────────────────────────────────────────────────
-  
-  const simulateWeightedDraws = (numIterations = 50000, weights = null) => {
-    const cacheKey = 'montecarlo_' + numIterations;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    // Se pesi non forniti, usa score composito da ultimi 20 estrazioni
-    const mockEstrazioni = Array(20).fill(null).map((_, i) => ({
-      numeri: Array(20).fill(0).map((_, j) => j + 1 + Math.floor(Math.random() * 70)),
-      data: new Date().toISOString()
-    }));
-
-    if (!weights) {
-      weights = {};
-      for (let n = 1; n <= 90; n++) {
-        const comp = calculateCompositeScore(n, mockEstrazioni);
-        weights[n] = comp.score;
-      }
-    }
-
-    // Normalizza pesi
-    const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-    const normalizedWeights = {};
-    for (let n = 1; n <= 90; n++) {
-      normalizedWeights[n] = (weights[n] || 0) / totalWeight;
-    }
-
-    // Simulazione: weighted random draw
-    const results = {};
-    for (let iter = 0; iter < numIterations; iter++) {
-      const drawn = [];
-      const remaining = Array.from({ length: 90 }, (_, i) => i + 1);
-      
-      for (let draw = 0; draw < 20; draw++) { // 20 numeri per estrazione (10eLotto)
-        let rand = Math.random();
-        let cumulative = 0;
-        
-        for (const num of remaining) {
-          cumulative += normalizedWeights[num] || 0.01;
-          if (rand <= cumulative) {
-            drawn.push(num);
-            remaining.splice(remaining.indexOf(num), 1);
-            break;
-          }
-        }
-        if (drawn.length === draw) break; // Fallback se calcolo peso fallisce
-      }
-
-      // Conta occorrenze per numero
-      for (const num of drawn) {
-        results[num] = (results[num] || 0) + 1;
-      }
-    }
-
-    // Top numeri più frequenti nella simulazione
-    const topNumbers = Object.entries(results)
-      .map(([num, freq]) => ({
-        num: parseInt(num),
-        frequency: freq,
-        percentFreq: (freq / numIterations) * 100
-      }))
-      .sort((a, b) => b.frequency - a.frequency)
-      .slice(0, 25);
-
-    const result = { topNumbers, allResults: results };
-    cache.set(cacheKey, result);
-    return result;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 6: BACKTEST AUTOMATICO
-  // Genera previsioni e verifica su estrazioni successive
-  // ────────────────────────────────────────────────────────
-  
-  const runBacktest = (estrazioni, method = 'composite') => {
-    const cacheKey = 'backtest_' + estrazioni.length + '_' + method;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const results = {
-      totalTests: 0,
-      hits: 0,
-      avgNumbersMatched: 0,
-      successRate: 0,
-      byNumMatches: {} // Quante volte ha indovinato 1, 2, 3... numeri
-    };
-
-    // Backtesting: per ogni set di estrazioni, predici i successivi e verifica
-    const windowSize = Math.min(100, Math.floor(estrazioni.length / 2));
-    const testWindow = Math.max(10, Math.floor(estrazioni.length / 4));
-
-    for (let t = windowSize; t < estrazioni.length - 5; t += 5) {
-      // Usa estrazioni fino a t per prevedere t+1 a t+5
-      const trainingSet = estrazioni.slice(0, t);
-      const testSet = estrazioni.slice(t, t + 5);
-
-      // Genera previsione con metodo composito
-      const topNumbers = [];
-      for (let n = 1; n <= 90; n++) {
-        const comp = calculateCompositeScore(n, trainingSet);
-        topNumbers.push({ num: n, score: comp.score });
-      }
-      topNumbers.sort((a, b) => b.score - a.score);
-      const predicted = topNumbers.slice(0, 15).map(x => x.num); // Predici top 15
-
-      // Verifica su test set
-      for (const actual of testSet) {
-        const matched = actual.numeri.filter(n => predicted.includes(n)).length;
-        results.totalTests++;
-        results.avgNumbersMatched += matched;
-        
-        if (matched > 0) {
-          results.hits++;
-          results.byNumMatches[matched] = (results.byNumMatches[matched] || 0) + 1;
-        }
-      }
-    }
-
-    results.avgNumbersMatched = Math.round((results.avgNumbersMatched / results.totalTests) * 10) / 10;
-    results.successRate = Math.round((results.hits / results.totalTests) * 1000) / 10;
-
-    const result = results;
-    cache.set(cacheKey, result);
-    return result;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // FASE 7: OTTIMIZZAZIONE PERFORMANCE - CACHING GIÀ IMPLEMENTATO
-  // Map per cache, Uint32Array per frequenze, early exit nei loop
-  // ────────────────────────────────────────────────────────
-
-  // ────────────────────────────────────────────────────────
-  // FASE 8: NUMERI CALDI / FREDDI / IN RECUPERO
-  // Identificazione avanzata di pattern numerici
-  // ────────────────────────────────────────────────────────
-  
-  const identifyHotColdRecovery = (estrazioni) => {
-    const cacheKey = 'hotcold_' + estrazioni.length;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const freq = calculateMultiWindowFrequencies(estrazioni);
-    const delay = calculateNormalizedDelay(estrazioni);
-    const momentum = calculateDetailedMomentum(estrazioni);
-
-    const analysis = {
-      hotNumbers: [],      // Usciti molto recentemente
-      coldNumbers: [],     // Quasi mai usciti
-      recoveryNumbers: []  // Lunghi ritardi ma frequenti storicamente
-    };
-
-    for (let n = 1; n <= 90; n++) {
-      const freq20Rel = freq.freq20Rel[n];
-      const freqTotalRel = freq.freqTotalRel[n];
-      const delayZ = delay[n].zScore;
-      const momTrend = momentum[n].trend;
-
-      // HOT: alta frequenza recente + trend up
-      if (freq20Rel > 5 && momTrend === 'up' && freqTotalRel > 2) {
-        analysis.hotNumbers.push({
-          num: n,
-          reason: `Freq ultimi 20: ${Math.round(freq20Rel)}% | Momentum: UP`,
-          score: freq20Rel
-        });
-      }
-
-      // COLD: bassa frequenza totale + non usciti di recente
-      if (freqTotalRel < 1.5 && freq20Rel === 0 && delay[n].currentDelay > delay[n].avgDelay * 1.5) {
-        analysis.coldNumbers.push({
-          num: n,
-          reason: `Freq totale: ${Math.round(freqTotalRel)}% | Ultimo: ${Math.round(delay[n].avgDelay)} estraz. fa`,
-          score: delay[n].currentDelay
-        });
-      }
-
-      // RECOVERY: alto ritardo (Z > 2) + frequente storicamente
-      if (delayZ > 2 && freqTotalRel > 3.5) {
-        analysis.recoveryNumbers.push({
-          num: n,
-          reason: `Ritardo: ${Math.round(delayZ)} dev. std. | Freq storica: ${Math.round(freqTotalRel)}%`,
-          score: delayZ * freqTotalRel
-        });
-      }
-    }
-
-    // Ordina
-    analysis.hotNumbers.sort((a, b) => b.score - a.score);
-    analysis.coldNumbers.sort((a, b) => b.score - a.score);
-    analysis.recoveryNumbers.sort((a, b) => b.score - a.score);
-
-    const result = analysis;
-    cache.set(cacheKey, result);
-    return result;
-  };
-
-  // ────────────────────────────────────────────────────────
-  // STRUMENTO: ANALISI TRIPLE STATISTICHE
-  // Identifica triple (3 numeri) che escono frequentemente insieme
-  // ────────────────────────────────────────────────────────
-  
-  const analyzeTripleStats = (estrazioni, topN = 20) => {
-    const cacheKey = 'triples_' + estrazioni.length + '_' + topN;
-    if (cache.has(cacheKey)) return cache.get(cacheKey);
-
-    const tripleCount = {};
-    
-    // Conta triple
-    for (const e of estrazioni) {
-      for (let i = 0; i < e.numeri.length; i++) {
-        for (let j = i + 1; j < e.numeri.length; j++) {
-          for (let k = j + 1; k < e.numeri.length; k++) {
-            const triple = [e.numeri[i], e.numeri[j], e.numeri[k]].sort((a, b) => a - b);
-            const key = triple.join('-');
-            tripleCount[key] = (tripleCount[key] || 0) + 1;
-          }
-        }
-      }
-    }
-
-    // Top triple
-    const topTriples = Object.entries(tripleCount)
-      .map(([key, count]) => ({
-        triple: key.split('-').map(Number),
-        count,
-        frequency: (count / estrazioni.length) * 100
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, topN);
-
-    const result = topTriples;
-    cache.set(cacheKey, result);
-    return result;
-  };
-
-  // PUBLIC API
-  return {
-    calculateMultiWindowFrequencies,
-    calculateDetailedMomentum,
-    calculateNormalizedDelay,
-    calculateCompositeScore,
-    calculatePairMatrix,
-    filterCombinations,
-    simulateWeightedDraws,
-    runBacktest,
-    identifyHotColdRecovery,
-    analyzeTripleStats,
-    clearCache
-  };
-})();
-
-// Fine StatisticalEngine
-
-// ============================================================
-// FUNZIONI UI PER STATISTICAL ENGINE — FASE 9
-// Permettono di visualizzare i risultati delle analisi avanzate
-// ============================================================
-
-// Mostra analisi Hot/Cold/Recovery
-function generateHotColdAnalysis() {
+function generaSerieAvanzata() {
   if (!allEstrazioni.length) {
-    console.warn('No estrazioni loaded');
-    return null;
+    document.getElementById('serie-content').innerHTML =
+      '<div class="error-box">Carica prima i dati — premi "Aggiorna dati" in alto</div>';
+    return;
   }
 
-  const analysis = StatisticalEngine.identifyHotColdRecovery(allEstrazioni);
+  const stats = calcolaStatisticheAvanzate(allEstrazioni);
+
+  // Score per ogni numero
+  const scored = [];
+  for (let n = 1; n <= 90; n++) {
+    scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
+  }
+  scored.sort((a, b) => b.score - a.score);
+
+  // Selezione: Auto = soglia dinamica, altrimenti numero fisso
+  let serieA, serieB;
+  if (quantiNumeri === 0) {
+    // Soglia = 65° percentile dello score (top ~35%)
+    const soglia = scored[Math.floor(scored.length * 0.35)].score;
+    serieA = scored.filter(x => x.score >= soglia).map(x => x.num).sort((a, b) => a - b);
+    // Limita a max 20 per leggibilità
+    if (serieA.length > 20) serieA = scored.slice(0, 20).map(x => x.num).sort((a, b) => a - b);
+  } else {
+    serieA = scored.slice(0, quantiNumeri).map(x => x.num).sort((a, b) => a - b);
+  }
+
+  // Serie B: stessa logica ma con pesi invertiti (momentum > ritardo)
+  const scoredB = [];
+  for (let n = 1; n <= 90; n++) {
+    const s = stats;
+    const ritAtt = s.ritardi[n] || 0;
+    const ciclo = Math.max(s.cicloMedio[n] || 4.5, 1);
+    const f1 = Math.min(ritAtt / ciclo, 3) / 3;
+    const mom = s.momentum[n] || 0;
+    const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
+    const atteso = 4.5;
+    const f3 = Math.min(ritAtt / atteso, 4) / 4;
+    const f4 = Math.max(0, Math.min(1, (s.coScore[n] || 0) + 0.5));
+    const f5 = s.ultimi3Set.has(n) ? 0 : 1;
+    // Pesi invertiti: momentum prima, poi ciclo
+    scoredB.push({ num: n, score: f2 * 0.35 + f3 * 0.25 + f1 * 0.20 + f4 * 0.10 + f5 * 0.10 });
+  }
+  scoredB.sort((a, b) => b.score - a.score);
+  const nB = quantiNumeri || serieA.length;
+  serieB = scoredB.slice(0, nB).map(x => x.num).sort((a, b) => a - b);
+
+  // Render card serie
+  const scorePct = n => Math.round(scored.find(x => x.num === n)?.score * 100 || 0);
+  const globalA = Math.round(serieA.reduce((s, n) => s + calcolaScoreMultiFattore(n, stats), 0) / serieA.length * 100);
+  const globalB = Math.round(serieB.reduce((s, n) => s + calcolaScoreMultiFattore(n, stats), 0) / serieB.length * 100);
+
+  function ballsHtml(numeri, sc) {
+    return numeri.map(n => {
+      const s = scorePct(n);
+      const col = s >= 70 ? '#C9A84C' : s >= 50 ? '#7AACFF' : '#7A8AAA';
+      return `<div class="serie-ball" style="background:linear-gradient(135deg,${col},${col}88);color:${s>=70?'#000':'#fff'};position:relative" title="Score ${s}%">${n}</div>`;
+    }).join('');
+  }
+
+  const strA = serieA.join(',');
+  const strB = serieB.join(',');
+
+  let html = '<div class="serie-grid">';
+  html += `
+    <div class="serie-card col-a" id="serie-0" onclick="selezionaSerie(0, [${strA}], 'Serie A — Ritardo+Ciclo')">
+      <div class="selected-check">✓</div>
+      <div class="serie-header">
+        <div class="serie-titolo">Serie A — Ritardo + Ciclo</div>
+        <div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${globalA}%"></div></div>Score ${globalA}%</div>
+      </div>
+      <div class="serie-tag">🎯 Priorità: ritardo relativo · ${serieA.length} numeri</div>
+      <div class="serie-balls">${ballsHtml(serieA, scored)}</div>
+      <div class="serie-motivo">Oro = score ≥70% · Blu = ≥50% · Grigio = base. Numeri selezionati per ritardo rispetto al loro ciclo personale e correlazione recente.</div>
+      <div class="gioca-btn">✅ Gioco questa serie sabato</div>
+    </div>
+    <div class="serie-card col-b" id="serie-1" onclick="selezionaSerie(1, [${strB}], 'Serie B — Momentum')">
+      <div class="selected-check">✓</div>
+      <div class="serie-header">
+        <div class="serie-titolo">Serie B — Momentum</div>
+        <div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${globalB}%"></div></div>Score ${globalB}%</div>
+      </div>
+      <div class="serie-tag">📈 Priorità: trend recente · ${serieB.length} numeri</div>
+      <div class="serie-balls">${ballsHtml(serieB, scoredB)}</div>
+      <div class="serie-motivo">Pesi invertiti — privilegia numeri con trend in crescita nelle ultime 10 estrazioni rispetto alle ultime 30.</div>
+      <div class="gioca-btn">✅ Gioco questa serie sabato</div>
+    </div>`;
+  html += '</div>';
+
+  document.getElementById('serie-content').innerHTML = html;
   
-  return {
-    hot: analysis.hotNumbers.slice(0, 10),
-    cold: analysis.coldNumbers.slice(0, 10),
-    recovery: analysis.recoveryNumbers.slice(0, 10)
-  };
-}
-
-// Mostra top coppie frequenti
-function generatePairAnalysis() {
-  if (!allEstrazioni.length) return null;
-
-  const pairs = StatisticalEngine.calculatePairMatrix(allEstrazioni);
-  return pairs.stats.slice(0, 15); // Top 15 coppie
-}
-
-// Mostra top triple
-function generateTripleAnalysis() {
-  if (!allEstrazioni.length) return null;
+  // Aggiungo bottone "Salva Previsione per 16/05"
+  const divPrev = document.createElement('div');
+  divPrev.style.cssText = 'margin-top:16px;padding:14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:10px;text-align:center';
+  divPrev.innerHTML = `
+    <div style="font-size:11px;color:var(--soft);margin-bottom:10px;letter-spacing:1px">SALVA COME PREVISIONE</div>
+    <button class="btn" onclick="salvaPrevisionePerData([${strA}], [${strB}], '2026-05-16')" 
+      style="background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-weight:700">
+      📌 Salva Previsione per Sabato 16 Maggio 2026
+    </button>
+    <div style="font-size:9px;color:var(--soft);margin-top:10px">
+      Entrambe le serie (A e B) verranno congelate e confrontate con l'estrazione reale nel backtest
+    </div>
+  `;
+  document.getElementById('serie-content').appendChild(divPrev);
   
-  return StatisticalEngine.analyzeTripleStats(allEstrazioni, 10);
-}
-
-// Esegui backtest e mostra risultati
-function generateBacktestReport() {
-  if (!allEstrazioni.length) return null;
-
-  const backtest = StatisticalEngine.runBacktest(allEstrazioni, 'composite');
-  
-  return {
-    totalTests: backtest.totalTests,
-    hits: backtest.hits,
-    successRate: backtest.successRate,
-    avgMatched: backtest.avgNumbersMatched,
-    breakdown: backtest.byNumMatches
-  };
-}
-
-// Simula Monte Carlo e ritorna top numeri
-function generateMonteCarloAnalysis(iterations = 50000) {
-  const result = StatisticalEngine.simulateWeightedDraws(iterations);
-  return result.topNumbers.slice(0, 20);
-}
-
-// Filtro combinazioni — ritorna se valida
-function validateCombination(combination, strictMode = false) {
-  const params = strictMode ? {
-    allowConsecutive: false,
-    maxPerDecade: 3,
-    avoidLinearPatterns: true
-  } : {};
-
-  return StatisticalEngine.filterCombinations(combination, params);
+  document.getElementById('riepilogo-box').classList.remove('show');
+  serieSelezionata = null;
 }
 
 // ============================================================
@@ -2643,146 +2099,9 @@ function generaSerie() {
   document.getElementById('serie-content').innerHTML = html;
   document.getElementById('riepilogo-box').classList.remove('show');
   serieSelezionata = null;
-
-  // NUOVO: Aggiungi dashboard analisi avanzata
-  setTimeout(() => mostraAnalisiAvanzata(), 300);
 }
 
-function mostraAnalisiAvanzata() {
-  if (!allEstrazioni.length) return;
-
-  // Crea sezione analisi avanzate se non esiste
-  let analisiDiv = document.getElementById('analisi-avanzata-content');
-  if (!analisiDiv) {
-    analisiDiv = document.createElement('div');
-    analisiDiv.id = 'analisi-avanzata-content';
-    document.getElementById('serie-content').parentElement.appendChild(analisiDiv);
-  }
-
-  // SEZIONE 1: COPPIE NUMERICHE
-  const pairs = generatePairAnalysis();
-  const pairsHtml = pairs ? pairs.slice(0, 10).map((p, i) => {
-    return `<div style="padding:10px;background:var(--blu);border:1px solid var(--bordo);border-radius:8px;font-size:10px">
-      <strong style="color:var(--oro)">[${p.pair[0]}, ${p.pair[1]}]</strong><br/>
-      Uscite insieme: <span style="color:#7AACFF">${p.cooccurrence}</span> | Correlazione: <span style="color:#3DB87A">${p.correlation}%</span>
-    </div>`;
-  }).join('') : '<div class="error-box">Dati insufficienti</div>';
-
-  // SEZIONE 2: TRIPLE STATISTICHE
-  const triples = generateTripleAnalysis();
-  const triplesHtml = triples ? triples.slice(0, 8).map(t => {
-    return `<div style="padding:10px;background:var(--blu);border:1px solid var(--bordo);border-radius:8px;font-size:10px">
-      <strong style="color:var(--oro)">[${t.triple[0]}, ${t.triple[1]}, ${t.triple[2]}]</strong><br/>
-      Frequenza: <span style="color:#FF8C42">${t.count}</span> volte | <span style="color:#7AACFF">${t.frequency.toFixed(1)}%</span>
-    </div>`;
-  }).join('') : '<div class="error-box">Dati insufficienti</div>';
-
-  // SEZIONE 3: MONTE CARLO (50K iterazioni)
-  const montecarlo = generateMonteCarloAnalysis(50000);
-  const montecarlHtml = montecarlo ? monteCarlo.slice(0, 12).map((m, i) => {
-    const style = m.percentFreq > 25 ? 'var(--oro)' : m.percentFreq > 20 ? '#7AACFF' : 'var(--soft)';
-    return `<div style="padding:8px 12px;background:rgba(201,168,76,.08);border-radius:6px;font-size:10px;color:${style};font-weight:600">
-      ${m.num} <span style="color:var(--soft);font-weight:400">${m.percentFreq.toFixed(1)}%</span>
-    </div>`;
-  }).join('') : '<div class="error-box">Simulazione non disponibile</div>';
-
-  // SEZIONE 4: BACKTEST
-  const backtest = generateBacktestReport();
-  const backtestHtml = backtest ? `
-    <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:10px;padding:14px;font-size:10px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div style="text-align:center">
-          <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--verde);font-weight:700">${backtest.successRate}%</div>
-          <div style="color:var(--soft);font-size:9px;letter-spacing:1px;text-transform:uppercase">Success Rate</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--accent);font-weight:700">${backtest.avgMatched.toFixed(1)}</div>
-          <div style="color:var(--soft);font-size:9px;letter-spacing:1px;text-transform:uppercase">Media Numeri</div>
-        </div>
-      </div>
-      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:12px;font-size:9px;color:var(--soft)">
-        ${backtest.totalTests} test | Hit: ${backtest.hits} | Breakdown: ${Object.entries(backtest.breakdown).map(([k, v]) => `${k}num=${v}`).join(' | ')}
-      </div>
-    </div>
-  ` : '<div class="error-box">Backtest non disponibile</div>';
-
-  // SEZIONE 5: HOT / COLD / RECOVERY
-  const hotCold = generateHotColdAnalysis();
-  const hotColdHtml = hotCold ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div style="background:rgba(255,140,66,.1);border:1px solid rgba(255,140,66,.3);border-radius:10px;padding:12px">
-        <div style="color:#FF8C42;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">🔥 Caldi</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${hotCold.hot.slice(0, 6).map(h => `<div style="background:var(--bordo);border:1px solid #FF8C42;color:#FF8C42;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700">${h.num}</div>`).join('')}
-        </div>
-      </div>
-      <div style="background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);border-radius:10px;padding:12px">
-        <div style="color:#4ECDC4;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">❄️ Freddi</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${hotCold.cold.slice(0, 6).map(c => `<div style="background:var(--bordo);border:1px solid #4ECDC4;color:#4ECDC4;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700">${c.num}</div>`).join('')}
-        </div>
-      </div>
-      <div style="background:rgba(42,93,191,.1);border:1px solid rgba(42,93,191,.3);border-radius:10px;padding:12px">
-        <div style="color:#7AACFF;font-weight:700;font-size:11px;letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">💥 Recupero</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${hotCold.recovery.slice(0, 6).map(r => `<div style="background:var(--bordo);border:1px solid #7AACFF;color:#7AACFF;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700">${r.num}</div>`).join('')}
-        </div>
-      </div>
-    </div>
-  ` : '<div class="error-box">Analisi non disponibile</div>';
-
-  // RENDER DASHBOARD
-  analisiDiv.innerHTML = `
-    <div style="margin-top:28px;border-top:2px solid var(--bordo);padding-top:28px">
-      <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--oro);letter-spacing:1px;margin-bottom:18px;display:flex;align-items:center;gap:10px">
-        🔬 DASHBOARD ANALISI AVANZATA
-        <span style="font-size:10px;color:var(--soft);font-family:'DM Mono',monospace;font-weight:400;letter-spacing:0">StatisticalEngine</span>
-      </div>
-
-      <!-- ROW 1: Coppie + Triple -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-        <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:12px;padding:16px">
-          <div style="color:var(--oro);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🔗 Top 10 Coppie</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            ${pairsHtml}
-          </div>
-        </div>
-
-        <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:12px;padding:16px">
-          <div style="color:var(--oro);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">⭐ Top 8 Triple</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            ${triplesHtml}
-          </div>
-        </div>
-      </div>
-
-      <!-- ROW 2: Monte Carlo + Backtest -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-        <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:12px;padding:16px">
-          <div style="color:var(--oro);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🎰 Monte Carlo (50K)</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
-            ${montecarlHtml}
-          </div>
-        </div>
-
-        <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:12px;padding:16px">
-          <div style="color:var(--oro);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">📈 Backtest Report</div>
-          ${backtestHtml}
-        </div>
-      </div>
-
-      <!-- ROW 3: Hot/Cold/Recovery -->
-      <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:12px;padding:16px">
-        <div style="color:var(--oro);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">🌡️ Analisi Termica Numeri</div>
-        ${hotColdHtml}
-      </div>
-
-      <div style="margin-top:16px;padding:12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;font-size:9px;color:var(--soft);letter-spacing:0.5px;line-height:1.6">
-        ℹ️ <strong>Cosa vedi</strong>: Coppie e triple più frequenti | Monte Carlo da 50.000 simulazioni weighted | Backtest accuracy su dati storici | Numeri caldi (recenti), freddi (assenti), in recupero (ritardo alto + freq storica).
-      </div>
-    </div>
-  `;
-}
+function selezionaSerie(idx, numeri, nomeSerieParam) {
   document.querySelectorAll('.serie-card').forEach(c => c.classList.remove('selected-serie'));
   document.getElementById('serie-' + idx).classList.add('selected-serie');
   serieSelezionata = numeri;
@@ -2819,6 +2138,7 @@ function mostraAnalisiAvanzata() {
 
   // Aggiorna pannello mie giocate
   renderMieGiocate();
+}
 
 // ============================================================
 // STORICO PERSONALE — localStorage
@@ -3213,27 +2533,14 @@ async function loadMDData() {
     while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
 
     let rawEstr = [];
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout API MillionDay')), 5000);
-    });
-
-    const fetchPromise = (async () => {
-      for (const anno of anniDaCaricare) {
-        try {
-          const estr = await fetchDatiReali('millionday', anno);
-          rawEstr = rawEstr.concat(estr);
-        } catch(e) { console.warn('MD errore anno', anno, e.message); }
-      }
-    })();
-
-    try {
-      await Promise.race([fetchPromise, timeoutPromise]);
-    } catch(timeoutErr) {
-      console.warn('⏱ Timeout API MillionDay — uso mock data');
-      rawEstr = []; // Forza uso mock
+    for (const anno of anniDaCaricare) {
+      try {
+        const estr = await fetchDatiReali('millionday', anno);
+        rawEstr = rawEstr.concat(estr);
+      } catch(e) { console.warn('MD errore anno', anno, e.message); }
     }
 
-    // Filtra ultimi 12 mesi
+    // Filtra ultimi 12 mesi (tutte le estrazioni, il proxy non distingue mattina/sera)
     mdEstrazioni = rawEstr
       .filter(e => {
         const d = new Date(e.data + 'T12:00:00');
@@ -3241,40 +2548,18 @@ async function loadMDData() {
       })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    // Se non ci sono dati da API, usa mock data
-    if (mdEstrazioni.length < 3) {
-      console.warn('⚠️ Dati insufficienti da API — carico mock MillionDay');
-      mdEstrazioni = generaMockDataMD();
-    }
+    if (mdEstrazioni.length < 3) throw new Error('Dati MillionDay insufficienti (' + mdEstrazioni.length + ')');
 
     calcolaMDStatistiche();
     renderAllMD();
-    document.getElementById('badge-txt').textContent = 'Dati MD ✓' + (rawEstr.length === 0 ? ' (mock)' : '');
-    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' estrazioni' + (rawEstr.length === 0 ? ' (mock data)' : '');
+    document.getElementById('badge-txt').textContent = 'Dati reali MD ✓';
+    document.getElementById('last-upd').textContent = 'MillionDay: ' + mdEstrazioni.length + ' estrazioni (12 mesi)';
 
   } catch(err) {
     document.getElementById('badge-txt').textContent = '⚠ Errore MD';
     document.getElementById('md-ultima-content').innerHTML =
       '<div class="error-box">Dati MillionDay non disponibili.<br><small>' + err.message + '</small></div>';
   }
-}
-
-// Mock data MillionDay — 20 estrazioni 5 numeri da 1-55
-function generaMockDataMD() {
-  const data = [];
-  const oggi = new Date();
-  for (let i = 0; i < 20; i++) {
-    const d = new Date(oggi);
-    d.setDate(d.getDate() - i * 3); // ogni 3 giorni
-    const numeri = [];
-    while (numeri.length < 5) {
-      const n = Math.floor(Math.random() * 55) + 1;
-      if (!numeri.includes(n)) numeri.push(n);
-    }
-    const dataStr = d.toISOString().split('T')[0];
-    data.push({ data: dataStr, numeri: numeri.sort((a,b)=>a-b) });
-  }
-  return data;
 }
 
 
@@ -3327,110 +2612,6 @@ function calcolaMDStatistiche() {
     }
     if (!found) mdRitardi[n] = mdEstrazioni.length;
   }
-}
-
-// ── METODO AVANZATO 7 FATTORI — MILLIONDDAY ──────────────────
-// Ciclo atteso = 55/5 = 11 estrazioni per numero
-function calcolaMDStatisticheAvanzate(estrazioni) {
-  const base = { freq: mdFreqMap, ritardi: mdRitardi };
-  const tot = estrazioni.length;
-
-  // 1. Ciclo medio per numero
-  const cicloMedio = {};
-  for (let n = 1; n <= 55; n++) {
-    const pos = [];
-    estrazioni.forEach((e, i) => { if (e.numeri.includes(n)) pos.push(i); });
-    if (pos.length >= 2) {
-      let sum = 0;
-      for (let i = 0; i < pos.length - 1; i++) sum += pos[i+1] - pos[i];
-      cicloMedio[n] = sum / (pos.length - 1);
-    } else if (pos.length === 1) {
-      cicloMedio[n] = tot;
-    } else {
-      cicloMedio[n] = tot * 1.2;
-    }
-  }
-
-  // 2. Momentum: frequenza ultimi 5 vs ultimi 15
-  const n5  = Math.min(5, tot);
-  const n15 = Math.min(15, tot);
-  const f5 = {}, f15 = {};
-  for (let n = 1; n <= 55; n++) { f5[n] = 0; f15[n] = 0; }
-  estrazioni.slice(0, n5).forEach(e => e.numeri.forEach(n => { f5[n]++; }));
-  estrazioni.slice(0, n15).forEach(e => e.numeri.forEach(n => { f15[n]++; }));
-  const momentum = {};
-  const attesaPerc = 5 / 55; // ~0.0909
-  for (let n = 1; n <= 55; n++) {
-    const r5  = f5[n]  / n5;
-    const r15 = f15[n] / n15;
-    momentum[n] = (r5 - r15) / (attesaPerc + 0.001);
-  }
-
-  // 3. Co-occorrenza con ultimi 2 sorteggi
-  const ultimi2Set = new Set(estrazioni.slice(0, Math.min(2, tot)).flatMap(e => e.numeri));
-  const coScore = {};
-  for (let n = 1; n <= 55; n++) {
-    if (ultimi2Set.has(n)) { coScore[n] = -0.5; continue; }
-    let hits = 0, total = 0;
-    estrazioni.forEach(e => {
-      if (e.numeri.some(m => ultimi2Set.has(m))) {
-        total++;
-        if (e.numeri.includes(n)) hits++;
-      }
-    });
-    coScore[n] = total > 3 ? (hits / total) / (5/55) - 1 : 0;
-  }
-
-  // 4. Pressione Binomiale (5/55 = attesa per numero)
-  const pressioneBinomiale = {};
-  for (let n = 1; n <= 55; n++) {
-    const osservata = (base.freq[n] || 0) / Math.max(tot, 1);
-    const dev = attesaPerc - osservata;
-    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
-  }
-
-  // 5. Coppie Frequenti
-  const coppieMap = {};
-  for (const e of estrazioni) {
-    const nums = e.numeri;
-    for (let i = 0; i < nums.length; i++) {
-      for (let j = i + 1; j < nums.length; j++) {
-        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
-        coppieMap[key] = (coppieMap[key] || 0) + 1;
-      }
-    }
-  }
-  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => e.numeri));
-  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
-  const scoreCoppie = {};
-  for (let n = 1; n <= 55; n++) {
-    if (ultimi3Set.has(n)) { scoreCoppie[n] = 0; continue; }
-    let somma = 0;
-    for (const partner of ultimi3Set) {
-      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
-      somma += (coppieMap[key] || 0);
-    }
-    scoreCoppie[n] = Math.min(somma / (ultimi3Set.size * maxCoppie), 1);
-  }
-
-  return { freq: base.freq, ritardi: base.ritardi, cicloMedio, momentum, coScore, ultimi2Set, pressioneBinomiale, scoreCoppie };
-}
-
-function calcolaMDScoreMultiFattore(num, stats) {
-  const attesoCiclo = 11; // 55/5
-  const ritAtt = stats.ritardi[num] || 0;
-  const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
-
-  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo al ciclo (25%)
-  const mom = stats.momentum[num] || 0;
-  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum recente (16%)
-  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
-  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
-  const f5 = stats.ultimi2Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
-  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
-  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
-
-  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
 }
 
 // ============================================================
@@ -3502,63 +2683,45 @@ function renderMDSerie() {
     document.getElementById('md-serie-content').innerHTML = '<div class="error-box">Carica prima i dati</div>';
     return;
   }
+  const tot = mdEstrazioni.length || 1;
+  const tutti = Array.from({length:55},(_,i)=>i+1);
 
-  // Statistiche avanzate 7 fattori (5/55)
-  const stats = calcolaMDStatisticheAvanzate(mdEstrazioni);
-
-  // Calcola score per tutti i 55 numeri
-  const tutti55 = [];
-  for (let num = 1; num <= 55; num++) {
-    tutti55.push({ num, score: calcolaMDScoreMultiFattore(num, stats) });
-  }
-  tutti55.sort((a, b) => b.score - a.score);
-
-  function scoreSerieGlobale(numeri) {
-    const raw = numeri.reduce((s, num) => s + calcolaMDScoreMultiFattore(num, stats), 0) / numeri.length;
-    return Math.round(55 + raw * 45);
+  function scoreMD(num, metodo) {
+    const f = (mdFreqMap[num]||0)/tot;
+    const r = Math.min((mdRitardi[num]||0)/15,1);
+    if (metodo==='bilanciato') return f*0.55 + r*0.45;
+    return f*0.4 + r*0.6;
   }
 
-  // Serie A: top score puro (ritardo + ciclo)
-  const serieA = tutti55.slice(0, 5).map(x => x.num).sort((a,b) => a-b);
-
-  // Serie B: priorità momentum e pressione
-  const scoredB = [];
-  for (let num = 1; num <= 55; num++) {
-    const s = stats;
-    const attesoCiclo = 11;
-    const ritAtt = s.ritardi[num] || 0;
-    const ciclo  = Math.max(s.cicloMedio[num] || attesoCiclo, 1);
-    const f1 = Math.min(ritAtt / ciclo, 3) / 3;
-    const mom = s.momentum[num] || 0;
-    const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
-    const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;
-    const f4 = Math.max(0, Math.min(1, (s.coScore[num] || 0) + 0.5));
-    const f5 = s.ultimi2Set.has(num) ? 0 : 1;
-    const f6 = s.pressioneBinomiale ? (s.pressioneBinomiale[num] || 0.5) : 0.5;
-    const f7 = s.scoreCoppie ? (s.scoreCoppie[num] || 0) : 0;
-    scoredB.push({ num, score: f2*0.30 + f6*0.25 + f3*0.20 + f1*0.12 + f4*0.08 + f7*0.05 });
+  function scegliMD(pool, metodo) {
+    const scored = pool.map(n=>({n, s:scoreMD(n,metodo)})).sort((a,b)=>b.s-a.s);
+    const scelti=[]; const dec=new Set();
+    for (const {n} of scored) {
+      if (scelti.length>=5) break;
+      const d = Math.floor((n-1)/11);
+      if (!dec.has(d)) { scelti.push(n); dec.add(d); }
+    }
+    for (const {n} of scored) {
+      if (scelti.length>=5) break;
+      if (!scelti.includes(n)) scelti.push(n);
+    }
+    return scelti.slice(0,5).sort((a,b)=>a-b);
   }
-  scoredB.sort((a,b) => b.score - a.score);
-  const poolB = scoredB.filter(x => !serieA.includes(x.num));
-  const serieB = poolB.slice(0, 5).map(x => x.num).sort((a,b) => a-b);
 
-  const scA = scoreSerieGlobale(serieA);
-  const scB = scoreSerieGlobale(serieB);
+  const serieA = scegliMD(tutti, 'bilanciato');
+  const serieB = scegliMD(tutti.filter(n=>!serieA.includes(n)), 'misto');
 
   const varianti = [
-    { nome:'Serie A — Consigliata', tag:'🎯 7 Fattori', numeri:serieA, sc:scA,
-      desc:'Top 5 numeri: ritardo relativo al ciclo personale, momentum, pressione binomiale, coppie frequenti.' },
-    { nome:'Serie B — Momentum', tag:'📈 Trend+Pressione', numeri:serieB, sc:scB,
-      desc:'Priorità ai numeri con trend in crescita recente e alta pressione statistica.' },
+    {nome:'Serie A — Consigliata', tag:'🎯 Bilanciata PRO', numeri:serieA, desc:'Bilancia frequenza e ritardo nei sabati sera degli ultimi 12 mesi.'},
+    {nome:'Serie B — Alternativa', tag:'⚖️ Ritardo+Frequenza', numeri:serieB, desc:'Numeri diversi dalla A, privilegia i ritardatari con buona frequenza di fondo.'},
   ];
 
   let html = '<div class="serie-grid">';
-  varianti.forEach((v, idx) => {
-    const cls = idx===0?'col-a':'col-b';
-    const ns  = v.numeri.join(',');
-    html += `<div class="serie-card ${cls}" id="md-serie-${idx}" onclick="selezionaMDSerie(${idx},[${ns}],'${v.nome.replace(/'/g,'')}')">
+  varianti.forEach((v,idx)=>{
+    const scoreVal = Math.min(Math.round(v.numeri.reduce((s,n)=>s+scoreMD(n,'bilanciato'),0)/5*100),98);
+    html += `<div class="serie-card ${idx===0?'col-a':'col-b'}" id="md-serie-${idx}" onclick="selezionaMDSerie(${idx},[${v.numeri.join(',')}],'${v.nome}')">
       <div class="selected-check">✓</div>
-      <div class="serie-header"><div class="serie-titolo">${v.nome}</div><div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${v.sc}%"></div></div>Score ${v.sc}%</div></div>
+      <div class="serie-header"><div class="serie-titolo">${v.nome}</div><div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:${scoreVal}%"></div></div>Score ${scoreVal}%</div></div>
       <div class="serie-tag">${v.tag} · 5 numeri</div>
       <div class="serie-balls">${v.numeri.map(n=>`<div class="md-serie-ball">${n}</div>`).join('')}</div>
       <div class="serie-motivo">${v.desc}</div>
@@ -3566,30 +2729,7 @@ function renderMDSerie() {
     </div>`;
   });
   html += '</div>';
-
-  // ── NUMERO DELLA SETTIMANA MILLIONDDAY ──────────────────────
-  const numTop = tutti55[0].num;
-  const scTop  = Math.round(tutti55[0].score * 100);
-  const pb     = stats.pressioneBinomiale ? Math.round((stats.pressioneBinomiale[numTop]||0.5)*100) : 50;
-  const ritTop = stats.ritardi[numTop] || 0;
-  const divNum = document.createElement('div');
-  divNum.style.cssText = 'margin-top:14px;padding:20px;background:linear-gradient(135deg,rgba(46,204,113,.12),rgba(46,204,113,.04));border:2px solid #2ECC71;border-radius:14px;text-align:center';
-  divNum.innerHTML = `
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#2ECC71;margin-bottom:10px">⭐ Numero della Settimana — MillionDay</div>
-    <div style="font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:#2ECC71;line-height:1;text-shadow:0 0 40px rgba(46,204,113,.4)">${numTop}</div>
-    <div style="font-size:10px;color:var(--soft);margin-top:10px;letter-spacing:1px">
-      Score composito: <strong style="color:var(--testo)">${scTop}%</strong> &nbsp;·&nbsp;
-      Pressione stat.: <strong style="color:var(--testo)">${pb}%</strong> &nbsp;·&nbsp;
-      Ritardo: <strong style="color:var(--testo)">${ritTop} estr.</strong>
-    </div>
-    <div style="font-size:9px;color:var(--soft);margin-top:8px;line-height:1.6">
-      Il numero con il punteggio più alto tra tutti i 7 fattori.<br>
-      <span style="color:rgba(46,204,113,.5)">⚠️ Analisi statistica — nessuna vincita garantita</span>
-    </div>
-  `;
-
   document.getElementById('md-serie-content').innerHTML = html;
-  document.getElementById('md-serie-content').appendChild(divNum);
   document.getElementById('md-riepilogo-box').classList.remove('show');
 }
 
@@ -3970,113 +3110,6 @@ function calcolaLottoStatistiche(estrazioni) {
   return { freq, ritardi };
 }
 
-// ── METODO AVANZATO 6 FATTORI — LOTTO ──────────────────────────
-// Stesso approccio del 10eLotto ma con parametri Lotto (5/90)
-// Ciclo atteso = 90/5 = 18 estrazioni per numero
-function calcolaLottoStatisticheAvanzate(estrazioni) {
-  const base = calcolaLottoStatistiche(estrazioni);
-  const tot = estrazioni.length;
-
-  // 1. Ciclo medio per numero
-  const cicloMedio = {};
-  for (let n = 1; n <= 90; n++) {
-    const pos = [];
-    estrazioni.forEach((e, i) => { if (e.numeri.includes(n)) pos.push(i); });
-    if (pos.length >= 2) {
-      let sum = 0;
-      for (let i = 0; i < pos.length - 1; i++) sum += pos[i+1] - pos[i];
-      cicloMedio[n] = sum / (pos.length - 1);
-    } else if (pos.length === 1) {
-      cicloMedio[n] = tot;
-    } else {
-      cicloMedio[n] = tot * 1.2;
-    }
-  }
-
-  // 2. Momentum: frequenza ultimi 8 vs ultimi 25
-  const n8  = Math.min(8, tot);
-  const n25 = Math.min(25, tot);
-  const f8 = {}, f25 = {};
-  for (let n = 1; n <= 90; n++) { f8[n] = 0; f25[n] = 0; }
-  estrazioni.slice(0, n8).forEach(e => e.numeri.forEach(n => { f8[n]++; }));
-  estrazioni.slice(0, n25).forEach(e => e.numeri.forEach(n => { f25[n]++; }));
-  const momentum = {};
-  const attesaPerc = 5 / 90; // ~0.0556
-  for (let n = 1; n <= 90; n++) {
-    const r8  = f8[n]  / n8;
-    const r25 = f25[n] / n25;
-    momentum[n] = (r8 - r25) / (attesaPerc + 0.001);
-  }
-
-  // 3. Co-occorrenza con ultimi 3 sorteggi
-  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => e.numeri));
-  const coScore = {};
-  for (let n = 1; n <= 90; n++) {
-    if (ultimi3Set.has(n)) { coScore[n] = -0.5; continue; }
-    let hits = 0, total = 0;
-    estrazioni.forEach(e => {
-      if (e.numeri.some(m => ultimi3Set.has(m))) {
-        total++;
-        if (e.numeri.includes(n)) hits++;
-      }
-    });
-    coScore[n] = total > 5 ? (hits / total) / (5/90) - 1 : 0;
-  }
-
-  // 4. Pressione Binomiale (5/90 = attesa per numero)
-  const pressioneBinomiale = {};
-  for (let n = 1; n <= 90; n++) {
-    const osservata = (base.freq[n] || 0) / Math.max(tot, 1);
-    const dev = attesaPerc - osservata;
-    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
-  }
-
-  // 5. Coppie Frequenti — numeri che escono spesso insieme nella stessa estrazione
-  // Costruisco mappa coppia → quante volte sono usciti insieme
-  const coppieMap = {};
-  for (const e of estrazioni) {
-    const nums = e.numeri;
-    for (let i = 0; i < nums.length; i++) {
-      for (let j = i + 1; j < nums.length; j++) {
-        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
-        coppieMap[key] = (coppieMap[key] || 0) + 1;
-      }
-    }
-  }
-  // Per ogni numero calcolo quanto "tende a uscire insieme" ai numeri caldi recenti (ultimi 5 sorteggi)
-  const ultimi5Set = new Set(estrazioni.slice(0, Math.min(5, tot)).flatMap(e => e.numeri));
-  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
-  const scoreCoppie = {};
-  for (let n = 1; n <= 90; n++) {
-    if (ultimi5Set.has(n)) { scoreCoppie[n] = 0; continue; } // già uscito di recente
-    let somma = 0;
-    for (const partner of ultimi5Set) {
-      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
-      somma += (coppieMap[key] || 0);
-    }
-    scoreCoppie[n] = Math.min(somma / (ultimi5Set.size * maxCoppie), 1);
-  }
-
-  return { ...base, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale, scoreCoppie };
-}
-
-function calcolaLottoScoreMultiFattore(num, stats) {
-  const attesoCiclo = 18; // 90/5
-  const ritAtt = stats.ritardi[num] || 0;
-  const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
-
-  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo al ciclo (25%)
-  const mom = stats.momentum[num] || 0;
-  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum recente (16%)
-  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
-  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
-  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
-  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
-  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
-
-  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
-}
-
 function renderAllLotto() {
   const estr = lottoEstrazioni[lottoRuota] || [];
   const stats = calcolaLottoStatistiche(estr);
@@ -4276,7 +3309,7 @@ function renderLottoStorico(estr) {
   document.getElementById('lotto-storico-content').innerHTML=html;
 }
 
-// Previsioni Lotto — Metodo Avanzato 6 Fattori
+// Previsioni Lotto
 function setLottoTipo(tipo) {
   lottoTipoGiocata = tipo;
   document.querySelectorAll('[id^="lotto-tipo-"]').forEach(b=>b.classList.remove('attivo'));
@@ -4290,109 +3323,65 @@ function generaPrevisioni() {
     return;
   }
   const n = lottoTipoGiocata==='ambo'?2:lottoTipoGiocata==='terno'?3:4;
+  const tot = estr.length || 1;
+  const tutti = Array.from({length:90}, (_,i) => i+1);
+  const freqAttesa = (tot * 5) / 90;
 
-  // Statistiche avanzate con 6 fattori (Lotto: 5/90)
-  const stats = calcolaLottoStatisticheAvanzate(estr);
-
-  // Calcola score per tutti i 90 numeri
-  const tutti90 = [];
-  for (let num = 1; num <= 90; num++) {
-    tutti90.push({ num, score: calcolaLottoScoreMultiFattore(num, stats) });
-  }
-  tutti90.sort((a, b) => b.score - a.score);
-
-  // Score globale di una serie (0–100)
-  function scoreSerieGlobale(numeri) {
-    const raw = numeri.reduce((s, num) => s + calcolaLottoScoreMultiFattore(num, stats), 0) / numeri.length;
-    return Math.round(55 + raw * 45);
+  // Score normalizzato — scala finale 70-95
+  function scoreNum(num, pF, pR) {
+    const fNorm = Math.min((lottoFreqMap[num]||0) / (freqAttesa * 2), 1);
+    const rNorm = Math.min((lottoRitardi[num]||0) / 20, 1);
+    const jitter = 1 + (Math.random() * 0.06 - 0.03);
+    return (fNorm * pF + rNorm * pR) * jitter;
   }
 
-  // Serie A: top score puro (ritardo + ciclo prioritari)
-  const serieA = tutti90.slice(0, n).map(x => x.num).sort((a,b) => a-b);
-
-  // Serie B: priorità momentum e pressione binomiale (pesi invertiti)
-  const scoredB = [];
-  for (let num = 1; num <= 90; num++) {
-    const s = stats;
-    const attesoCiclo = 18;
-    const ritAtt = s.ritardi[num] || 0;
-    const ciclo  = Math.max(s.cicloMedio[num] || attesoCiclo, 1);
-    const f1 = Math.min(ritAtt / ciclo, 3) / 3;
-    const mom = s.momentum[num] || 0;
-    const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));
-    const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;
-    const f4 = Math.max(0, Math.min(1, (s.coScore[num] || 0) + 0.5));
-    const f5 = s.ultimi3Set.has(num) ? 0 : 1;
-    const f6 = s.pressioneBinomiale ? (s.pressioneBinomiale[num] || 0.5) : 0.5;
-    scoredB.push({ num, score: f2*0.30 + f6*0.25 + f3*0.20 + f1*0.12 + f4*0.08 + f5*0.05 });
+  function calcolaScoreSerie(numeri, pF, pR) {
+    const raw = numeri.reduce((s,num) => s + scoreNum(num, pF, pR), 0) / numeri.length;
+    return Math.round(70 + raw * 25);
   }
-  scoredB.sort((a,b) => b.score - a.score);
-  const poolB = scoredB.filter(x => !serieA.includes(x.num));
-  const serieB = poolB.slice(0, n).map(x => x.num).sort((a,b) => a-b);
 
-  // Serie C: frequenti + pressione binomiale alta
-  const scoredC = [];
-  for (let num = 1; num <= 90; num++) {
-    const fNorm = Math.min((stats.freq[num]||0) / ((estr.length * 5 / 90) * 2), 1);
-    const pb = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5;
-    scoredC.push({ num, score: fNorm * 0.60 + pb * 0.40 });
+  function scegli(pool, quanti, pF, pR) {
+    return pool
+      .map(num => ({ num, s: scoreNum(num, pF, pR) }))
+      .sort((a,b) => b.s - a.s)
+      .slice(0, quanti)
+      .map(x => x.num)
+      .sort((a,b) => a - b);
   }
-  scoredC.sort((a,b) => b.score - a.score);
-  const poolC = scoredC.filter(x => !serieA.includes(x.num) && !serieB.includes(x.num));
-  const serieC = poolC.slice(0, n).map(x => x.num).sort((a,b) => a-b);
 
-  const scA = scoreSerieGlobale(serieA);
-  const scB = scoreSerieGlobale(serieB);
-  const scC = scoreSerieGlobale(serieC);
+  // 3 serie con logiche genuinamente diverse
+  const serieA = scegli(tutti, n, 0.40, 0.60);
+  const poolB  = tutti.filter(x => !serieA.includes(x));
+  const serieB = scegli(poolB, n, 0.15, 0.85);
+  const poolC  = tutti.filter(x => !serieA.includes(x) && !serieB.includes(x));
+  const serieC = scegli(poolC, n, 0.80, 0.20);
 
   const varianti = [
-    { nome:'Serie A — Consigliata', tag:'🎯 6 Fattori — Ritardo+Ciclo', numeri:serieA, sc:scA,
-      desc:'Top ' + n + ' numeri per score composito: ritardo relativo al ciclo personale, momentum, pressione binomiale.' },
-    { nome:'Serie B — Momentum', tag:'📈 6 Fattori — Trend+Pressione', numeri:serieB, sc:scB,
-      desc:'Priorità ai numeri con trend in crescita nelle ultime 8 estrazioni e alta pressione statistica.' },
-    { nome:'Serie C — Frequenti', tag:'🔢 6 Fattori — Freq+Binomiale', numeri:serieC, sc:scC,
-      desc:'Frequenti storici con alta pressione binomiale. Diversi da A e B per massima copertura.' },
+    { nome:'Serie A — Consigliata', tag:'🎯 Bilanciata',     numeri:serieA, pF:0.40, pR:0.60,
+      desc:'Top ' + n + ' numeri: miglior bilanciamento tra frequenza storica e pressione di rientro.' },
+    { nome:'Serie B — Ritardatari', tag:'⏳ Ritardo massimo', numeri:serieB, pF:0.15, pR:0.85,
+      desc:'Numeri con il ritardo più lungo — alta pressione statistica di rientro sulla ruota.' },
+    { nome:'Serie C — Frequenti',   tag:'📈 Alta frequenza', numeri:serieC, pF:0.80, pR:0.20,
+      desc:'Numeri più usciti storicamente. Diversi dalla A e B per massima copertura.' },
   ];
 
   let html = '<div class="serie-grid">';
   varianti.forEach((v, idx) => {
+    const sc  = calcolaScoreSerie(v.numeri, v.pF, v.pR);
     const cls = idx===0?'col-a':idx===1?'col-b':'';
     const ns  = v.numeri.join(',');
-    html += '<div class="serie-card ' + cls + '" id="lotto-serie-' + idx + '" onclick="selezionaLottoSerie(' + idx + ',[' + ns + '],\'' + v.nome.replace(/'/g,'') + '\')">'
+    html += '<div class="serie-card ' + cls + '" id="lotto-serie-' + idx + '" onclick="selezionaLottoSerie(' + idx + ',[' + ns + '],\'' + v.nome + '\')">'
           + '<div class="selected-check">&#10003;</div>'
           + '<div class="serie-header"><div class="serie-titolo">' + v.nome + '</div>'
-          + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + v.sc + '%"></div></div>Score ' + v.sc + '%</div></div>'
+          + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + sc + '%"></div></div>Score ' + sc + '%</div></div>'
           + '<div class="serie-tag">' + v.tag + ' &middot; ' + lottoTipoGiocata + ' &middot; Ruota ' + lottoRuota + '</div>'
-          + '<div class="serie-balls">' + v.numeri.map(nm => '<div class="serie-ball">'+nm+'</div>').join('') + '</div>'
+          + '<div class="serie-balls">' + v.numeri.map(function(nm){return '<div class="serie-ball">'+nm+'</div>';}).join('') + '</div>'
           + '<div class="serie-motivo">' + v.desc + '</div>'
           + '<div class="gioca-btn">&#9989; Gioco questa serie sabato</div>'
           + '</div>';
   });
   html += '</div>';
   document.getElementById('lotto-previsioni-content').innerHTML = html;
-
-  // ── NUMERO DELLA SETTIMANA LOTTO ──────────────────────────
-  const numTop = tutti90[0].num;
-  const scTop  = Math.round(tutti90[0].score * 100);
-  const pb     = stats.pressioneBinomiale ? Math.round((stats.pressioneBinomiale[numTop]||0.5)*100) : 50;
-  const ritTop = stats.ritardi[numTop] || 0;
-  const divNum = document.createElement('div');
-  divNum.style.cssText = 'margin-top:14px;padding:20px;background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:2px solid var(--oro);border-radius:14px;text-align:center';
-  divNum.innerHTML = `
-    <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--oro);margin-bottom:10px">⭐ Numero della Settimana — Lotto ${lottoRuota}</div>
-    <div style="font-family:'Playfair Display',serif;font-size:64px;font-weight:900;color:var(--oro);line-height:1;text-shadow:0 0 40px rgba(201,168,76,.5)">${numTop}</div>
-    <div style="font-size:10px;color:var(--soft);margin-top:10px;letter-spacing:1px">
-      Score composito: <strong style="color:var(--testo)">${scTop}%</strong> &nbsp;·&nbsp;
-      Pressione stat.: <strong style="color:var(--testo)">${pb}%</strong> &nbsp;·&nbsp;
-      Ritardo: <strong style="color:var(--testo)">${ritTop} estr.</strong>
-    </div>
-    <div style="font-size:9px;color:var(--soft);margin-top:8px;line-height:1.6">
-      Il numero con il punteggio più alto tra tutti i 6 fattori — ruota di ${lottoRuota}.<br>
-      <span style="color:rgba(201,168,76,.5)">⚠️ Analisi statistica — nessuna vincita garantita</span>
-    </div>
-  `;
-  document.getElementById('lotto-previsioni-content').appendChild(divNum);
-
   document.getElementById('lotto-riepilogo-box').classList.remove('show');
 }
 function selezionaLottoSerie(idx, numeri, nomeSerie) {
@@ -4851,63 +3840,18 @@ salvaRisultato = function() {
 // ============================================================
 let seEstrazioni = [];
 
-// Mock data SuperEnalotto — 20 estrazioni 6 numeri da 1-90
-function generaMockDataSE() {
-  const data = [];
-  const oggi = new Date();
-  for (let i = 0; i < 20; i++) {
-    const d = new Date(oggi);
-    d.setDate(d.getDate() - i * 3);
-    const numeri = [];
-    while (numeri.length < 6) {
-      const n = Math.floor(Math.random() * 90) + 1;
-      if (!numeri.includes(n)) numeri.push(n);
-    }
-    let jolly = Math.floor(Math.random() * 90) + 1;
-    while (numeri.includes(jolly)) jolly = Math.floor(Math.random() * 90) + 1;
-    let superstar = Math.floor(Math.random() * 90) + 1;
-    while (numeri.includes(superstar) || superstar === jolly) superstar = Math.floor(Math.random() * 90) + 1;
-    const dataStr = d.toISOString().split('T')[0];
-    data.push({ data: dataStr, numeri: numeri.sort((a,b)=>a-b), jolly, superstar });
-  }
-  return data;
-}
-
 function loadSuperEnalottoTab() {
-  const badge = document.getElementById('badge-txt');
-  if (badge) badge.textContent = 'Caricamento SE...';
-
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Timeout API SuperEnalotto')), 5000);
-  });
-
-  const fetchPromise = fetch('/api/proxy?tipo=superenalotto&anno=2026')
+  fetch('/api/proxy?tipo=superenalotto&anno=2026')
     .then(r => r.json())
     .then(data => {
-      if (data.ok && data.estrazioni && data.estrazioni.length > 0) {
-        return data.estrazioni;
+      if (data.ok && data.estrazioni.length > 0) {
+        seEstrazioni = data.estrazioni;
+        displaySuperEnalottoUltima();
+        displaySuperEnalottoStatistiche();
+        displaySuperEnalottoHistory();
       }
-      throw new Error('Dati SE vuoti da API');
-    });
-
-  Promise.race([fetchPromise, timeoutPromise])
-    .then(estr => {
-      seEstrazioni = estr;
-      if (badge) badge.textContent = 'Dati SE ✓';
-      displaySuperEnalottoUltima();
-      displaySuperEnalottoStatistiche();
-      displaySuperEnalottoHistory();
-      displaySuperEnalottoPrevisioni();
     })
-    .catch(err => {
-      console.warn('⏱ Timeout/Errore API SuperEnalotto — uso mock data', err.message);
-      seEstrazioni = generaMockDataSE();
-      if (badge) badge.textContent = 'Dati SE ✓ (mock)';
-      displaySuperEnalottoUltima();
-      displaySuperEnalottoStatistiche();
-      displaySuperEnalottoHistory();
-      displaySuperEnalottoPrevisioni();
-    });
+    .catch(err => console.error('Errore SuperEnalotto:', err));
 }
 
 function displaySuperEnalottoUltima() {
@@ -4964,84 +3908,6 @@ function displaySuperEnalottoStatistiche() {
   document.getElementById('se-ov-freddo').textContent = sorted[sorted.length - 1] ? sorted[sorted.length - 1][0] : '—';
 }
 
-function displaySuperEnalottoPrevisioni() {
-  if (!seEstrazioni.length) return;
-
-  const stats = calcoloSEStatisticheAvanzate(seEstrazioni);
-
-  // Calcola score per tutti i 90 numeri
-  const tutti90 = [];
-  for (let num = 1; num <= 90; num++) {
-    tutti90.push({ num, score: calcoloSEScoreMultiFattore(num, stats) });
-  }
-  tutti90.sort((a, b) => b.score - a.score);
-
-  function scoreSerieGlobale(numeri) {
-    const raw = numeri.reduce((s, num) => s + calcoloSEScoreMultiFattore(num, stats), 0) / numeri.length;
-    return Math.round(55 + raw * 45);
-  }
-
-  // Serie A: top 6 numeri (unica serie richiesta)
-  const serieA = tutti90.slice(0, 6).map(x => x.num).sort((a,b) => a-b);
-  const scA = scoreSerieGlobale(serieA);
-
-  // Numero della Settimana = #1 overall
-  const numTop = tutti90[0].num;
-  const scTop = Math.round(tutti90[0].score * 100);
-  
-  // Raccomandazione Jolly = #7 (primo numero fuori dalla serie principale)
-  const numJolly = tutti90[6].num;
-  const scJolly = Math.round(tutti90[6].score * 100);
-  const pb = stats.pressioneBinomiale ? Math.round((stats.pressioneBinomiale[numJolly]||0.5)*100) : 50;
-
-  let html = `
-    <div style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.04));border:2px solid #FFD700;border-radius:14px">
-      <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#FFD700;margin-bottom:10px">🎯 Serie Consigliata — 6 Numeri</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
-        ${serieA.map(n => `<div style="background:#FFD700;color:#000;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:16px">${n}</div>`).join('')}
-      </div>
-      <div style="font-size:10px;color:var(--soft);display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,215,0,.3)">
-        <span>Score: <strong style="color:#FFD700">${scA}%</strong></span>
-        <span>Metodo 7 Fattori (6/90) — Ciclo atteso 15 estrazioni</span>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <!-- Numero della Settimana -->
-      <div style="padding:18px;background:linear-gradient(135deg,rgba(255,215,0,.12),rgba(255,215,0,.04));border:2px solid #FFD700;border-radius:14px;text-align:center">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#FFD700;margin-bottom:8px">⭐ Numero della Settimana</div>
-        <div style="font-family:'Playfair Display',serif;font-size:56px;font-weight:900;color:#FFD700;line-height:1;text-shadow:0 0 30px rgba(255,215,0,.3)">${numTop}</div>
-        <div style="font-size:9px;color:var(--soft);margin-top:10px">Score: <strong>${scTop}%</strong></div>
-      </div>
-
-      <!-- Raccomandazione Jolly -->
-      <div style="padding:18px;background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04));border:2px solid #FF6B6B;border-radius:14px;text-align:center">
-        <div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#FF6B6B;margin-bottom:8px">🎲 Jolly Consigliato</div>
-        <div style="font-family:'Playfair Display',serif;font-size:56px;font-weight:900;color:#FF6B6B;line-height:1;text-shadow:0 0 30px rgba(255,107,107,.3)">${numJolly}</div>
-        <div style="font-size:9px;color:var(--soft);margin-top:10px">Score: <strong>${scJolly}%</strong> | Pressione: <strong>${pb}%</strong></div>
-      </div>
-    </div>
-
-    <div style="font-size:9px;color:var(--soft);margin-top:14px;text-align:center;padding:10px">
-      <span style="color:rgba(255,215,0,.6)">⚠️ Analisi statistica — nessuna vincita garantita</span>
-    </div>
-  `;
-
-  const container = document.getElementById('se-previsioni-content');
-  if (container) {
-    container.innerHTML = html;
-  } else {
-    // Se non esiste il container, crealo dinamicamente
-    const newDiv = document.createElement('div');
-    newDiv.id = 'se-previsioni-content';
-    newDiv.innerHTML = html;
-    const historySection = document.getElementById('seHistoryTable');
-    if (historySection) {
-      historySection.parentElement.insertBefore(newDiv, historySection);
-    }
-  }
-}
-
 function displaySuperEnalottoHistory() {
   const tbody = document.getElementById('seHistoryTable');
   tbody.innerHTML = seEstrazioni.slice(0, 20).map((e, idx) => `
@@ -5053,131 +3919,6 @@ function displaySuperEnalottoHistory() {
       <td style="padding:8px;border-bottom:1px solid #253550;text-align:center"><button class="micro-btn" onclick="event.stopPropagation(); loadSuperEnalottoRow(${idx})">Carica</button></td>
     </tr>
   `).join('');
-}
-
-// ── METODO AVANZATO 7 FATTORI — SUPERENALOTTO ──────────────────
-// Ciclo atteso = 90/6 = 15 estrazioni per numero
-function calcoloSEStatisticheAvanzate(estrazioni) {
-  const freqMap = {}, ritardi = {};
-  for (let n = 1; n <= 90; n++) freqMap[n] = 0;
-  
-  for (const e of estrazioni) {
-    for (const n of e.numeri) { if (freqMap[n] !== undefined) freqMap[n]++; }
-    if (e.jolly && freqMap[e.jolly] !== undefined) freqMap[e.jolly]++;
-  }
-  
-  for (let n = 1; n <= 90; n++) {
-    let found = false;
-    for (let i = 0; i < estrazioni.length; i++) {
-      if (estrazioni[i].numeri.includes(n) || estrazioni[i].jolly === n) { ritardi[n] = i; found = true; break; }
-    }
-    if (!found) ritardi[n] = estrazioni.length;
-  }
-
-  const tot = estrazioni.length;
-
-  // 1. Ciclo medio
-  const cicloMedio = {};
-  for (let n = 1; n <= 90; n++) {
-    const pos = [];
-    estrazioni.forEach((e, i) => { if (e.numeri.includes(n) || e.jolly === n) pos.push(i); });
-    if (pos.length >= 2) {
-      let sum = 0;
-      for (let i = 0; i < pos.length - 1; i++) sum += pos[i+1] - pos[i];
-      cicloMedio[n] = sum / (pos.length - 1);
-    } else if (pos.length === 1) {
-      cicloMedio[n] = tot;
-    } else {
-      cicloMedio[n] = tot * 1.2;
-    }
-  }
-
-  // 2. Momentum (ultimi 6 vs ultimi 18)
-  const n6  = Math.min(6, tot);
-  const n18 = Math.min(18, tot);
-  const f6 = {}, f18 = {};
-  for (let n = 1; n <= 90; n++) { f6[n] = 0; f18[n] = 0; }
-  estrazioni.slice(0, n6).forEach(e => { 
-    e.numeri.forEach(n => { f6[n]++; });
-    if (e.jolly) f6[e.jolly]++;
-  });
-  estrazioni.slice(0, n18).forEach(e => { 
-    e.numeri.forEach(n => { f18[n]++; });
-    if (e.jolly) f18[e.jolly]++;
-  });
-  const momentum = {};
-  const attesaPerc = 6 / 90; // ~0.0667
-  for (let n = 1; n <= 90; n++) {
-    const r6  = f6[n]  / n6;
-    const r18 = f18[n] / n18;
-    momentum[n] = (r6 - r18) / (attesaPerc + 0.001);
-  }
-
-  // 3. Co-occorrenza ultimi 3 sorteggi
-  const ultimi3Set = new Set(estrazioni.slice(0, Math.min(3, tot)).flatMap(e => [...e.numeri, e.jolly]));
-  const coScore = {};
-  for (let n = 1; n <= 90; n++) {
-    if (ultimi3Set.has(n)) { coScore[n] = -0.5; continue; }
-    let hits = 0, total = 0;
-    estrazioni.forEach(e => {
-      if (e.numeri.some(m => ultimi3Set.has(m)) || ultimi3Set.has(e.jolly)) {
-        total++;
-        if (e.numeri.includes(n) || e.jolly === n) hits++;
-      }
-    });
-    coScore[n] = total > 5 ? (hits / total) / (6/90) - 1 : 0;
-  }
-
-  // 4. Pressione Binomiale
-  const pressioneBinomiale = {};
-  for (let n = 1; n <= 90; n++) {
-    const osservata = (freqMap[n] || 0) / Math.max(tot, 1);
-    const dev = attesaPerc - osservata;
-    pressioneBinomiale[n] = Math.max(0, Math.min(1, 0.5 + dev / attesaPerc));
-  }
-
-  // 5. Coppie Frequenti
-  const coppieMap = {};
-  for (const e of estrazioni) {
-    const nums = e.numeri;
-    for (let i = 0; i < nums.length; i++) {
-      for (let j = i + 1; j < nums.length; j++) {
-        const key = Math.min(nums[i], nums[j]) + '_' + Math.max(nums[i], nums[j]);
-        coppieMap[key] = (coppieMap[key] || 0) + 1;
-      }
-    }
-  }
-  const ultimi2Set = new Set(estrazioni.slice(0, Math.min(2, tot)).flatMap(e => e.numeri));
-  const maxCoppie = Math.max(...Object.values(coppieMap), 1);
-  const scoreCoppie = {};
-  for (let n = 1; n <= 90; n++) {
-    if (ultimi2Set.has(n)) { scoreCoppie[n] = 0; continue; }
-    let somma = 0;
-    for (const partner of ultimi2Set) {
-      const key = Math.min(n, partner) + '_' + Math.max(n, partner);
-      somma += (coppieMap[key] || 0);
-    }
-    scoreCoppie[n] = Math.min(somma / (ultimi2Set.size * maxCoppie), 1);
-  }
-
-  return { freqMap, ritardi, cicloMedio, momentum, coScore, ultimi3Set, pressioneBinomiale, scoreCoppie };
-}
-
-function calcoloSEScoreMultiFattore(num, stats) {
-  const attesoCiclo = 15; // 90/6
-  const ritAtt = stats.ritardi[num] || 0;
-  const ciclo  = Math.max(stats.cicloMedio[num] || attesoCiclo, 1);
-
-  const f1 = Math.min(ritAtt / ciclo, 3) / 3;                                         // Ritardo relativo (25%)
-  const mom = stats.momentum[num] || 0;
-  const f2 = Math.max(0, Math.min(1, (mom + 1) / 2));                                 // Momentum (16%)
-  const f3 = Math.min(ritAtt / attesoCiclo, 4) / 4;                                   // Ciclo normalizzato (20%)
-  const f4 = Math.max(0, Math.min(1, (stats.coScore[num] || 0) + 0.5));               // Correlazione (11%)
-  const f5 = stats.ultimi3Set.has(num) ? 0 : 1;                                       // Non appena uscito (7%)
-  const f6 = stats.pressioneBinomiale ? (stats.pressioneBinomiale[num] || 0.5) : 0.5; // Pressione binomiale (11%)
-  const f7 = stats.scoreCoppie ? (stats.scoreCoppie[num] || 0) : 0;                   // Coppie frequenti (10%)
-
-  return (f1*0.25 + f2*0.16 + f3*0.20 + f4*0.11 + f5*0.07 + f6*0.11 + f7*0.10);
 }
 
 function loadSuperEnalottoRow(idx) {
@@ -5766,427 +4507,130 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btn) btn.addEventListener('click', verificaSuperEnalotto);
 });
 
+
 // ============================================================
-// PROFESSIONAL STATISTICAL LOTTERY ENGINE
-// All 10 Steps Implemented
+// ADVANCED STATS — Moduli statistici professionali
 // ============================================================
 
-// STEP 1: CORE STATISTICAL ENGINE
-// ============================================================
-const RealDistributionAnalyzer = (() => {
-  const analyzeCombinationRealism = (combination) => {
-    const scores = {};
-    
-    // Even/Odd ratio
-    const even = combination.filter(n => n % 2 === 0).length;
-    const odd = combination.length - even;
-    scores.evenOdd = Math.abs(even - odd) <= 2 ? 1 : 0.5;
-    
-    // Low/High ratio (1-45 vs 46-90)
-    const low = combination.filter(n => n <= 45).length;
-    const high = combination.length - low;
-    scores.lowHigh = Math.abs(low - high) <= 2 ? 1 : 0.6;
-    
-    // Decade distribution
-    const decades = {};
-    for (let i = 0; i < 9; i++) decades[i] = 0;
-    for (const n of combination) {
-      decades[Math.floor(n / 10)]++;
-    }
-    const decadeVar = Object.values(decades).filter(v => v > 0).length;
-    scores.decadeSpread = decadeVar >= 4 ? 1 : decadeVar === 3 ? 0.8 : 0.5;
-    
-    // Sum range (typical 200-400 for 6 numbers)
-    const sum = combination.reduce((a, b) => a + b, 0);
-    const sumMin = combination.length * 20;
-    const sumMax = combination.length * 70;
-    scores.sumRealism = (sum >= sumMin && sum <= sumMax) ? 1 : 0.6;
-    
-    // Consecutive gaps
-    let maxGap = 0, minGap = 90;
-    for (let i = 0; i < combination.length - 1; i++) {
-      const gap = combination[i + 1] - combination[i];
-      maxGap = Math.max(maxGap, gap);
-      minGap = Math.min(minGap, gap);
-    }
-    scores.gapDistribution = (minGap > 1 && maxGap < 20) ? 1 : 0.7;
-    
-    // Final score
-    const finalScore = Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length;
-    return { ...scores, finalScore: Math.round(finalScore * 100) };
-  };
+function runAdvancedAnalysis() {
+  if (!allEstrazioni || allEstrazioni.length < 5) {
+    document.getElementById('advanced-result').innerHTML =
+      '<div style="color:#ff6b6b;padding:20px">Prima carica i dati — premi "Aggiorna dati" in alto</div>';
+    return;
+  }
 
-  const scoreCombination = (combination) => {
-    return analyzeCombinationRealism(combination);
-  };
+  const estr = allEstrazioni;
+  const n = estr.length;
 
-  const getDistributionStats = (estrazioni) => {
-    const allNumbers = estrazioni.flatMap(e => e.numeri);
-    const sums = estrazioni.map(e => e.numeri.reduce((a, b) => a + b, 0));
-    
-    return {
-      avgSum: Math.round(sums.reduce((a, b) => a + b, 0) / sums.length),
-      minSum: Math.min(...sums),
-      maxSum: Math.max(...sums),
-      avgNumbersPerDraw: Math.round(allNumbers.length / estrazioni.length)
-    };
-  };
+  // Frequenze
+  const freq = {};
+  for (let i = 1; i <= 90; i++) freq[i] = 0;
+  estr.forEach(e => e.numeri.forEach(n => freq[n]++));
 
-  return {
-    scoreCombination,
-    analyzeCombinationRealism,
-    getDistributionStats
-  };
-})();
-
-// STEP 3: MONTE CARLO SIMULATOR
-// ============================================================
-const MonteCarloSimulator = (() => {
-  const runMonteCarloAnalysis = (estrazioni, iterations = 50000, numRange = 90, numbersPerDraw = 20) => {
-    const freq = StatisticalEngine.analyzeFrequency(estrazioni, numRange);
-    const weights = {};
-    
-    for (let n = 1; n <= numRange; n++) {
-      weights[n] = freq[n] > 0 ? freq[n] / estrazioni.length : 0.1;
+  // Ritardi
+  const ritardi = {};
+  for (let i = 1; i <= 90; i++) {
+    let found = false;
+    for (let j = 0; j < estr.length; j++) {
+      if (estr[j].numeri.includes(i)) { ritardi[i] = j; found = true; break; }
     }
-    
-    const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
-    for (let n = 1; n <= numRange; n++) {
-      weights[n] /= totalWeight;
-    }
-    
-    const results = new Uint32Array(numRange + 1);
-    for (let iter = 0; iter < iterations; iter++) {
-      const drawn = [];
-      const remaining = Array.from({length: numRange}, (_, i) => i + 1);
-      
-      for (let draw = 0; draw < numbersPerDraw; draw++) {
-        let rand = Math.random();
-        let cumulative = 0;
-        for (const num of remaining) {
-          cumulative += weights[num] || 0.001;
-          if (rand <= cumulative) {
-            drawn.push(num);
-            remaining.splice(remaining.indexOf(num), 1);
-            break;
-          }
-        }
+    if (!found) ritardi[i] = estr.length;
+  }
+
+  // Hot (usciti nelle ultime 3 estrazioni)
+  const recent = new Set(estr.slice(0, 3).flatMap(e => e.numeri));
+  const hot = [...recent].sort((a,b) => freq[b]-freq[a]).slice(0, 10);
+
+  // Cold (ritardo > 15)
+  const cold = Object.entries(ritardi).filter(([,v]) => v > 15)
+    .sort((a,b) => b[1]-a[1]).slice(0, 10).map(([k]) => parseInt(k));
+
+  // Top frequenti
+  const topFreq = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 15);
+
+  // Top ritardatari
+  const topRit = Object.entries(ritardi).sort((a,b) => b[1]-a[1]).slice(0, 10);
+
+  // Coppie
+  const coppie = {};
+  estr.forEach(e => {
+    for (let i = 0; i < e.numeri.length; i++)
+      for (let j = i+1; j < e.numeri.length; j++) {
+        const k = [Math.min(e.numeri[i],e.numeri[j]), Math.max(e.numeri[i],e.numeri[j])].join('-');
+        coppie[k] = (coppie[k]||0) + 1;
       }
-      
-      for (const n of drawn) {
-        results[n]++;
-      }
-    }
-    
-    const topNumbers = Array.from({length: numRange}, (_, i) => ({
-      num: i + 1,
-      frequency: results[i + 1],
-      percentage: (results[i + 1] / iterations * 100).toFixed(2)
-    })).sort((a, b) => b.frequency - a.frequency).slice(0, 25);
-    
-    return { topNumbers, allResults: results, iterations };
-  };
+  });
+  const topCoppie = Object.entries(coppie).sort((a,b)=>b[1]-a[1]).slice(0,8);
 
-  return { runMonteCarloAnalysis };
-})();
+  // Render
+  document.getElementById('advanced-result').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:20px">
 
-// STEP 4: PATTERN CYCLE DETECTOR
-// ============================================================
-const PatternCycleDetector = (() => {
-  const detectPatterns = (estrazioni, numRange = 90) => {
-    const patterns = {};
-    const delays = StatisticalEngine.analyzeDelays(estrazioni, numRange);
-    
-    for (let n = 1; n <= numRange; n++) {
-      const d = delays[n];
-      if (d.positions.length >= 3) {
-        const gaps = [];
-        for (let i = 1; i < d.positions.length; i++) {
-          gaps.push(d.positions[i] - d.positions[i - 1]);
-        }
-        
-        const avgGap = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-        const variance = gaps.reduce((s, g) => s + Math.pow(g - avgGap, 2), 0) / gaps.length;
-        const stdDev = Math.sqrt(variance);
-        const consistency = stdDev < avgGap * 0.5 ? 1 : stdDev < avgGap ? 0.7 : 0.3;
-        
-        patterns[n] = {
-          avgCycle: Math.round(avgGap * 10) / 10,
-          consistency,
-          predictability: consistency > 0.7 ? 'HIGH' : consistency > 0.3 ? 'MEDIUM' : 'LOW'
-        };
-      }
-    }
-    
-    return patterns;
-  };
-
-  const getPatternConfidenceScore = (number, patterns) => {
-    return patterns[number]?.consistency || 0;
-  };
-
-  return {
-    detectPatterns,
-    getPatternConfidenceScore
-  };
-})();
-
-// STEP 5: ADVANCED COMBINATION GENERATOR
-// ============================================================
-const AdvancedCombinationGenerator = (() => {
-  const generateAdvancedSeries = (estrazioni, count = 10, numRange = 90) => {
-    const strategies = {
-      frequency: () => StatisticalEngine.generateOptimizedSeries(estrazioni, count, numRange, 'freq'),
-      delay: () => StatisticalEngine.generateOptimizedSeries(estrazioni, count, numRange, 'delay'),
-      balanced: () => StatisticalEngine.generateOptimizedSeries(estrazioni, count, numRange, 'balanced'),
-      monteCarlo: () => {
-        const mc = MonteCarloSimulator.runMonteCarloAnalysis(estrazioni, 50000, numRange);
-        return mc.topNumbers.slice(0, count).map(x => x.num).sort((a, b) => a - b);
-      }
-    };
-
-    const results = {};
-    for (const [name, strategy] of Object.entries(strategies)) {
-      const series = strategy();
-      const realism = RealDistributionAnalyzer.scoreCombination(series);
-      results[name] = { series, ...realism };
-    }
-
-    // Sort by combined score
-    const sorted = Object.entries(results).sort((a, b) => b[1].finalScore - a[1].finalScore);
-    return sorted.slice(0, 3).map(([name, data]) => ({ strategy: name, ...data }));
-  };
-
-  return { generateAdvancedSeries };
-})();
-
-// STEP 6-8: DASHBOARD WITH QUALITY FILTERS & OPTIMIZATION
-// ============================================================
-const ProfessionalDashboard = (() => {
-  const generateAnalysisDashboard = (estrazioni, numRange = 90) => {
-    const hotCold = StatisticalEngine.analyzeHotColdNumbers(estrazioni, numRange);
-    const pairs = StatisticalEngine.analyzePairs(estrazioni, numRange);
-    const triples = StatisticalEngine.analyzeTriples(estrazioni, numRange, 8);
-    const patterns = PatternCycleDetector.detectPatterns(estrazioni, numRange);
-    const monteCarlo = MonteCarloSimulator.runMonteCarloAnalysis(estrazioni, 50000, numRange);
-    const advanced = AdvancedCombinationGenerator.generateAdvancedSeries(estrazioni, 10, numRange);
-
-    return {
-      hotNumbers: hotCold.hot.slice(0, 10),
-      coldNumbers: hotCold.cold.slice(0, 10),
-      warmingNumbers: hotCold.warming.slice(0, 10),
-      topPairs: pairs.slice(0, 10),
-      topTriples: triples,
-      patterns,
-      monteCarlo: monteCarlo.topNumbers.slice(0, 15),
-      advancedCombinations: advanced,
-      timestamp: new Date().toLocaleString()
-    };
-  };
-
-  const renderDashboardHTML = (analysis) => {
-    return `
-      <div style="background:linear-gradient(135deg,var(--blu3),var(--blu));border-radius:14px;padding:20px;margin-bottom:20px">
-        <h3 style="color:var(--oro);margin-bottom:16px">📊 PROFESSIONAL STATISTICAL ANALYSIS</h3>
-        
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-bottom:20px">
-          <!-- HOT NUMBERS -->
-          <div style="background:var(--blu2);border-left:4px solid #FF6B6B;border-radius:8px;padding:14px">
-            <h4 style="color:#FF6B6B;margin-bottom:10px">🔥 Hot Numbers</h4>
-            <div style="display:flex;flex-wrap:wrap;gap:6px">
-              ${analysis.hotNumbers.slice(0, 6).map(h => `<span style="background:#FF6B6B;color:white;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px">${h.num}</span>`).join('')}
-            </div>
-          </div>
-          
-          <!-- COLD NUMBERS -->
-          <div style="background:var(--blu2);border-left:4px solid #4ECDC4;border-radius:8px;padding:14px">
-            <h4 style="color:#4ECDC4;margin-bottom:10px">❄️ Cold Numbers</h4>
-            <div style="display:flex;flex-wrap:wrap;gap:6px">
-              ${analysis.coldNumbers.slice(0, 6).map(c => `<span style="background:#4ECDC4;color:white;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px">${c.num}</span>`).join('')}
-            </div>
-          </div>
-          
-          <!-- WARMING UP -->
-          <div style="background:var(--blu2);border-left:4px solid #FFD700;border-radius:8px;padding:14px">
-            <h4 style="color:#FFD700;margin-bottom:10px">🔆 Warming Up</h4>
-            <div style="display:flex;flex-wrap:wrap;gap:6px">
-              ${analysis.warmingNumbers.slice(0, 6).map(w => `<span style="background:#FFD700;color:#000;padding:4px 10px;border-radius:4px;font-weight:700;font-size:12px">${w.num}</span>`).join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- TOP PAIRS & TRIPLES -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-          <div style="background:var(--blu2);border-radius:8px;padding:14px">
-            <h4 style="color:var(--accent);margin-bottom:10px">🔗 Top Pairs</h4>
-            <div style="font-size:11px;line-height:1.8;color:var(--soft)">
-              ${analysis.topPairs.slice(0, 8).map(p => `<div>[${p.pair[0]}, ${p.pair[1]}] - <strong style="color:#7AACFF">${p.count} times</strong></div>`).join('')}
-            </div>
-          </div>
-          
-          <div style="background:var(--blu2);border-radius:8px;padding:14px">
-            <h4 style="color:var(--accent);margin-bottom:10px">⭐ Top Triples</h4>
-            <div style="font-size:11px;line-height:1.8;color:var(--soft)">
-              ${analysis.topTriples.slice(0, 8).map(t => `<div>[${t.triple[0]}, ${t.triple[1]}, ${t.triple[2]}] - <strong style="color:#3DB87A">${t.count}x</strong></div>`).join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- MONTE CARLO TOP 15 -->
-        <div style="background:var(--blu2);border-radius:8px;padding:14px;margin-bottom:20px">
-          <h4 style="color:var(--accent);margin-bottom:10px">🎰 Monte Carlo Top Numbers (50K iterations)</h4>
-          <div style="display:grid;grid-template-columns:repeat(15,1fr);gap:6px">
-            ${analysis.monteCarlo.map(m => `<div style="background:var(--bordo);padding:8px;text-align:center;border-radius:4px;border:1px solid rgba(122,172,255,0.3)">
-              <div style="font-weight:700;color:var(--accent);font-size:13px">${m.num}</div>
-              <div style="font-size:10px;color:var(--soft)">${m.percentage}%</div>
-            </div>`).join('')}
-          </div>
-        </div>
-
-        <!-- ADVANCED COMBINATIONS -->
-        <div style="background:var(--blu2);border-radius:8px;padding:14px">
-          <h4 style="color:var(--accent);margin-bottom:10px">🎯 Advanced Optimized Combinations</h4>
-          ${analysis.advancedCombinations.map((combo, idx) => `
-            <div style="margin-bottom:12px;padding:10px;background:var(--bordo);border-radius:6px">
-              <div style="color:var(--oro);font-weight:700;margin-bottom:6px">Strategy: ${combo.strategy.toUpperCase()} (Realism Score: ${combo.finalScore}%)</div>
-              <div style="display:flex;flex-wrap:wrap;gap:4px">
-                ${combo.series.map(n => `<span style="background:var(--accent);color:white;padding:3px 8px;border-radius:3px;font-size:11px;font-weight:600">${n}</span>`).join('')}
-              </div>
-              <div style="margin-top:6px;font-size:10px;color:var(--soft)">
-                Even/Odd: ${combo.evenOdd.toFixed(2)} | Low/High: ${combo.lowHigh.toFixed(2)} | Decade: ${combo.decadeSpread.toFixed(2)} | Sum: ${combo.sumRealism.toFixed(2)}
-              </div>
-            </div>
-          `).join('')}
-        </div>
-
-        <div style="margin-top:14px;padding:10px;background:rgba(122,172,255,0.1);border-left:3px solid var(--accent);border-radius:4px;font-size:11px;color:var(--soft)">
-          📅 Generated: ${analysis.timestamp}
+      <div style="background:var(--blu2);border-left:4px solid #FF6B6B;border-radius:8px;padding:14px">
+        <div style="color:#FF6B6B;font-weight:700;margin-bottom:10px">🔥 Numeri Caldi (ultime 3 estrazioni)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${hot.map(n=>`<span style="background:#FF6B6B;color:#fff;padding:5px 10px;border-radius:4px;font-weight:700">${n}</span>`).join('')}
         </div>
       </div>
-    `;
-  };
 
-  return {
-    generateAnalysisDashboard,
-    renderDashboardHTML
-  };
-})();
+      <div style="background:var(--blu2);border-left:4px solid #4ECDC4;border-radius:8px;padding:14px">
+        <div style="color:#4ECDC4;font-weight:700;margin-bottom:10px">❄️ Numeri Freddi (ritardo > 15)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${cold.map(n=>`<span style="background:#4ECDC4;color:#000;padding:5px 10px;border-radius:4px;font-weight:700">${n}</span>`).join('')}
+        </div>
+      </div>
 
-// STEP 9: REPORT GENERATOR
-// ============================================================
-const ReportGenerator = (() => {
-  const generateReport = (estrazioni, numRange = 90) => {
-    const analysis = ProfessionalDashboard.generateAnalysisDashboard(estrazioni, numRange);
-    const distStats = RealDistributionAnalyzer.getDistributionStats(estrazioni);
-    
-    return {
-      summary: {
-        totalDraws: estrazioni.length,
-        numberRange: numRange,
-        averageSum: distStats.avgSum,
-        minSum: distStats.minSum,
-        maxSum: distStats.maxSum
-      },
-      analysis,
-      generatedAt: new Date().toISOString()
-    };
-  };
+      <div style="background:var(--blu2);border-left:4px solid var(--oro);border-radius:8px;padding:14px">
+        <div style="color:var(--oro);font-weight:700;margin-bottom:10px">📊 Top 15 Frequenti</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${topFreq.map(([n,f])=>`<span style="background:rgba(201,168,76,0.2);border:1px solid var(--oro);color:var(--oro);padding:4px 8px;border-radius:4px;font-size:12px"><strong>${n}</strong> (${f}x)</span>`).join('')}
+        </div>
+      </div>
 
-  const exportJSON = (report, filename = 'lottery_analysis.json') => {
-    const dataStr = JSON.stringify(report, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+      <div style="background:var(--blu2);border-left:4px solid #7AACFF;border-radius:8px;padding:14px">
+        <div style="color:#7AACFF;font-weight:700;margin-bottom:10px">⏳ Top 10 Ritardatari</div>
+        <div style="font-size:12px;line-height:2;color:var(--soft)">
+          ${topRit.map(([n,v])=>`<span style="color:var(--testo)"><strong>${n}</strong>: ${v} estr.</span>`).join(' · ')}
+        </div>
+      </div>
 
-  const exportAsText = (report, filename = 'lottery_analysis.txt') => {
-    let text = `LOTTERY STATISTICAL ANALYSIS REPORT\n`;
-    text += `Generated: ${report.generatedAt}\n`;
-    text += `\n--- SUMMARY ---\n`;
-    text += `Total Draws: ${report.summary.totalDraws}\n`;
-    text += `Number Range: 1-${report.summary.numberRange}\n`;
-    text += `Average Sum: ${report.summary.averageSum}\n`;
-    text += `\n--- HOT NUMBERS ---\n`;
-    text += report.analysis.hotNumbers.map(h => `${h.num} (freq: ${h.freq})`).join(', ') + '\n';
-    text += `\n--- TOP PAIRS ---\n`;
-    text += report.analysis.topPairs.slice(0, 10).map(p => `[${p.pair[0]}, ${p.pair[1]}] (${p.count} times)`).join('\n') + '\n';
-    text += `\n--- TOP COMBINATIONS ---\n`;
-    text += report.analysis.advancedCombinations.map(c => `${c.strategy}: [${c.series.join(', ')}] - Realism: ${c.finalScore}%`).join('\n');
-    
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+      <div style="background:var(--blu2);border-left:4px solid #a78bfa;border-radius:8px;padding:14px">
+        <div style="color:#a78bfa;font-weight:700;margin-bottom:10px">🔗 Top 8 Coppie</div>
+        <div style="font-size:12px;line-height:2;color:var(--soft)">
+          ${topCoppie.map(([k,v])=>`[${k}] <strong style="color:var(--testo)">${v}x</strong>`).join(' · ')}
+        </div>
+      </div>
 
-  return {
-    generateReport,
-    exportJSON,
-    exportAsText
-  };
-})();
+      <div style="background:var(--blu2);border-left:4px solid #3DB87A;border-radius:8px;padding:14px">
+        <div style="color:#3DB87A;font-weight:700;margin-bottom:10px">📈 Riepilogo Dataset</div>
+        <div style="font-size:12px;color:var(--soft);line-height:2">
+          <div>Estrazioni analizzate: <strong style="color:var(--testo)">${n}</strong></div>
+          <div>Numero più frequente: <strong style="color:var(--oro)">${topFreq[0][0]} (${topFreq[0][1]}x)</strong></div>
+          <div>Più ritardatario: <strong style="color:#FF6B6B">${topRit[0][0]} (${topRit[0][1]} estr.)</strong></div>
+          <div>Aggiornato: <strong style="color:var(--testo)">${new Date().toLocaleString('it-IT')}</strong></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-// FUNCTION TO INTEGRATE WITH EXISTING UI
-// ============================================================
-function showAdvancedAnalysisDashboard() {
-  const dataset = allEstrazioni || [];
-  if (dataset.length < 10) {
-    alert('Need at least 10 draws for analysis');
+function exportAdvancedJSON() {
+  if (!allEstrazioni || allEstrazioni.length < 5) {
+    alert('Prima carica i dati');
     return;
   }
-
-  document.getElementById('stat-status').textContent = 'Analyzing...';
-  setTimeout(() => {
-    const dashboard = ProfessionalDashboard.generateAnalysisDashboard(dataset, 90);
-    const html = ProfessionalDashboard.renderDashboardHTML(dashboard);
-    
-    document.getElementById('advanced-dashboard-content').innerHTML = html;
-    document.getElementById('stat-total-draws').textContent = dataset.length;
-    document.getElementById('stat-status').textContent = '✅ Complete';
-    document.getElementById('stat-updated').textContent = new Date().toLocaleTimeString();
-    
-    document.getElementById('advanced-dashboard-content').scrollIntoView({ behavior: 'smooth' });
-  }, 100);
+  const data = {
+    generatedAt: new Date().toISOString(),
+    totalDraws: allEstrazioni.length,
+    lastDraw: allEstrazioni[0],
+    draws: allEstrazioni
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'lotterie_analysis.json'; a.click();
+  URL.revokeObjectURL(url);
 }
-
-function downloadAnalysisReport() {
-  const dataset = allEstrazioni || [];
-  if (dataset.length < 10) {
-    alert('Need at least 10 draws for analysis');
-    return;
-  }
-  const report = ReportGenerator.generateReport(dataset, 90);
-  ReportGenerator.exportJSON(report);
-}
-
-function exportAnalysisAsText() {
-  const dataset = allEstrazioni || [];
-  if (dataset.length < 10) {
-    alert('Need at least 10 draws for analysis');
-    return;
-  }
-  const report = ReportGenerator.generateReport(dataset, 90);
-  ReportGenerator.exportAsText(report);
-}
-
-// Update stats when data is loaded
-function updateAdvancedStats() {
-  const dataset = allEstrazioni || [];
-  document.getElementById('stat-total-draws').textContent = dataset.length;
-  if (dataset.length > 0) {
-    document.getElementById('stat-status').textContent = 'Ready';
-  }
-}
-
-// Call this after data loads
-setInterval(updateAdvancedStats, 1000);
 
 </script>
 </body>
