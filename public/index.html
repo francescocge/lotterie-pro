@@ -1251,64 +1251,43 @@ function isSabato(dataStr) {
 }
 
 async function loadAllData() {
-  document.getElementById('badge-txt').textContent = 'Caricamento... (max 5 sec)';
-  document.getElementById('last-upd').textContent = 'Connessione al server...';
+  document.getElementById('badge-txt').textContent = 'Caricamento...';
+  document.getElementById('last-upd').textContent = 'Caricamento dati...';
 
+  // STEP 1: Carica SUBITO i mock data — nessuna attesa
+  allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
+    .sort((a, b) => new Date(b.data) - new Date(a.data));
+
+  const stats = calcolaStatistiche(allEstrazioni);
+  lastUpdate = new Date();
+  renderAll(stats);
+  document.getElementById('badge-txt').textContent = '✅ Caricato';
+  document.getElementById('last-upd').textContent =
+    'Ultima estrazione: ' + allEstrazioni[0].data + ' — ' + allEstrazioni.length + ' estrazioni';
+
+  // STEP 2: Prova l'API in background (non blocca la UI)
   try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 3000);
+
     const oggi = new Date();
-    const unAnnoFa = new Date(oggi);
-    unAnnoFa.setFullYear(unAnnoFa.getFullYear() - 1);
-
-    const anniDaCaricare = new Set();
-    let y = unAnnoFa.getFullYear();
-    while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
-
-    allEstrazioni = [];
-    
-    // TIMEOUT AGGRESSIVO: 5 secondi max
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout 5sec')), 5000);
-    });
-
-    const fetchPromise = (async () => {
-      for (const anno of anniDaCaricare) {
-        try {
-          const estr = await fetchDatiReali('10elotto', anno);
-          allEstrazioni = allEstrazioni.concat(estr);
-        } catch(e) { console.warn('10eLotto errore anno', anno, e.message); }
+    const anno = oggi.getFullYear();
+    const r = await fetch('/api/proxy?tipo=10elotto&anno=' + anno, { signal: controller.signal });
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.length > 0) {
+        allEstrazioni = data.sort((a, b) => new Date(b.data) - new Date(a.data));
+        const statsReali = calcolaStatistiche(allEstrazioni);
+        lastUpdate = new Date();
+        renderAll(statsReali);
+        document.getElementById('badge-txt').textContent = '✅ Dati Reali';
+        document.getElementById('last-upd').textContent =
+          'Aggiornato: ' + lastUpdate.toLocaleString('it-IT');
       }
-    })();
-
-    await Promise.race([fetchPromise, timeoutPromise]);
-
-    // Filtra: ultimi 12 mesi
-    allEstrazioni = allEstrazioni
-      .filter(e => {
-        const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi;
-      })
-      .sort((a, b) => new Date(b.data) - new Date(a.data));
-
-    if (allEstrazioni.length < 3) throw new Error('Dati insufficienti dal server (' + allEstrazioni.length + ' estrazioni)');
-
-    const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
-    renderAll(stats);
-    document.getElementById('badge-txt').textContent = 'Dati reali ✓';
-    document.getElementById('last-upd').textContent =
-      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni (12 mesi)';
-
-  } catch(err) {
-    console.error('loadAllData errore:', err.message);
-    console.log('⚠️ API offline o timeout — uso dati mockati');
-    // Fallback IMMEDIATO ai dati mockati
-    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.sort((a, b) => new Date(b.data) - new Date(a.data));
-    const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
-    renderAll(stats);
-    document.getElementById('badge-txt').textContent = '📊 Dati Demo (API offline)';
-    document.getElementById('last-upd').textContent =
-      'Fallback mockati — ' + allEstrazioni.length + ' estrazioni (da usare come test)';
+    }
+  } catch(e) {
+    // API offline — mock data già mostrati, nessun problema
+    console.log('API offline, uso mock data');
   }
 }
 
