@@ -298,6 +298,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-finali')">🔢 Finali</button>
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-storico')">📅 Storico</button>
   <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-premi')">💰 Premi</button>
+  <button class="nav-tab nav-tab-lotto" style="display:none" onclick="showPanelLotto('lotto-adv')">🧠 Avanzate</button>
   <!-- Tab SuperEnalotto — nascoste di default -->
   <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-ultima')">💰 Ultima</button>
   <button class="nav-tab nav-tab-se" style="display:none" onclick="showPanelSE('se-gioca')">🏆 Previsioni</button>
@@ -965,6 +966,69 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
     <p style="font-size:9px;color:var(--soft);margin-top:18px;line-height:1.7;letter-spacing:.5px">
       ⚠️ Premi ufficiali Sisal per 1€ di puntata base. Verifica sempre su sisal.it.
     </p>
+  </div>
+</div>
+
+<!-- ===== PANEL AVANZATE LOTTO ===== -->
+<div class="panel panel-lotto" id="panel-lotto-adv" style="display:none">
+  <div class="card">
+    <div class="card-title">🧠 Analisi Avanzata Lotto — Ruota <span id="lotto-adv-ruota-nome">Genova</span></div>
+    <p style="font-size:10px;color:var(--soft);margin-bottom:14px;line-height:1.7">Statistical Engine · Distribution Analyzer · Monte Carlo · Pattern Detector · Combination Generator</p>
+    <button class="btn" onclick="runAdvancedAnalysisLotto()" id="lotto-adv-btn" style="width:100%;margin-bottom:8px">▶ Avvia Analisi Completa</button>
+    <div id="lotto-adv-status" style="font-size:10px;color:var(--soft);text-align:center;min-height:16px"></div>
+  </div>
+  <div id="lotto-adv-dashboard" style="display:none">
+    <div class="card">
+      <div class="card-title">📊 Statistical Engine</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="q-btn attivo" onclick="lottoAdvTab('hot')" id="lotto-adv-tab-hot">🔥 Hot</button>
+        <button class="q-btn" onclick="lottoAdvTab('cold')" id="lotto-adv-tab-cold">❄️ Cold</button>
+        <button class="q-btn" onclick="lottoAdvTab('coppie')" id="lotto-adv-tab-coppie">👥 Coppie</button>
+        <button class="q-btn" onclick="lottoAdvTab('triple')" id="lotto-adv-tab-triple">🎯 Triple</button>
+      </div>
+      <div id="lotto-adv-se-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📈 Score Realistico (0–100%)</div>
+      <p style="font-size:10px;color:var(--soft);margin-bottom:12px">Top 20 numeri per score combinato.</p>
+      <div id="lotto-adv-rda-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🔄 Pattern & Cicli</div>
+      <div id="lotto-adv-pcd-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🎲 Monte Carlo (50.000 iterazioni)</div>
+      <p style="font-size:10px;color:var(--soft);margin-bottom:12px">Probabilità reale di indovinare N numeri su 5 estratti (Lotto).</p>
+      <div id="lotto-adv-mc-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ Combinazioni Avanzate</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="q-btn attivo" onclick="lottoAdvComboTab('hot')" id="lotto-advc-hot">🔥 Hot</button>
+        <button class="q-btn" onclick="lottoAdvComboTab('cold')" id="lotto-advc-cold">❄️ Cold</button>
+        <button class="q-btn" onclick="lottoAdvComboTab('bil')" id="lotto-advc-bil">⚖️ Bilanciata</button>
+      </div>
+      <div id="lotto-adv-combo-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📄 Report</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="lottoAdvReport('text')" style="flex:1">📋 Mostra Testo</button>
+        <button class="btn" onclick="lottoAdvReport('json')" style="flex:1">{ } Mostra JSON</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modale report lotto -->
+<div id="lotto-adv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;padding:20px;overflow-y:auto">
+  <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:14px;max-width:700px;margin:0 auto;padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="color:var(--oro);font-family:'Playfair Display',serif;font-size:15px">📄 Report Avanzato Lotto</span>
+      <button onclick="document.getElementById('lotto-adv-modal').style.display='none'" style="background:none;border:none;color:var(--soft);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <textarea id="lotto-adv-modal-txt" readonly style="width:100%;height:400px;background:var(--blu2);border:1px solid var(--bordo);border-radius:8px;color:var(--testo);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:vertical"></textarea>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('lotto-adv-modal-txt').value).then(()=>alert('Copiato!'))" style="margin-top:10px;width:100%" class="btn">📋 Copia negli appunti</button>
   </div>
 </div>
 
@@ -3375,8 +3439,12 @@ function generaPrevisioni() {
   const tutti = Array.from({length:90}, (_,i) => i+1);
   const freqAttesa = (tot * 5) / 90;
 
-  // Score normalizzato — scala finale 70-95
+  // Usa advLottoData se disponibile e relativo alla stessa ruota
+  const usaAdvLotto = advLottoData && advLottoData.allScores && advLottoData.ruota === lottoRuota && Object.keys(advLottoData.allScores).length === 90;
+
+  // Score normalizzato — usa Advanced Stats se disponibili
   function scoreNum(num, pF, pR) {
+    if (usaAdvLotto) return advLottoData.allScores[num] || 0;
     const fNorm = Math.min((lottoFreqMap[num]||0) / (freqAttesa * 2), 1);
     const rNorm = Math.min((lottoRitardi[num]||0) / 20, 1);
     const jitter = 1 + (Math.random() * 0.06 - 0.03);
@@ -3413,7 +3481,10 @@ function generaPrevisioni() {
       desc:'Numeri più usciti storicamente. Diversi dalla A e B per massima copertura.' },
   ];
 
-  let html = '<div class="serie-grid">';
+  const lottoBadge = usaAdvLotto
+    ? `<div style="font-size:10px;color:var(--verde);text-align:center;padding:8px;margin-bottom:8px;background:rgba(40,180,100,.1);border-radius:8px;border:1px solid rgba(40,180,100,.2)">✅ Punteggi da <strong>Advanced Stats</strong> — Ruota ${advLottoData.ruota} — ${advLottoData.ts}</div>`
+    : `<div style="font-size:10px;color:var(--soft);text-align:center;padding:6px;margin-bottom:8px">⚙️ Motore standard — vai su 🧠 Avanzate e avvia l\'analisi prima</div>`;
+  let html = lottoBadge + '<div class="serie-grid">';
   varianti.forEach((v, idx) => {
     const sc  = calcolaScoreSerie(v.numeri, v.pF, v.pR);
     const cls = idx===0?'col-a':idx===1?'col-b':'';
@@ -4556,8 +4627,221 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================================
-// ADVANCED STATS — 10eLotto
+// ADVANCED STATS — LOTTO
 // ============================================================
+let advLottoData = null;
+let advLottoSeTab = 'hot';
+let advLottoComboTabActive = 'hot';
+
+async function runAdvancedAnalysisLotto() {
+  const estr = lottoEstrazioni[lottoRuota];
+  if (!estr || !estr.length) { alert('Carica prima i dati Lotto.'); return; }
+  const btn = document.getElementById('lotto-adv-btn');
+  const status = document.getElementById('lotto-adv-status');
+  btn.disabled = true; btn.textContent = '⏳ Analisi in corso...';
+  document.getElementById('lotto-adv-ruota-nome').textContent = lottoRuota;
+
+  await new Promise(r=>setTimeout(r,30));
+  status.textContent = 'StatisticalEngine...';
+  const se = StatisticalEngine(estr);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'RealDistributionAnalyzer...';
+  const rda = RealDistributionAnalyzer(se, estr);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'PatternCycleDetector...';
+  const pcd = PatternCycleDetector(se, estr);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'MonteCarloSimulator 50k (Lotto 5/90)...';
+  // Lotto: 5 numeri estratti su 90
+  const mc = MonteCarloSimulatorLotto(5, 50000);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'AdvancedCombinationGenerator...';
+  const combo = AdvancedCombinationGenerator(se, rda);
+
+  advLottoData = { se, rda, allScores: rda.allScores || {}, pcd, mc, combo, ruota: lottoRuota, ts: new Date().toLocaleString('it-IT') };
+  status.textContent = '✅ Completato — ' + estr.length + ' estrazioni · Ruota ' + lottoRuota;
+  btn.disabled = false; btn.textContent = '🔄 Ricalcola';
+
+  document.getElementById('lotto-adv-dashboard').style.display = 'block';
+  lottoAdvRenderSE();
+  lottoAdvRenderRDA();
+  lottoAdvRenderPCD();
+  lottoAdvRenderMC();
+  lottoAdvRenderCombo();
+}
+
+// Monte Carlo specifico Lotto: 5 numeri estratti su 90
+function MonteCarloSimulatorLotto(nGiocati, iter) {
+  iter = iter || 50000;
+  const counts = {};
+  for(let i=0;i<=nGiocati;i++) counts[i]=0;
+  for(let s=0;s<iter;s++) {
+    const estratti=[];
+    while(estratti.length<5){ const x=Math.floor(Math.random()*90)+1; if(!estratti.includes(x)) estratti.push(x); }
+    const giocati=[];
+    while(giocati.length<nGiocati){ const x=Math.floor(Math.random()*90)+1; if(!giocati.includes(x)) giocati.push(x); }
+    counts[giocati.filter(n=>estratti.includes(n)).length]++;
+  }
+  return Object.entries(counts).map(([k,v])=>({k:+k,pct:+(v/iter*100).toFixed(3)}));
+}
+
+// ── Tab SE ─────────────────────────────────────────────────
+function lottoAdvTab(t) {
+  advLottoSeTab = t;
+  ['hot','cold','coppie','triple'].forEach(x=>document.getElementById('lotto-adv-tab-'+x).classList.toggle('attivo',x===t));
+  lottoAdvRenderSE();
+}
+
+function lottoAdvRenderSE() {
+  if (!advLottoData) return;
+  const { se } = advLottoData;
+  let html = '';
+  if (advLottoSeTab==='hot') {
+    html = se.hot.map(x=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${x.n}</div>
+        <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(x.f/se.tot*100*5)}%;max-width:100%;background:linear-gradient(90deg,#e05e2a,#C9A84C);border-radius:4px"></div>
+        </div>
+        <span style="font-size:10px;color:var(--soft);min-width:60px">ult.15: ${x.f}x · tot: ${x.tot}x</span>
+      </div>`).join('');
+  } else if (advLottoSeTab==='cold') {
+    html = se.cold.map(x=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${x.n}</div>
+        <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,Math.round(x.r/se.tot*100*3))}%;background:linear-gradient(90deg,#2a7ae0,#4aa8ff);border-radius:4px"></div>
+        </div>
+        <span style="font-size:10px;color:var(--soft);min-width:60px">assente: ${x.r} estr.</span>
+      </div>`).join('');
+  } else if (advLottoSeTab==='coppie') {
+    html = se.coppie.map(x=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+        <div style="display:flex;gap:6px">${x.k.split('-').map(n=>`<div class="ball n" style="width:28px;height:28px;font-size:11px">${n}</div>`).join('')}</div>
+        <span style="color:var(--oro);font-size:12px">${x.f}x insieme</span>
+      </div>`).join('');
+  } else {
+    html = se.triple.map(x=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+        <div style="display:flex;gap:4px">${x.k.split('-').map(n=>`<div class="ball n" style="width:26px;height:26px;font-size:10px">${n}</div>`).join('')}</div>
+        <span style="color:var(--oro);font-size:12px">${x.f}x insieme</span>
+      </div>`).join('');
+  }
+  document.getElementById('lotto-adv-se-content').innerHTML = html;
+}
+
+function lottoAdvRenderRDA() {
+  if (!advLottoData) return;
+  const max = advLottoData.rda[0].s || 1;
+  let html = '';
+  advLottoData.rda.forEach(({n,s})=>{
+    const pct = Math.round(s/max*100);
+    const col = s>=70?'var(--verde)':s>=40?'var(--oro)':'var(--soft)';
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${n}</div>
+      <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${col},${col}88);border-radius:4px"></div>
+      </div>
+      <span style="font-size:11px;color:${col};min-width:36px;text-align:right">${s}%</span>
+    </div>`;
+  });
+  document.getElementById('lotto-adv-rda-content').innerHTML = html;
+}
+
+function lottoAdvRenderPCD() {
+  if (!advLottoData) return;
+  const { pcd } = advLottoData;
+  let html = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--oro)">${pcd.pariPct}%</div><div class="stat-mini-lbl">Numeri Pari</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--oro)">${pcd.dispiPct}%</div><div class="stat-mini-lbl">Numeri Dispari</div></div>
+      <div class="stat-mini" style="grid-column:1/-1"><div class="stat-mini-val" style="color:var(--oro)">${pcd.sommaMedia}</div><div class="stat-mini-lbl">Somma Media per Estrazione</div></div>
+    </div>
+    <div class="sec-label" style="margin-bottom:10px">🔔 Numeri in scadenza di ciclo (${pcd.inScadenza.length})</div>`;
+  pcd.inScadenza.forEach(c=>{
+    const ov = (c.attesa/c.ciclo*100).toFixed(0);
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+      <div class="ball n" style="width:28px;height:28px;font-size:11px">${c.n}</div>
+      <span style="font-size:10px;color:var(--soft)">ciclo: ${c.ciclo}</span>
+      <span style="font-size:10px;color:var(--soft)">attesa: ${c.attesa}</span>
+      <span style="font-size:11px;color:${ov>150?'var(--rosso)':'var(--oro)'}">${ov}% ciclo</span>
+    </div>`;
+  });
+  document.getElementById('lotto-adv-pcd-content').innerHTML = html;
+}
+
+function lottoAdvRenderMC() {
+  if (!advLottoData) return;
+  const rows = advLottoData.mc.filter(x=>x.k>=1);
+  let html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+  html += '<th style="text-align:left;padding:8px;color:var(--soft);border-bottom:1px solid var(--bordo)">Indovinati</th>';
+  html += '<th style="text-align:right;padding:8px;color:var(--soft);border-bottom:1px solid var(--bordo)">Probabilità</th>';
+  html += '</tr></thead><tbody>';
+  const labels = {1:'Ambata',2:'Ambo',3:'Terno',4:'Quaterna',5:'Cinquina'};
+  rows.forEach(({k,pct})=>{
+    const col = k>=3?'var(--verde)':k>=2?'var(--oro)':'var(--testo)';
+    html += `<tr><td style="padding:9px 8px;color:${col}">${k} — ${labels[k]||''}</td><td style="padding:9px 8px;text-align:right;color:${col}">${pct}%</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('lotto-adv-mc-content').innerHTML = html;
+}
+
+function lottoAdvComboTab(t) {
+  advLottoComboTabActive = t;
+  ['hot','cold','bil'].forEach(x=>document.getElementById('lotto-advc-'+x).classList.toggle('attivo',x===t));
+  lottoAdvRenderCombo();
+}
+
+function lottoAdvRenderCombo() {
+  if (!advLottoData) return;
+  const map = { hot: advLottoData.combo.hot, cold: advLottoData.combo.cold, bil: advLottoData.combo.bilanciata };
+  const nums = map[advLottoComboTabActive] || [];
+  const label = { hot:'🔥 Hot — numeri più frequenti nelle ultime 15', cold:'❄️ Cold — più in ritardo', bil:'⚖️ Bilanciata — mix score, hot e cold' };
+  let html = `<p style="font-size:10px;color:var(--soft);margin-bottom:12px">${label[advLottoComboTabActive]}</p>`;
+  html += `<div class="balls-wrap">${nums.map(n=>`<div class="ball n">${n}</div>`).join('')}</div>`;
+  document.getElementById('lotto-adv-combo-content').innerHTML = html;
+}
+
+function lottoAdvReport(tipo) {
+  if (!advLottoData) { alert('Avvia prima l\'analisi.'); return; }
+  let txt = '';
+  const d = advLottoData;
+  if (tipo==='json') {
+    txt = JSON.stringify({ generato:d.ts, ruota:d.ruota, estrazioni_analizzate:d.se.tot,
+      top20_score:d.rda, hot:d.se.hot.slice(0,10), cold:d.se.cold.slice(0,10),
+      top_coppie:d.se.coppie.slice(0,10), top_triple:d.se.triple.slice(0,5),
+      pattern:{pari:d.pcd.pariPct+'%',dispari:d.pcd.dispiPct+'%',sommaMedia:d.pcd.sommaMedia},
+      in_scadenza:d.pcd.inScadenza.slice(0,10), combinazioni:d.combo, monte_carlo:d.mc }, null, 2);
+  } else {
+    txt  = '=== REPORT AVANZATO LOTTO — Ruota ' + d.ruota + ' ===\n';
+    txt += 'Generato: ' + d.ts + '\nEstrazioni: ' + d.se.tot + '\n\n';
+    txt += '--- TOP 10 HOT ---\n';
+    d.se.hot.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: ${x.f}x ult.15, ${x.tot}x totale\n`; });
+    txt += '\n--- TOP 10 COLD ---\n';
+    d.se.cold.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: assente da ${x.r} estrazioni\n`; });
+    txt += '\n--- TOP 10 SCORE ---\n';
+    d.rda.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: ${x.s}%\n`; });
+    txt += '\n--- TOP 10 COPPIE ---\n';
+    d.se.coppie.slice(0,10).forEach(x=>{ txt+=`${x.k}: ${x.f}x\n`; });
+    txt += '\n--- PATTERN ---\n';
+    txt += `Pari: ${d.pcd.pariPct}% | Dispari: ${d.pcd.dispiPct}% | Somma media: ${d.pcd.sommaMedia}\n`;
+    txt += '\n--- IN SCADENZA ---\n';
+    d.pcd.inScadenza.forEach(x=>{ txt+=`N.${x.n}: ciclo ${x.ciclo}, attesa ${x.attesa}\n`; });
+    txt += '\n--- COMBINAZIONI ---\n';
+    txt += 'Hot: ' + d.combo.hot.join(', ') + '\nCold: ' + d.combo.cold.join(', ') + '\nBilanciata: ' + d.combo.bilanciata.join(', ') + '\n';
+    txt += '\n--- MONTE CARLO (5/90) ---\n';
+    d.mc.filter(x=>x.k>=1).forEach(x=>{ txt+=`${x.k} indovinati: ${x.pct}%\n`; });
+  }
+  document.getElementById('lotto-adv-modal-txt').value = txt;
+  document.getElementById('lotto-adv-modal').style.display = 'block';
+}
+
+
+</script>
 let advData = null; // risultati analisi
 let advSeTab = 'hot';
 let advComboTabActive = 'hot';
