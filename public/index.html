@@ -280,7 +280,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <button class="nav-tab nav-tab-10e" onclick="showPanel('sim')">🧪 Simulatore</button>
   <button class="nav-tab nav-tab-10e" onclick="showPanel('storico')">📅 Storico</button>
   <button class="nav-tab nav-tab-10e" onclick="showPanel('premi')">💰 Premi</button>
-  <button class="nav-tab nav-tab-10e" onclick="showPanel('advanced')" style="background:linear-gradient(135deg,#C9A84C,#a07828);color:#000;font-weight:700">🔬 Advanced Stats</button>
+  <button class="nav-tab nav-tab-10e" onclick="showPanel('adv')">🧠 Avanzate</button>
   <!-- Tab MillionDay — nascoste di default -->
   <button class="nav-tab nav-tab-md" style="display:none" onclick="showPanelMD('md-ultima')">💎 Ultima</button>
   <button class="nav-tab nav-tab-md" style="display:none" onclick="showPanelMD('md-gioca')">🏆 Gioca</button>
@@ -550,19 +550,72 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   </div>
 </div>
 
-<!-- ===== PANEL ADVANCED STATS ===== -->
-<div class="panel panel-10e" id="panel-advanced" style="display:none">
+<!-- ===== PANEL AVANZATE 10eLotto ===== -->
+<div class="panel panel-10e" id="panel-adv">
   <div class="card">
-    <div class="card-title">🔬 Advanced Statistical Analysis</div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0">
-      <button class="btn" onclick="runAdvancedAnalysis()" style="background:linear-gradient(135deg,#C9A84C,#a07828);color:#000;font-weight:700;border:none">📊 Genera Dashboard</button>
-      <button class="btn" onclick="exportAdvancedJSON()" style="border:none">📥 Export JSON</button>
+    <div class="card-title">🧠 Analisi Avanzata 10eLotto</div>
+    <p style="font-size:10px;color:var(--soft);margin-bottom:14px;line-height:1.7">Statistical Engine · Distribution Analyzer · Monte Carlo · Pattern Detector · Combination Generator</p>
+    <button class="btn" onclick="runAdvancedAnalysis()" id="adv-btn" style="width:100%;margin-bottom:8px">▶ Avvia Analisi Completa</button>
+    <div id="adv-status" style="font-size:10px;color:var(--soft);text-align:center;min-height:16px"></div>
+  </div>
+  <div id="adv-dashboard" style="display:none">
+    <!-- StatisticalEngine -->
+    <div class="card">
+      <div class="card-title">📊 Statistical Engine</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="q-btn attivo" onclick="advTab('hot')" id="adv-tab-hot">🔥 Hot</button>
+        <button class="q-btn" onclick="advTab('cold')" id="adv-tab-cold">❄️ Cold</button>
+        <button class="q-btn" onclick="advTab('coppie')" id="adv-tab-coppie">👥 Coppie</button>
+        <button class="q-btn" onclick="advTab('triple')" id="adv-tab-triple">🎯 Triple</button>
+      </div>
+      <div id="adv-se-content"></div>
     </div>
-    <div id="advanced-result">
-      <div style="text-align:center;color:var(--soft);padding:40px">
-        Premi "Genera Dashboard" per analizzare i dati correnti
+    <!-- RealDistributionAnalyzer -->
+    <div class="card">
+      <div class="card-title">📈 Score Realistico (0–100%)</div>
+      <p style="font-size:10px;color:var(--soft);margin-bottom:12px">Punteggio combinato: frequenza + ritardo + momentum. Top 20 numeri.</p>
+      <div id="adv-rda-content"></div>
+    </div>
+    <!-- PatternCycleDetector -->
+    <div class="card">
+      <div class="card-title">🔄 Pattern & Cicli</div>
+      <div id="adv-pcd-content"></div>
+    </div>
+    <!-- MonteCarloSimulator -->
+    <div class="card">
+      <div class="card-title">🎲 Monte Carlo (50.000 iterazioni)</div>
+      <p style="font-size:10px;color:var(--soft);margin-bottom:12px">Probabilità reale di indovinare N numeri su 20 estratti.</p>
+      <div id="adv-mc-content"></div>
+    </div>
+    <!-- AdvancedCombinationGenerator -->
+    <div class="card">
+      <div class="card-title">⚡ Combinazioni Avanzate</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <button class="q-btn attivo" onclick="advComboTab('hot')" id="advc-hot">🔥 Hot</button>
+        <button class="q-btn" onclick="advComboTab('cold')" id="advc-cold">❄️ Cold</button>
+        <button class="q-btn" onclick="advComboTab('bil')" id="advc-bil">⚖️ Bilanciata</button>
+      </div>
+      <div id="adv-combo-content"></div>
+    </div>
+    <!-- ReportGenerator -->
+    <div class="card">
+      <div class="card-title">📄 Report</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="advReport('text')" style="flex:1">📋 Mostra Testo</button>
+        <button class="btn" onclick="advReport('json')" style="flex:1">{ } Mostra JSON</button>
       </div>
     </div>
+  </div>
+</div>
+<!-- modale report -->
+<div id="adv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;padding:20px;overflow-y:auto">
+  <div style="background:var(--blu3);border:1px solid var(--bordo);border-radius:14px;max-width:700px;margin:0 auto;padding:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="color:var(--oro);font-family:'Playfair Display',serif;font-size:15px">📄 Report Avanzato</span>
+      <button onclick="document.getElementById('adv-modal').style.display='none'" style="background:none;border:none;color:var(--soft);font-size:18px;cursor:pointer">✕</button>
+    </div>
+    <textarea id="adv-modal-txt" readonly style="width:100%;height:400px;background:var(--blu2);border:1px solid var(--bordo);border-radius:8px;color:var(--testo);font-family:'DM Mono',monospace;font-size:10px;padding:12px;resize:vertical"></textarea>
+    <button onclick="navigator.clipboard.writeText(document.getElementById('adv-modal-txt').value).then(()=>alert('Copiato!'))" style="margin-top:10px;width:100%" class="btn">📋 Copia negli appunti</button>
   </div>
 </div>
 
@@ -1222,65 +1275,55 @@ function isSabato(dataStr) {
 }
 
 async function loadAllData() {
-  document.getElementById('badge-txt').textContent = 'Caricamento... (max 5 sec)';
-  document.getElementById('last-upd').textContent = 'Connessione al server...';
+  document.getElementById('badge-txt').textContent = 'Caricamento...';
+  document.getElementById('last-upd').textContent = 'Caricamento in corso...';
 
+  // ── STEP 1: Mostra SUBITO i mock data ──────────────────────
+  allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
+    .sort((a, b) => new Date(b.data) - new Date(a.data));
+  const statsMock = calcolaStatistiche(allEstrazioni);
+  lastUpdate = new Date();
+  renderAll(statsMock);
+  document.getElementById('badge-txt').textContent = '📊 Dati locali';
+  document.getElementById('last-upd').textContent =
+    'Ultima: ' + allEstrazioni[0].data + ' — ' + allEstrazioni.length + ' estrazioni';
+
+  // ── STEP 2: Prova API in background (max 4 sec) ─────────────
   try {
     const oggi = new Date();
     const unAnnoFa = new Date(oggi);
     unAnnoFa.setFullYear(unAnnoFa.getFullYear() - 1);
-
     const anniDaCaricare = new Set();
     let y = unAnnoFa.getFullYear();
     while (y <= oggi.getFullYear()) { anniDaCaricare.add(y); y++; }
 
-    allEstrazioni = [];
-    
-    // TIMEOUT AGGRESSIVO: 5 secondi max
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Timeout 5sec')), 5000);
-    });
+    let reali = [];
+    for (const anno of anniDaCaricare) {
+      try {
+        const r = await fetch('/api/proxy?tipo=10elotto&anno=' + anno, {
+          signal: AbortSignal.timeout(4000)
+        });
+        if (r.ok) {
+          const json = await r.json();
+          if (json.ok && json.estrazioni) reali = reali.concat(json.estrazioni);
+        }
+      } catch(e) { /* API offline — ok */ }
+    }
 
-    const fetchPromise = (async () => {
-      for (const anno of anniDaCaricare) {
-        try {
-          const estr = await fetchDatiReali('10elotto', anno);
-          allEstrazioni = allEstrazioni.concat(estr);
-        } catch(e) { console.warn('10eLotto errore anno', anno, e.message); }
-      }
-    })();
-
-    await Promise.race([fetchPromise, timeoutPromise]);
-
-    // Filtra: ultimi 12 mesi
-    allEstrazioni = allEstrazioni
-      .filter(e => {
-        const d = new Date(e.data + 'T12:00:00');
-        return d >= unAnnoFa && d <= oggi;
-      })
+    reali = reali
+      .filter(e => { const d = new Date(e.data+'T12:00:00'); return d >= unAnnoFa && d <= oggi; })
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    if (allEstrazioni.length < 3) throw new Error('Dati insufficienti dal server (' + allEstrazioni.length + ' estrazioni)');
-
-    const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
-    renderAll(stats);
-    document.getElementById('badge-txt').textContent = 'Dati reali ✓';
-    document.getElementById('last-upd').textContent =
-      'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni (12 mesi)';
-
-  } catch(err) {
-    console.error('loadAllData errore:', err.message);
-    console.log('⚠️ API offline o timeout — uso dati mockati');
-    // Fallback IMMEDIATO ai dati mockati
-    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.sort((a, b) => new Date(b.data) - new Date(a.data));
-    const stats = calcolaStatistiche(allEstrazioni);
-    lastUpdate = new Date();
-    renderAll(stats);
-    document.getElementById('badge-txt').textContent = '📊 Dati Demo (API offline)';
-    document.getElementById('last-upd').textContent =
-      'Fallback mockati — ' + allEstrazioni.length + ' estrazioni (da usare come test)';
-  }
+    if (reali.length >= 3) {
+      allEstrazioni = reali;
+      const statsReali = calcolaStatistiche(allEstrazioni);
+      lastUpdate = new Date();
+      renderAll(statsReali);
+      document.getElementById('badge-txt').textContent = '✅ Dati reali';
+      document.getElementById('last-upd').textContent =
+        'Aggiornato: ' + lastUpdate.toLocaleString('it-IT') + ' — ' + allEstrazioni.length + ' estrazioni';
+    }
+  } catch(e) { /* rimane con mock data */ }
 }
 
 
@@ -1599,10 +1642,12 @@ function generaSerieAvanzata() {
 
   const stats = calcolaStatisticheAvanzate(allEstrazioni);
 
-  // Score per ogni numero
+  // Score per ogni numero — usa advData se disponibile, altrimenti calcola
+  const usaAvanzate = advData && advData.allScores && Object.keys(advData.allScores).length === 90;
   const scored = [];
   for (let n = 1; n <= 90; n++) {
-    scored.push({ num: n, score: calcolaScoreMultiFattore(n, stats) });
+    const score = usaAvanzate ? advData.allScores[n] : calcolaScoreMultiFattore(n, stats);
+    scored.push({ num: n, score });
   }
   scored.sort((a, b) => b.score - a.score);
 
@@ -1654,7 +1699,10 @@ function generaSerieAvanzata() {
   const strA = serieA.join(',');
   const strB = serieB.join(',');
 
-  let html = '<div class="serie-grid">';
+  const engineBadge = usaAvanzate
+    ? `<div style="font-size:10px;color:var(--verde);text-align:center;padding:8px;margin-bottom:8px;background:rgba(40,180,100,.1);border-radius:8px;border:1px solid rgba(40,180,100,.2)">✅ Punteggi da <strong>Advanced Stats</strong> — ${advData.ts}</div>`
+    : `<div style="font-size:10px;color:var(--soft);text-align:center;padding:6px;margin-bottom:8px">⚙️ Motore standard — vai su 🧠 Avanzate e avvia l\'analisi prima</div>`;
+  let html = engineBadge + '<div class="serie-grid">';
   html += `
     <div class="serie-card col-a" id="serie-0" onclick="selezionaSerie(0, [${strA}], 'Serie A — Ritardo+Ciclo')">
       <div class="selected-check">✓</div>
@@ -4507,130 +4555,347 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btn) btn.addEventListener('click', verificaSuperEnalotto);
 });
 
-
 // ============================================================
-// ADVANCED STATS — Moduli statistici professionali
+// ADVANCED STATS — 10eLotto
 // ============================================================
+let advData = null; // risultati analisi
+let advSeTab = 'hot';
+let advComboTabActive = 'hot';
 
-function runAdvancedAnalysis() {
-  if (!allEstrazioni || allEstrazioni.length < 5) {
-    document.getElementById('advanced-result').innerHTML =
-      '<div style="color:#ff6b6b;padding:20px">Prima carica i dati — premi "Aggiorna dati" in alto</div>';
-    return;
-  }
-
-  const estr = allEstrazioni;
-  const n = estr.length;
-
-  // Frequenze
-  const freq = {};
-  for (let i = 1; i <= 90; i++) freq[i] = 0;
-  estr.forEach(e => e.numeri.forEach(n => freq[n]++));
-
-  // Ritardi
-  const ritardi = {};
-  for (let i = 1; i <= 90; i++) {
-    let found = false;
-    for (let j = 0; j < estr.length; j++) {
-      if (estr[j].numeri.includes(i)) { ritardi[i] = j; found = true; break; }
-    }
-    if (!found) ritardi[i] = estr.length;
-  }
-
-  // Hot (usciti nelle ultime 3 estrazioni)
-  const recent = new Set(estr.slice(0, 3).flatMap(e => e.numeri));
-  const hot = [...recent].sort((a,b) => freq[b]-freq[a]).slice(0, 10);
-
-  // Cold (ritardo > 15)
-  const cold = Object.entries(ritardi).filter(([,v]) => v > 15)
-    .sort((a,b) => b[1]-a[1]).slice(0, 10).map(([k]) => parseInt(k));
-
-  // Top frequenti
-  const topFreq = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0, 15);
-
-  // Top ritardatari
-  const topRit = Object.entries(ritardi).sort((a,b) => b[1]-a[1]).slice(0, 10);
-
-  // Coppie
-  const coppie = {};
-  estr.forEach(e => {
-    for (let i = 0; i < e.numeri.length; i++)
-      for (let j = i+1; j < e.numeri.length; j++) {
-        const k = [Math.min(e.numeri[i],e.numeri[j]), Math.max(e.numeri[i],e.numeri[j])].join('-');
-        coppie[k] = (coppie[k]||0) + 1;
-      }
+// ── StatisticalEngine ──────────────────────────────────────
+function StatisticalEngine(estrazioni) {
+  const freq = {}, ritardiMap = {}, presenze = {};
+  for (let n = 1; n <= 90; n++) { freq[n] = 0; presenze[n] = []; }
+  estrazioni.forEach((e, i) => {
+    e.numeri.forEach(n => { freq[n]++; presenze[n].push(i); });
   });
-  const topCoppie = Object.entries(coppie).sort((a,b)=>b[1]-a[1]).slice(0,8);
-
-  // Render
-  document.getElementById('advanced-result').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:20px">
-
-      <div style="background:var(--blu2);border-left:4px solid #FF6B6B;border-radius:8px;padding:14px">
-        <div style="color:#FF6B6B;font-weight:700;margin-bottom:10px">🔥 Numeri Caldi (ultime 3 estrazioni)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${hot.map(n=>`<span style="background:#FF6B6B;color:#fff;padding:5px 10px;border-radius:4px;font-weight:700">${n}</span>`).join('')}
-        </div>
-      </div>
-
-      <div style="background:var(--blu2);border-left:4px solid #4ECDC4;border-radius:8px;padding:14px">
-        <div style="color:#4ECDC4;font-weight:700;margin-bottom:10px">❄️ Numeri Freddi (ritardo > 15)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${cold.map(n=>`<span style="background:#4ECDC4;color:#000;padding:5px 10px;border-radius:4px;font-weight:700">${n}</span>`).join('')}
-        </div>
-      </div>
-
-      <div style="background:var(--blu2);border-left:4px solid var(--oro);border-radius:8px;padding:14px">
-        <div style="color:var(--oro);font-weight:700;margin-bottom:10px">📊 Top 15 Frequenti</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${topFreq.map(([n,f])=>`<span style="background:rgba(201,168,76,0.2);border:1px solid var(--oro);color:var(--oro);padding:4px 8px;border-radius:4px;font-size:12px"><strong>${n}</strong> (${f}x)</span>`).join('')}
-        </div>
-      </div>
-
-      <div style="background:var(--blu2);border-left:4px solid #7AACFF;border-radius:8px;padding:14px">
-        <div style="color:#7AACFF;font-weight:700;margin-bottom:10px">⏳ Top 10 Ritardatari</div>
-        <div style="font-size:12px;line-height:2;color:var(--soft)">
-          ${topRit.map(([n,v])=>`<span style="color:var(--testo)"><strong>${n}</strong>: ${v} estr.</span>`).join(' · ')}
-        </div>
-      </div>
-
-      <div style="background:var(--blu2);border-left:4px solid #a78bfa;border-radius:8px;padding:14px">
-        <div style="color:#a78bfa;font-weight:700;margin-bottom:10px">🔗 Top 8 Coppie</div>
-        <div style="font-size:12px;line-height:2;color:var(--soft)">
-          ${topCoppie.map(([k,v])=>`[${k}] <strong style="color:var(--testo)">${v}x</strong>`).join(' · ')}
-        </div>
-      </div>
-
-      <div style="background:var(--blu2);border-left:4px solid #3DB87A;border-radius:8px;padding:14px">
-        <div style="color:#3DB87A;font-weight:700;margin-bottom:10px">📈 Riepilogo Dataset</div>
-        <div style="font-size:12px;color:var(--soft);line-height:2">
-          <div>Estrazioni analizzate: <strong style="color:var(--testo)">${n}</strong></div>
-          <div>Numero più frequente: <strong style="color:var(--oro)">${topFreq[0][0]} (${topFreq[0][1]}x)</strong></div>
-          <div>Più ritardatario: <strong style="color:#FF6B6B">${topRit[0][0]} (${topRit[0][1]} estr.)</strong></div>
-          <div>Aggiornato: <strong style="color:var(--testo)">${new Date().toLocaleString('it-IT')}</strong></div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function exportAdvancedJSON() {
-  if (!allEstrazioni || allEstrazioni.length < 5) {
-    alert('Prima carica i dati');
-    return;
+  // ritardi
+  for (let n = 1; n <= 90; n++) {
+    const pos = presenze[n];
+    ritardiMap[n] = pos.length ? pos[0] : estrazioni.length;
   }
-  const data = {
-    generatedAt: new Date().toISOString(),
-    totalDraws: allEstrazioni.length,
-    lastDraw: allEstrazioni[0],
-    draws: allEstrazioni
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'lotterie_analysis.json'; a.click();
-  URL.revokeObjectURL(url);
+  // hot/cold: confronto freq ultimi 15 vs globale
+  const recenti = estrazioni.slice(0, 15);
+  const freqRec = {};
+  for (let n = 1; n <= 90; n++) freqRec[n] = 0;
+  recenti.forEach(e => e.numeri.forEach(n => freqRec[n]++));
+  const hot = Object.entries(freqRec).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([n,f])=>({n:+n,f,tot:freq[n]}));
+  const cold = Object.entries(ritardiMap).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([n,r])=>({n:+n,r,tot:freq[n]}));
+  // coppie
+  const copMap = {};
+  estrazioni.forEach(e => {
+    const nums = e.numeri.slice().sort((a,b)=>a-b);
+    for (let i=0;i<nums.length;i++) for (let j=i+1;j<nums.length;j++) {
+      const k=nums[i]+'-'+nums[j]; copMap[k]=(copMap[k]||0)+1;
+    }
+  });
+  const coppie = Object.entries(copMap).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([k,f])=>({k,f}));
+  // triple
+  const triMap = {};
+  estrazioni.forEach(e => {
+    const nums = e.numeri.slice().sort((a,b)=>a-b);
+    for (let i=0;i<nums.length;i++) for (let j=i+1;j<nums.length;j++) for (let z=j+1;z<nums.length;z++) {
+      const k=nums[i]+'-'+nums[j]+'-'+nums[z]; triMap[k]=(triMap[k]||0)+1;
+    }
+  });
+  const triple = Object.entries(triMap).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([k,f])=>({k,f}));
+  return { freq, ritardiMap, hot, cold, coppie, triple, tot: estrazioni.length };
 }
+
+// ── RealDistributionAnalyzer ───────────────────────────────
+function RealDistributionAnalyzer(se, estrazioni) {
+  const tot = se.tot || 1;
+  const maxFreq = Math.max(...Object.values(se.freq));
+  const maxRit = Math.max(...Object.values(se.ritardiMap));
+  // momentum: freq ultimi 10
+  const recenti = estrazioni.slice(0, 10);
+  const mom = {};
+  for (let n=1;n<=90;n++) mom[n]=0;
+  recenti.forEach(e=>e.numeri.forEach(n=>mom[n]++));
+  const maxMom = Math.max(...Object.values(mom)) || 1;
+  const scores = {};
+  for (let n=1;n<=90;n++) {
+    const sFreq = se.freq[n]/maxFreq*40;
+    const sRit  = (1 - se.ritardiMap[n]/maxRit)*35;
+    const sMom  = mom[n]/maxMom*25;
+    scores[n] = Math.round(sFreq+sRit+sMom);
+  }
+  // allScores normalizzati 0-1 per uso in generaSerieAvanzata
+  const maxS = Math.max(...Object.values(scores));
+  const allScores = {};
+  for(let n=1;n<=90;n++) allScores[n] = scores[n]/(maxS||1);
+  const top20 = Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([n,s])=>({n:+n,s}));
+  top20.allScores = allScores; // passa entrambi
+  return top20;
+}
+
+// ── PatternCycleDetector ───────────────────────────────────
+function PatternCycleDetector(se, estrazioni) {
+  const tot = estrazioni.length;
+  // ciclo medio per numero (gap medio tra apparizioni)
+  const cicli = [];
+  for (let n=1;n<=90;n++) {
+    const pos = [];
+    estrazioni.forEach((e,i)=>{ if(e.numeri.includes(n)) pos.push(i); });
+    if (pos.length>=3) {
+      let g=0; for(let i=0;i<pos.length-1;i++) g+=pos[i+1]-pos[i];
+      cicli.push({n,ciclo:+(g/(pos.length-1)).toFixed(1),attesa:pos[0]});
+    }
+  }
+  // in ritardo rispetto al ciclo (attesa > ciclo medio)
+  const inScadenza = cicli.filter(c=>c.attesa>c.ciclo*0.9).sort((a,b)=>(b.attesa/b.ciclo)-(a.attesa/a.ciclo)).slice(0,10);
+  // pattern parità: % pari/dispari per estrazione
+  let pariTot=0, dispiTot=0;
+  estrazioni.forEach(e=>{ e.numeri.forEach(n=>{ if(n%2===0) pariTot++; else dispiTot++; }); });
+  const totN = pariTot+dispiTot;
+  const pariPct = Math.round(pariTot/totN*100);
+  // somma media per estrazione
+  const somme = estrazioni.map(e=>e.numeri.reduce((a,b)=>a+b,0));
+  const sommaMedia = Math.round(somme.reduce((a,b)=>a+b,0)/somme.length);
+  return { inScadenza, pariPct, dispiPct:100-pariPct, sommaMedia };
+}
+
+// ── MonteCarloSimulator ────────────────────────────────────
+function MonteCarloSimulator(nGiocati, iter) {
+  iter = iter || 50000;
+  const counts = {};
+  for(let i=0;i<=nGiocati;i++) counts[i]=0;
+  for(let s=0;s<iter;s++) {
+    const pool=[];
+    while(pool.length<20){ const x=Math.floor(Math.random()*90)+1; if(!pool.includes(x)) pool.push(x); }
+    // numeri giocati: prendi i primi nGiocati interi 1..nGiocati (simulazione generica)
+    // per generalità, genera nGiocati numeri casuali da 1-90
+    const giocati=[];
+    while(giocati.length<nGiocati){ const x=Math.floor(Math.random()*90)+1; if(!giocati.includes(x)) giocati.push(x); }
+    const hit=giocati.filter(n=>pool.includes(n)).length;
+    counts[hit]++;
+  }
+  return Object.entries(counts).map(([k,v])=>({k:+k,pct:+(v/iter*100).toFixed(3)}));
+}
+
+// ── AdvancedCombinationGenerator ──────────────────────────
+function AdvancedCombinationGenerator(se, rda) {
+  const hotNums = se.hot.slice(0,10).map(x=>x.n);
+  const coldNums = se.cold.slice(0,10).map(x=>x.n);
+  const topScore = rda.slice(0,10).map(x=>x.n);
+  // bilanciata: mix hot + cold + score
+  const bil = [...new Set([...topScore.slice(0,5), ...hotNums.slice(0,3), ...coldNums.slice(0,3)])].slice(0,10);
+  return {
+    hot: hotNums,
+    cold: coldNums,
+    bilanciata: bil
+  };
+}
+
+// ── Runner principale ──────────────────────────────────────
+async function runAdvancedAnalysis() {
+  if (!allEstrazioni.length) { alert('Carica prima i dati.'); return; }
+  const btn = document.getElementById('adv-btn');
+  const status = document.getElementById('adv-status');
+  btn.disabled = true; btn.textContent = '⏳ Analisi in corso...';
+
+  await new Promise(r=>setTimeout(r,30)); // lascia respirare il browser
+  status.textContent = 'StatisticalEngine...';
+  const se = StatisticalEngine(allEstrazioni);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'RealDistributionAnalyzer...';
+  const rda = RealDistributionAnalyzer(se, allEstrazioni);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'PatternCycleDetector...';
+  const pcd = PatternCycleDetector(se, allEstrazioni);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'MonteCarloSimulator 50k...';
+  const mc = MonteCarloSimulator(10, 50000);
+
+  await new Promise(r=>setTimeout(r,10));
+  status.textContent = 'AdvancedCombinationGenerator...';
+  const combo = AdvancedCombinationGenerator(se, rda);
+
+  advData = { se, rda, allScores: rda.allScores || {}, pcd, mc, combo, ts: new Date().toLocaleString('it-IT') };
+  status.textContent = '✅ Completato — ' + allEstrazioni.length + ' estrazioni analizzate';
+  btn.disabled = false; btn.textContent = '🔄 Ricalcola';
+
+  document.getElementById('adv-dashboard').style.display = 'block';
+  renderAdvSE();
+  renderAdvRDA();
+  renderAdvPCD();
+  renderAdvMC();
+  renderAdvCombo();
+}
+
+// ── Render StatisticalEngine ───────────────────────────────
+function advTab(t) {
+  advSeTab = t;
+  ['hot','cold','coppie','triple'].forEach(x=>{
+    document.getElementById('adv-tab-'+x).classList.toggle('attivo', x===t);
+  });
+  renderAdvSE();
+}
+
+function renderAdvSE() {
+  if (!advData) return;
+  const { se } = advData;
+  let html = '';
+  if (advSeTab==='hot') {
+    html = se.hot.map((x,i)=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${x.n}</div>
+        <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(x.f/se.tot*100*5)}%;max-width:100%;background:linear-gradient(90deg,#e05e2a,#C9A84C);border-radius:4px"></div>
+        </div>
+        <span style="font-size:10px;color:var(--soft);min-width:60px">ult.15: ${x.f}x · tot: ${x.tot}x</span>
+      </div>`).join('');
+  } else if (advSeTab==='cold') {
+    html = se.cold.map(x=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${x.n}</div>
+        <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,Math.round(x.r/se.tot*100*3))}%;background:linear-gradient(90deg,#2a7ae0,#4aa8ff);border-radius:4px"></div>
+        </div>
+        <span style="font-size:10px;color:var(--soft);min-width:60px">assente: ${x.r} estr.</span>
+      </div>`).join('');
+  } else if (advSeTab==='coppie') {
+    html = se.coppie.map(x=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+        <div style="display:flex;gap:6px">${x.k.split('-').map(n=>`<div class="ball n" style="width:28px;height:28px;font-size:11px">${n}</div>`).join('')}</div>
+        <span style="color:var(--oro);font-size:12px">${x.f}x insieme</span>
+      </div>`).join('');
+  } else {
+    html = se.triple.map(x=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+        <div style="display:flex;gap:4px">${x.k.split('-').map(n=>`<div class="ball n" style="width:26px;height:26px;font-size:10px">${n}</div>`).join('')}</div>
+        <span style="color:var(--oro);font-size:12px">${x.f}x insieme</span>
+      </div>`).join('');
+  }
+  document.getElementById('adv-se-content').innerHTML = html;
+}
+
+// ── Render RDA ─────────────────────────────────────────────
+function renderAdvRDA() {
+  if (!advData) return;
+  const max = advData.rda[0].s || 1;
+  let html = '';
+  advData.rda.forEach(({n,s})=>{
+    const pct = Math.round(s/max*100);
+    const col = s>=70?'var(--verde)':s>=40?'var(--oro)':'var(--soft)';
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div class="ball n" style="width:30px;height:30px;font-size:12px;flex-shrink:0">${n}</div>
+      <div style="flex:1;background:var(--bordo);border-radius:4px;height:14px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${col},${col}88);border-radius:4px"></div>
+      </div>
+      <span style="font-size:11px;color:${col};min-width:36px;text-align:right">${s}%</span>
+    </div>`;
+  });
+  document.getElementById('adv-rda-content').innerHTML = html;
+}
+
+// ── Render PCD ─────────────────────────────────────────────
+function renderAdvPCD() {
+  if (!advData) return;
+  const { pcd } = advData;
+  let html = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--oro)">${pcd.pariPct}%</div><div class="stat-mini-lbl">Numeri Pari</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--oro)">${pcd.dispiPct}%</div><div class="stat-mini-lbl">Numeri Dispari</div></div>
+      <div class="stat-mini" style="grid-column:1/-1"><div class="stat-mini-val" style="color:var(--oro)">${pcd.sommaMedia}</div><div class="stat-mini-lbl">Somma Media per Estrazione</div></div>
+    </div>
+    <div class="sec-label" style="margin-bottom:10px">🔔 Numeri in scadenza di ciclo (${pcd.inScadenza.length})</div>`;
+  pcd.inScadenza.forEach(c=>{
+    const ov = (c.attesa/c.ciclo*100).toFixed(0);
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(28,42,66,.5)">
+      <div class="ball n" style="width:28px;height:28px;font-size:11px">${c.n}</div>
+      <span style="font-size:10px;color:var(--soft)">ciclo: ${c.ciclo} estr.</span>
+      <span style="font-size:10px;color:var(--soft)">attesa: ${c.attesa} estr.</span>
+      <span style="font-size:11px;color:${ov>150?'var(--rosso)':'var(--oro)'}">${ov}% ciclo</span>
+    </div>`;
+  });
+  document.getElementById('adv-pcd-content').innerHTML = html;
+}
+
+// ── Render Monte Carlo ─────────────────────────────────────
+function renderAdvMC() {
+  if (!advData) return;
+  const rows = advData.mc.filter(x=>x.k>=1);
+  let html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>';
+  html += '<th style="text-align:left;padding:8px;color:var(--soft);border-bottom:1px solid var(--bordo)">Indovinati</th>';
+  html += '<th style="text-align:right;padding:8px;color:var(--soft);border-bottom:1px solid var(--bordo)">Probabilità (10 numeri)</th>';
+  html += '</tr></thead><tbody>';
+  rows.forEach(({k,pct})=>{
+    const col = k>=5?'var(--verde)':k>=3?'var(--oro)':'var(--testo)';
+    html += `<tr><td style="padding:9px 8px;color:${col}">${k} / 10</td><td style="padding:9px 8px;text-align:right;color:${col}">${pct}%</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('adv-mc-content').innerHTML = html;
+}
+
+// ── Render Combinazioni ────────────────────────────────────
+function advComboTab(t) {
+  advComboTabActive = t;
+  ['hot','cold','bil'].forEach(x=>document.getElementById('advc-'+x).classList.toggle('attivo', x===t));
+  renderAdvCombo();
+}
+
+function renderAdvCombo() {
+  if (!advData) return;
+  const map = { hot: advData.combo.hot, cold: advData.combo.cold, bil: advData.combo.bilanciata };
+  const nums = map[advComboTabActive] || [];
+  const label = { hot:'🔥 Strategia Hot — numeri più frequenti nelle ultime 15 estrazioni', cold:'❄️ Strategia Cold — numeri più in ritardo', bil:'⚖️ Strategia Bilanciata — mix score, hot e cold' };
+  let html = `<p style="font-size:10px;color:var(--soft);margin-bottom:12px">${label[advComboTabActive]}</p>`;
+  html += `<div class="balls-wrap" style="margin-bottom:16px">${nums.map(n=>`<div class="ball n">${n}</div>`).join('')}</div>`;
+  document.getElementById('adv-combo-content').innerHTML = html;
+}
+
+// ── ReportGenerator ────────────────────────────────────────
+function advReport(tipo) {
+  if (!advData) { alert('Avvia prima l\'analisi.'); return; }
+  let txt = '';
+  if (tipo==='json') {
+    txt = JSON.stringify({
+      generato: advData.ts,
+      estrazioni_analizzate: advData.se.tot,
+      top20_score: advData.rda,
+      hot: advData.se.hot.slice(0,10),
+      cold: advData.se.cold.slice(0,10),
+      top_coppie: advData.se.coppie.slice(0,10),
+      top_triple: advData.se.triple.slice(0,5),
+      pattern: { pari: advData.pcd.pariPct+'%', dispari: advData.pcd.dispiPct+'%', sommaMedia: advData.pcd.sommaMedia },
+      in_scadenza: advData.pcd.inScadenza.slice(0,10),
+      combinazioni: advData.combo,
+      monte_carlo_10num: advData.mc
+    }, null, 2);
+  } else {
+    const d = advData;
+    txt  = '=== REPORT AVANZATO 10eLotto ===\n';
+    txt += 'Generato: ' + d.ts + '\n';
+    txt += 'Estrazioni analizzate: ' + d.se.tot + '\n\n';
+    txt += '--- TOP 10 HOT (ultimi 15) ---\n';
+    d.se.hot.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: ${x.f}x ult.15, ${x.tot}x totale\n`; });
+    txt += '\n--- TOP 10 COLD (più in ritardo) ---\n';
+    d.se.cold.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: assente da ${x.r} estrazioni\n`; });
+    txt += '\n--- TOP 10 SCORE (0-100%) ---\n';
+    d.rda.slice(0,10).forEach(x=>{ txt+=`N.${x.n}: ${x.s}%\n`; });
+    txt += '\n--- TOP 10 COPPIE ---\n';
+    d.se.coppie.slice(0,10).forEach(x=>{ txt+=`${x.k}: ${x.f}x\n`; });
+    txt += '\n--- TOP 5 TRIPLE ---\n';
+    d.se.triple.slice(0,5).forEach(x=>{ txt+=`${x.k}: ${x.f}x\n`; });
+    txt += '\n--- PATTERN ---\n';
+    txt += `Pari: ${d.pcd.pariPct}% | Dispari: ${d.pcd.dispiPct}% | Somma media: ${d.pcd.sommaMedia}\n`;
+    txt += '\n--- NUMERI IN SCADENZA CICLO ---\n';
+    d.pcd.inScadenza.forEach(x=>{ txt+=`N.${x.n}: ciclo ${x.ciclo} estr., attesa ${x.attesa} estr.\n`; });
+    txt += '\n--- COMBINAZIONI ---\n';
+    txt += 'Hot: ' + d.combo.hot.join(', ') + '\n';
+    txt += 'Cold: ' + d.combo.cold.join(', ') + '\n';
+    txt += 'Bilanciata: ' + d.combo.bilanciata.join(', ') + '\n';
+    txt += '\n--- MONTE CARLO (10 numeri, 50k iter.) ---\n';
+    d.mc.filter(x=>x.k>=1).forEach(x=>{ txt+=`Indovinati ${x.k}/10: ${x.pct}%\n`; });
+  }
+  document.getElementById('adv-modal-txt').value = txt;
+  document.getElementById('adv-modal').style.display = 'block';
+}
+
 
 </script>
 </body>
