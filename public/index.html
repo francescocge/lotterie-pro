@@ -2283,7 +2283,7 @@ function generaSerieAvanzata() {
     </div>`;
   // ── MFCSE: aggiunge le 3 migliori serie del Simulation Engine ──
   try {
-    const _mfcse10e = runMassiveSimulation('10elotto', stats.freqMap, stats.ritardi, allEstrazioni, 200000);
+    const _mfcse10e = runMassiveSimulation('10elotto', stats.freqMap, stats.ritardi, allEstrazioni, 200000, serieA.length);
     if (_mfcse10e.valid > 0) {
       html += '<div style="display:flex;align-items:center;gap:10px;margin:6px 0 2px">'
             + '<div style="flex:1;height:1px;background:var(--bordo);opacity:.45"></div>'
@@ -5780,21 +5780,27 @@ function mfcseIsValid(combo, game) {
       if (combo[i] === combo[i-1] + 1) { if (++cc > mc) mc = cc; } else cc = 1;
     }
     if (mc > 2) return false;
-  } else { // 10elotto — 10 numeri
-    // pari/dispari: 4/6, 5/5, 6/4
-    if (pari < 4 || pari > 6) return false;
-    // alti/bassi: 4/6, 5/5, 6/4
-    if (alti < 4 || alti > 6) return false;
-    // decine: almeno 4 diverse, max 4 per decina
+  } else { // 10elotto — dimensione variabile (1-10 numeri)
+    // Soglie proporzionali alla dimensione reale
+    const halfSize = size / 2;
+    const tol = Math.max(1, Math.round(size * 0.2)); // tolleranza ±20%
+    // pari/dispari: entro tolleranza del 50%
+    if (Math.abs(pari - halfSize) > tol + 0.5) return false;
+    // alti/bassi: entro tolleranza del 50%
+    if (Math.abs(alti - halfSize) > tol + 0.5) return false;
+    // decine: almeno ceil(size/3) diverse, max ceil(size/3)+1 per decina
+    const minDec = Math.max(2, Math.ceil(size / 3));
+    const maxClust = Math.min(4, Math.ceil(size / 2));
     let ndec = 0;
-    for (let i = 0; i < 10; i++) { if (dc[i] > 4) return false; if (dc[i] > 0) ndec++; }
-    if (ndec < 4) return false;
-    // consecutivi: max 3
+    for (let i = 0; i < 10; i++) { if (dc[i] > maxClust) return false; if (dc[i] > 0) ndec++; }
+    if (ndec < minDec) return false;
+    // consecutivi: max ceil(size/3)
+    const maxConsec = Math.max(2, Math.ceil(size / 3));
     let mc = 1, cc = 1;
     for (let i = 1; i < size; i++) {
       if (combo[i] === combo[i-1] + 1) { if (++cc > mc) mc = cc; } else cc = 1;
     }
-    if (mc > 3) return false;
+    if (mc > maxConsec) return false;
   }
   return true;
 }
@@ -5837,9 +5843,9 @@ function mfcseCalculateScore(combo, freqN, ritN, coppieFlat) {
   return (freqSum / size) * 0.30 + (ritSum / size) * 0.25 + distribSc * 0.20 + coppieSc * 0.15 + ((bilPD + bilAB) / 2) * 0.10;
 }
 
-function runMassiveSimulation(game, freqMap, ritardiMap, estrazioni, nSim) {
+function runMassiveSimulation(game, freqMap, ritardiMap, estrazioni, nSim, sizeOverride) {
   nSim = nSim || 200000;
-  const size = game === 'lotto' ? 5 : 10;
+  const size = sizeOverride || (game === 'lotto' ? 5 : 10);
 
   // Normalizza freq e ritardi 0-1
   const maxFreq = Math.max(...Object.values(freqMap)) || 1;
