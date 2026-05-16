@@ -4062,35 +4062,80 @@ function selezionaLottoSerie(idx, numeri, nomeSerie) {
   document.querySelectorAll('#panel-lotto-gioca .serie-card').forEach(c=>c.classList.remove('selected-serie'));
   document.getElementById('lotto-serie-'+idx).classList.add('selected-serie');
 
-  document.getElementById('lotto-rie-balls').innerHTML=numeri.map(n=>`<div class="rie-ball">${n}</div>`).join('');
-  document.getElementById('lotto-rie-info').innerHTML=`
-    <strong>Numeri:</strong> ${numeri.join(' – ')}<br>
-    <strong>Tipo:</strong> ${lottoTipoGiocata} · Ruota ${lottoRuota}<br>
-    <div style="margin-top:10px;margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Puntata per tipo (€)</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <input type="number" id="lotto-rie-puntata" value="1" min="1" step="1"
-        style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:14px;text-align:center">
-      <span style="font-size:10px;color:var(--soft)">€ per tipo di giocata</span>
-    </div>
-    <button class="btn" id="lotto-conferma-btn" data-numeri="${numeri.join(',')}" data-nome="${(nomeSerie||'').replace(/'/g,'')}" onclick="confermaLottoSerie()" style="margin-top:4px">✅ Confermo — Salva giocata</button>
-    <span style="color:var(--rosso);font-size:9px;display:block;margin-top:8px">⚠️ Nessuna strategia garantisce vincite</span>`;
+  document.getElementById('lotto-rie-balls').innerHTML=numeri.map(function(n){return '<div class="rie-ball">'+n+'</div>';}).join('');
+  const _n = numeri.length;
+  let _tipiHtml = '';
+  if (_n >= 2) _tipiHtml += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--blu2);border-radius:8px;border:1px solid var(--bordo)">'
+    + '<input type="checkbox" id="lt-ambo" checked onchange="aggiornaCostoLotto()" style="accent-color:var(--oro);width:16px;height:16px;flex-shrink:0">'
+    + '<label for="lt-ambo" style="font-size:11px;color:var(--testo);flex:1;cursor:pointer">Ambo <span style=\'color:var(--soft);font-size:9px\'>(~250€ per 1€)</span></label>'
+    + '<input type="number" id="lt-ambo-imp" value="1" min="0.5" step="0.5" oninput="aggiornaCostoLotto()" style="width:64px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:6px 8px;font-family:\'DM Mono\',monospace;font-size:12px;text-align:center"> <span style="font-size:10px;color:var(--soft)">€</span></div>';
+  if (_n >= 3) _tipiHtml += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--blu2);border-radius:8px;border:1px solid var(--bordo)">'
+    + '<input type="checkbox" id="lt-terno" onchange="aggiornaCostoLotto()" style="accent-color:var(--oro);width:16px;height:16px;flex-shrink:0">'
+    + '<label for="lt-terno" style="font-size:11px;color:var(--testo);flex:1;cursor:pointer">Terno <span style=\'color:var(--soft);font-size:9px\'>(~4.500€ per 1€)</span></label>'
+    + '<input type="number" id="lt-terno-imp" value="1" min="0.5" step="0.5" oninput="aggiornaCostoLotto()" style="width:64px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:6px 8px;font-family:\'DM Mono\',monospace;font-size:12px;text-align:center"> <span style="font-size:10px;color:var(--soft)">€</span></div>';
+  if (_n >= 4) _tipiHtml += '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--blu2);border-radius:8px;border:1px solid var(--bordo)">'
+    + '<input type="checkbox" id="lt-quaterna" onchange="aggiornaCostoLotto()" style="accent-color:var(--oro);width:16px;height:16px;flex-shrink:0">'
+    + '<label for="lt-quaterna" style="font-size:11px;color:var(--testo);flex:1;cursor:pointer">Quaterna <span style=\'color:var(--soft);font-size:9px\'>(~120.000€ per 1€)</span></label>'
+    + '<input type="number" id="lt-quaterna-imp" value="0.5" min="0.5" step="0.5" oninput="aggiornaCostoLotto()" style="width:64px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:6px;padding:6px 8px;font-family:\'DM Mono\',monospace;font-size:12px;text-align:center"> <span style="font-size:10px;color:var(--soft)">€</span></div>';
+  document.getElementById('lotto-rie-info').innerHTML = ''
+    + '<strong style="font-size:11px">Numeri:</strong> <span style="color:var(--oro)">' + numeri.join(' – ') + '</span>'
+    + ' &nbsp;·&nbsp; <strong style="font-size:11px">Ruota:</strong> ' + lottoRuota + '<br>'
+    + '<div style="font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase;margin:10px 0 6px">Scegli tipi di giocata</div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">' + _tipiHtml + '</div>'
+    + '<div id="lt-costo-tot" style="font-size:11px;color:var(--soft);margin-bottom:10px">Totale: <strong style="color:var(--oro)">1.00€</strong></div>'
+    + '<button class="btn" id="lotto-conferma-btn" data-numeri="' + numeri.join(',') + '" data-nome="' + (nomeSerie||'').replace(/'/g,'') + '" onclick="confermaLottoSerie()" style="margin-top:4px">✅ Confermo — Salva giocata</button>'
+    + '<span style="color:var(--rosso);font-size:9px;display:block;margin-top:8px">⚠️ Nessuna strategia garantisce vincite</span>';
   document.getElementById('lotto-riepilogo-box').classList.add('show');
   document.getElementById('lotto-riepilogo-box').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function aggiornaCostoLotto() {
+  let tot = 0;
+  ['ambo','terno','quaterna'].forEach(function(tipo) {
+    const cb  = document.getElementById('lt-'+tipo);
+    const imp = document.getElementById('lt-'+tipo+'-imp');
+    if (cb && cb.checked && imp) tot += parseFloat(imp.value) || 0;
+  });
+  const el = document.getElementById('lt-costo-tot');
+  if (el) el.innerHTML = 'Totale: <strong style="color:var(--oro)">' + tot.toFixed(2) + '€</strong>';
 }
 
 function confermaLottoSerie() {
   const btn = document.getElementById('lotto-conferma-btn');
   if (!btn) return;
-  const numeri = btn.dataset.numeri.split(',').map(Number);
+  const numeri   = btn.dataset.numeri.split(',').map(Number);
   const nomeSerie = btn.dataset.nome || 'Serie consigliata';
-  const speso = parseFloat(document.getElementById('lotto-rie-puntata')?.value) || 1;
+
+  // Raccoglie i tipi selezionati con i rispettivi importi
+  const puntate = {};
+  var speso = 0;
+  ['ambo','terno','quaterna'].forEach(function(tipo) {
+    const cb  = document.getElementById('lt-'+tipo);
+    const imp = document.getElementById('lt-'+tipo+'-imp');
+    if (cb && cb.checked && imp) {
+      const val = Math.max(0.5, parseFloat(imp.value) || 0.5);
+      puntate[tipo] = val;
+      speso += val;
+    }
+  });
+
+  if (Object.keys(puntate).length === 0) {
+    alert('Seleziona almeno un tipo di giocata (Ambo, Terno o Quaterna).');
+    return;
+  }
+
+  const tipoLabel = Object.keys(puntate).map(function(t){ return t.charAt(0).toUpperCase()+t.slice(1); }).join('+');
   const oggi = new Date().toISOString().split('T')[0];
-  const nuova = {id:Date.now(), data:oggi, numeri, nomeSerie, ruota:lottoRuota, tipo:lottoTipoGiocata, esito:'attesa', vinto:0, speso};
+  const nuova = {
+    id: Date.now(), data: oggi, numeri: numeri, nomeSerie: nomeSerie,
+    ruota: lottoRuota, tipo: tipoLabel, puntate: puntate,
+    esito: 'attesa', vinto: 0, speso: speso
+  };
   const storico = getLottoStorico();
-  const esiste = storico.find(g=>g.data===oggi&&JSON.stringify(g.numeri)===JSON.stringify(numeri));
-  if(!esiste){storico.unshift(nuova);salvaLottoStorico(storico);}
+  const esiste = storico.find(function(g){ return g.data===oggi && JSON.stringify(g.numeri)===JSON.stringify(numeri); });
+  if (!esiste) { storico.unshift(nuova); salvaLottoStorico(storico); }
   renderMieGiocateLotto();
-  btn.textContent = `✅ Salvato! ${speso}€`;
+  btn.textContent = '✅ Salvato! ' + speso.toFixed(2) + '€ — ' + tipoLabel;
   btn.disabled = true;
   btn.style.opacity = '0.6';
 }
@@ -4133,8 +4178,11 @@ function renderMieGiocateLotto() {
     })();
     let confrontoHtml='';
     if(estrRefLotto){const indovinati=g.numeri.filter(n=>estrRefLotto.numeri.includes(n));const hit=indovinati.length;if(hit>0){const tipoVincita=hit>=4?'Quaterna! 🏆':hit>=3?'Terno! 🎉':hit>=2?'Ambo! ✨':'Ambata';const col=hit>=3?'var(--verde)':hit>=2?'var(--oro)':'var(--soft)';confrontoHtml=`<div style="margin:8px 0;padding:8px 10px;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:8px;font-size:10px"><span style="color:var(--soft)">Estr. ${g.ruota||lottoRuota} del ${new Date(estrRefLotto.data+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit'})}:</span><strong style="color:${col};margin-left:6px">${hit} indovinat${hit===1?'o':'i'} — ${tipoVincita}</strong><span style="color:var(--soft);margin-left:4px">(${indovinati.join(', ')})</span></div>`;}}
+    const _tipoDettaglio = g.puntate
+      ? Object.entries(g.puntate).map(function(e){ return e[0].charAt(0).toUpperCase()+e[0].slice(1)+' '+e[1].toFixed(2)+'€'; }).join(' · ')
+      : (g.tipo || '');
     return `<div class="mia-giocata ${g.esito}">
-      <div class="mg-header"><div><div class="mg-data">📅 ${dataFmt}</div><div style="font-size:9px;color:var(--soft);margin-top:2px;letter-spacing:1px">${g.nomeSerie||''} · ${g.tipo||''} · ${g.ruota||''}</div></div><span class="mg-esito ${ec}">${et}</span></div>
+      <div class="mg-header"><div><div class="mg-data">📅 ${dataFmt}</div><div style="font-size:9px;color:var(--soft);margin-top:2px;letter-spacing:1px">${g.nomeSerie||''} · ${_tipoDettaglio} · ${g.ruota||''}</div></div><span class="mg-esito ${ec}">${et}</span></div>
       <div class="mg-balls">${g.numeri.map(n=>{const isHit=estrRefLotto&&estrRefLotto.numeri.includes(n);const st=isHit?'background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;box-shadow:0 2px 8px rgba(201,168,76,.5)':'';return `<div class="mg-ball" style="${st}">${n}</div>`;}).join('')}</div>
       ${confrontoHtml}
       <div class="mg-footer"><div class="mg-importo ${ic}">${it}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="mg-aggiungi-ris" onclick="rigiocaLotto(${g.id})" style="background:rgba(42,93,191,.15);border-color:rgba(42,93,191,.3);color:#7AACFF">🔁 Rigioca</button>${g.esito==='attesa'?`<button class="mg-aggiungi-ris" onclick="apriModalLotto(${g.id})">+ Risultato</button>`:''}<button class="mg-del" onclick="eliminaLottoGiocata(${g.id})">🗑</button></div></div>
@@ -4325,33 +4373,28 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function aggiornaCosto10e() {
-  const base = parseFloat(document.getElementById('man10e-puntata').value) || 2;
-  const oro = document.getElementById('man10e-oro')?.checked ? 1 : 0;
-  const doppioOro = document.getElementById('man10e-doppiooro')?.checked ? 2 : 0;
-  // Doppio Oro include già Numero Oro — non si sommano
-  const extra = doppioOro > 0 ? doppioOro : oro;
-  const totale = base + extra;
-  const desc = doppioOro > 0 ? ' + Doppio Oro' : oro > 0 ? ' + Numero Oro' : '';
+  const base = parseFloat(document.getElementById('man10e-puntata').value) || 1;
+  const oro      = document.getElementById('man10e-oro')?.checked || false;
+  const doppioOro = document.getElementById('man10e-doppiooro')?.checked || false;
+  // Costo reale: normale = base, oro = base×2, doppio oro = base×4
+  const moltiplicatore = doppioOro ? 4 : oro ? 2 : 1;
+  const totale = base * moltiplicatore;
+  const desc = doppioOro ? ' × 4 (Doppio Oro)' : oro ? ' × 2 (Numero Oro)' : '';
   const el = document.getElementById('man10e-costo');
-  if (el) el.innerHTML = `Costo totale: <strong style="color:var(--oro)">${totale.toFixed(2)}€</strong><span style="color:var(--soft);font-size:10px"> (${base}€ base${desc})</span>`;
-  // Se seleziona Doppio Oro, deseleziona N.Oro (sono mutualmente esclusivi)
-  if (doppioOro > 0 && document.getElementById('man10e-oro').checked) {
-    document.getElementById('man10e-oro').checked = false;
-  }
+  if (el) el.innerHTML = 'Costo totale: <strong style="color:var(--oro)">' + totale.toFixed(2) + '€</strong><span style="color:var(--soft);font-size:10px"> (' + base.toFixed(2) + '€ base' + desc + ')</span>';
+  if (doppioOro && document.getElementById('man10e-oro')) document.getElementById('man10e-oro').checked = false;
 }
 
 function aggiornaCostoSerie() {
-  const oro = document.getElementById('rie-oro')?.checked ? 1 : 0;
-  const doppioOro = document.getElementById('rie-doppiooro')?.checked ? 2 : 0;
-  if (doppioOro > 0 && document.getElementById('rie-oro').checked) {
-    document.getElementById('rie-oro').checked = false;
-  }
-  const extra = doppioOro > 0 ? doppioOro : oro;
-  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 2;
-  const totale = base + extra;
-  const desc = doppioOro > 0 ? ' + Doppio Oro' : oro > 0 ? ' + Numero Oro' : '';
+  const oro      = document.getElementById('rie-oro')?.checked || false;
+  const doppioOro = document.getElementById('rie-doppiooro')?.checked || false;
+  if (doppioOro && document.getElementById('rie-oro')) document.getElementById('rie-oro').checked = false;
+  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 1;
+  const moltiplicatore = doppioOro ? 4 : oro ? 2 : 1;
+  const totale = base * moltiplicatore;
+  const desc = doppioOro ? ' × 4 (Doppio Oro)' : oro ? ' × 2 (Numero Oro)' : '';
   const el = document.getElementById('rie-costo');
-  if (el) el.innerHTML = `Costo totale: <strong style="color:var(--oro)">${totale.toFixed(2)}€</strong><span style="color:var(--soft);font-size:10px"> (${base}€ base${desc})</span>`;
+  if (el) el.innerHTML = 'Costo totale: <strong style="color:var(--oro)">' + totale.toFixed(2) + '€</strong><span style="color:var(--soft);font-size:10px"> (' + base.toFixed(2) + '€ base' + desc + ')</span>';
 }
 
 function confermaSerie() {
@@ -4359,11 +4402,11 @@ function confermaSerie() {
   if (!btn) return;
   const numeri = btn.dataset.numeri.split(',').map(Number);
   const nomeSerie = btn.dataset.nome || 'Serie consigliata';
-  const oro = document.getElementById('rie-oro')?.checked || false;
+  const oro      = document.getElementById('rie-oro')?.checked || false;
   const doppioOro = document.getElementById('rie-doppiooro')?.checked || false;
-  const extra = doppioOro ? 2 : oro ? 1 : 0;
-  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 2;
-  const speso = base + extra;
+  const base = parseFloat(document.getElementById('rie-puntata')?.value) || 1;
+  const moltiplicatore = doppioOro ? 4 : oro ? 2 : 1;
+  const speso = base * moltiplicatore;
   const opzioneOro = doppioOro ? 'doppio-oro' : oro ? 'oro' : 'nessuno';
   const oggi = new Date().toISOString().split('T')[0];
   const nuova = {
@@ -4387,11 +4430,11 @@ function salvaManuale10e() {
   const numeri = parsaNumeri(document.getElementById('man10e-numeri').value, 1, 90);
   if (numeri.length < 1) { alert('Inserisci almeno 1 numero tra 1 e 90.'); return; }
   if (numeri.length > 10) { alert('Massimo 10 numeri per il 10eLotto.'); return; }
-  const base = parseFloat(document.getElementById('man10e-puntata').value) || 2;
-  const oro = document.getElementById('man10e-oro')?.checked || false;
+  const base = parseFloat(document.getElementById('man10e-puntata').value) || 1;
+  const oro      = document.getElementById('man10e-oro')?.checked || false;
   const doppioOro = document.getElementById('man10e-doppiooro')?.checked || false;
-  const extra = doppioOro ? 2 : oro ? 1 : 0;
-  const speso = base + extra;
+  const moltiplicatore = doppioOro ? 4 : oro ? 2 : 1;
+  const speso = base * moltiplicatore;
   const opzioneOro = doppioOro ? 'doppio-oro' : oro ? 'oro' : 'nessuno';
   const nome = document.getElementById('man10e-nome').value.trim() || 'Giocata manuale';
   const dataInput = document.getElementById('man10e-data').value;
