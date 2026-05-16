@@ -2774,17 +2774,31 @@ function salvaStorico(storico) {
 // Trova l'estrazione più vicina (successiva o uguale) alla data di giocata
 function trovaSabatoVicino10e(dataGiocata) {
   if (!allEstrazioni || allEstrazioni.length === 0) return null;
-  const dg = new Date(dataGiocata + 'T12:00:00');
+  const dg  = new Date(dataGiocata + 'T00:00:00');
+  const now = new Date();
+  // Il 10eLotto estrae ogni sera: consideriamo la draw avvenuta solo dopo le 20:30
+  // Se sono le 7am del 16/5, la draw del 16/5 NON è ancora avvenuta → la saltiamo
+  const drawOra = 20; // ora draw (20:00)
+  const drawMin = 30; // minuto sicurezza
+
+  function isDrawAvvenuta(dataStr) {
+    const d = new Date(dataStr + 'T00:00:00');
+    const cutoff = new Date(d.getFullYear(), d.getMonth(), d.getDate(), drawOra, drawMin, 0);
+    return now >= cutoff; // ora corrente è dopo le 20:30 di quel giorno
+  }
+
   let best = null;
   let bestDiff = Infinity;
   allEstrazioni.forEach(e => {
-    const de = new Date(e.data + 'T12:00:00');
+    if (!isDrawAvvenuta(e.data)) return; // draw non ancora avvenuta, salta
+    const de = new Date(e.data + 'T00:00:00');
     const diff = de - dg;
     if (diff >= 0 && diff < bestDiff) { bestDiff = diff; best = e; }
   });
   if (!best) {
     allEstrazioni.forEach(e => {
-      const de = new Date(e.data + 'T12:00:00');
+      if (!isDrawAvvenuta(e.data)) return;
+      const de = new Date(e.data + 'T00:00:00');
       const diff = Math.abs(de - dg);
       if (diff < bestDiff) { bestDiff = diff; best = e; }
     });
@@ -4838,29 +4852,29 @@ function salvaSEGiocataCorrente() { salvaSEColonnaFantasia(); }
 // Trova l'estrazione del sabato più vicino (successivo) alla data di giocata
 function trovaSabatoVicinoSE(dataGiocata) {
   if (!seEstrazioni || seEstrazioni.length === 0) return null;
-  const dg = new Date(dataGiocata + 'T12:00:00');
-  // Cerca il sabato più vicino >= data giocata
-  // Prima prova successivo, poi precedente
+  const dg  = new Date(dataGiocata + 'T00:00:00');
+  const now = new Date();
+
+  function isDrawSEAvvenuta(dataStr) {
+    const d = new Date(dataStr + 'T00:00:00');
+    const cutoff = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30, 0);
+    return now >= cutoff;
+  }
+
   let best = null;
   let bestDiff = Infinity;
   seEstrazioni.forEach(e => {
-    const de = new Date(e.data + 'T12:00:00');
-    const diff = de - dg; // positivo = estrazione dopo giocata
-    // Preferiamo estrazioni dopo o uguale alla data di giocata
-    if (diff >= 0 && diff < bestDiff) {
-      bestDiff = diff;
-      best = e;
-    }
+    if (!isDrawSEAvvenuta(e.data)) return;
+    const de = new Date(e.data + 'T00:00:00');
+    const diff = de - dg;
+    if (diff >= 0 && diff < bestDiff) { bestDiff = diff; best = e; }
   });
-  // Se non trovato successivo, usa il precedente più vicino
   if (!best) {
     seEstrazioni.forEach(e => {
-      const de = new Date(e.data + 'T12:00:00');
+      if (!isDrawSEAvvenuta(e.data)) return;
+      const de = new Date(e.data + 'T00:00:00');
       const diff = Math.abs(de - dg);
-      if (diff < bestDiff) {
-        bestDiff = diff;
-        best = e;
-      }
+      if (diff < bestDiff) { bestDiff = diff; best = e; }
     });
   }
   return best;
@@ -5219,7 +5233,7 @@ async function runAdvancedAnalysisLotto() {
 
   await new Promise(r=>setTimeout(r,10));
   status.textContent = 'AdvancedCombinationGenerator...';
-  const combo = AdvancedCombinationGenerator(se, rda);
+  const combo = AdvancedCombinationGenerator(se, rda, 5); // Lotto = 5 numeri su 90
 
   advLottoData = { se, rda, allScores: rda.allScores || {}, pcd, mc, combo, ruota: lottoRuota, ts: new Date().toLocaleString('it-IT') };
   status.textContent = '✅ Completato — ' + estr.length + ' estrazioni · Ruota ' + lottoRuota;
@@ -5516,17 +5530,20 @@ function MonteCarloSimulator(nGiocati, iter) {
 }
 
 // ── AdvancedCombinationGenerator ──────────────────────────
-function AdvancedCombinationGenerator(se, rda) {
-  const hotNums = se.hot.slice(0,10).map(x=>x.n);
-  const coldNums = se.cold.slice(0,10).map(x=>x.n);
-  const topScore = rda.slice(0,10).map(x=>x.n);
-  // bilanciata: mix hot + cold + score
-  const bil = [...new Set([...topScore.slice(0,5), ...hotNums.slice(0,3), ...coldNums.slice(0,3)])].slice(0,10);
-  return {
-    hot: hotNums,
-    cold: coldNums,
-    bilanciata: bil
-  };
+function AdvancedCombinationGenerator(se, rda, size) {
+  size = size || 10;
+  const hotNums  = se.hot.slice(0, size).map(x => x.n);
+  const coldNums = se.cold.slice(0, size).map(x => x.n);
+  const topScore = rda.slice(0, size).map(x => x.n);
+  const half    = Math.ceil(size / 2);
+  const quarter = Math.max(1, Math.floor(size / 4));
+  // bilanciata: mix score + hot + cold nella giusta proporzione
+  const bil = [...new Set([
+    ...topScore.slice(0, half),
+    ...hotNums.slice(0, quarter),
+    ...coldNums.slice(0, quarter)
+  ])].slice(0, size);
+  return { hot: hotNums, cold: coldNums, bilanciata: bil };
 }
 
 // ── Runner principale ──────────────────────────────────────
@@ -5554,7 +5571,7 @@ async function runAdvancedAnalysis() {
 
   await new Promise(r=>setTimeout(r,10));
   status.textContent = 'AdvancedCombinationGenerator...';
-  const combo = AdvancedCombinationGenerator(se, rda);
+  const combo = AdvancedCombinationGenerator(se, rda, quantiNumeri || 10);
 
   advData = { se, rda, allScores: rda.allScores || {}, pcd, mc, combo, ts: new Date().toLocaleString('it-IT') };
   status.textContent = '✅ Completato — ' + allEstrazioni.length + ' estrazioni analizzate';
