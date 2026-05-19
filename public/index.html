@@ -190,7 +190,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .mg-balls{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
 .mg-ball{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .mg-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-.mg-importo{font-size:11px;font-family:'Playfair Display',serif}
+.mg-importo{font-size:11px;font-family:'Playfair Display',serif}.mg-importo.spe{color:var(--oro);opacity:.85}
 .mg-importo.pos{color:var(--verde)}
 .mg-importo.neg{color:var(--rosso)}
 .mg-importo.neu{color:var(--soft)}
@@ -1504,8 +1504,10 @@ const MOCK_ESTRAZIONI_MILLIONDAY = [
 // ============================================================
 const MOCK_ESTRAZIONI_LOTTO_GENOVA = [
   {"data":"2026-05-16","numeri":[8,30,61,75,55]},
+  {"data":"2026-05-15","numeri":[5,13,17,28,47,68],"jolly":42,"superstar":19},
   {"data":"2026-05-14","numeri":[15,20,29,70,83]},
   {"data":"2026-05-09","numeri":[26,55,76,81,85]},
+  {"data":"2026-05-08","numeri":[8,16,41,47,51,90],"jolly":82,"superstar":69},
   {"data":"2026-05-07","numeri":[10,30,34,59,88]},
   {"data":"2026-05-02","numeri":[5,30,37,38,90]},
   {"data":"2026-04-30","numeri":[53,58,61,77,89]},
@@ -1616,9 +1618,11 @@ const MOCK_ESTRAZIONI_LOTTO_GENOVA = [
 // ============================================================
 const MOCK_ESTRAZIONI_SE = [
   {"data":"2026-05-16","numeri":[7,12,60,69,89,90],"jolly":59,"superstar":36},
-  {"data":"2026-05-14","numeri":[27,54,74,80,82,84],"jolly":4,"superstar":64},
-  {"data":"2026-05-12","numeri":[4,6,11,44,73,83],"jolly":79,"superstar":34},
-  {"data":"2026-05-09","numeri":[20,22,75,76,83,85],"jolly":86,"superstar":78},
+  {"data":"2026-05-15","numeri":[5,13,17,28,47,68],"jolly":42,"superstar":19},
+  {"data":"2026-05-14","numeri":[31,56,72,74,84,85],"jolly":18,"superstar":34},
+  {"data":"2026-05-12","numeri":[2,28,31,57,58,59],"jolly":5,"superstar":2},
+  {"data":"2026-05-09","numeri":[9,27,30,42,43,62],"jolly":11,"superstar":11},
+  {"data":"2026-05-08","numeri":[8,16,41,47,51,90],"jolly":82,"superstar":69},
   {"data":"2026-05-07","numeri":[17,36,39,69,79,81],"jolly":12,"superstar":65},
   {"data":"2026-05-05","numeri":[11,26,33,37,45,67],"jolly":88,"superstar":71},
   {"data":"2026-05-02","numeri":[16,20,21,22,39,67],"jolly":47,"superstar":29},
@@ -2879,7 +2883,7 @@ function renderMieGiocate() {
 
   let totSpeso = 0, totVinto = 0, nVincite = 0;
   for (const g of storico) {
-    if (g.esito !== 'attesa') totSpeso += (g.speso || 0);
+    totSpeso += (g.speso || 0); // conta anche 'attesa' come spesa pianificata
     if (g.esito === 'vincente') { totVinto += (g.vinto || 0); nVincite++; }
   }
   const saldo = totVinto - totSpeso;
@@ -2900,8 +2904,10 @@ function renderMieGiocate() {
     const dataFmt = new Date(g.data + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
     const esitoClass = g.esito === 'vincente' ? 'v' : g.esito === 'perdente' ? 'p' : 'a';
     const esitoTxt = g.esito === 'vincente' ? '✅ Vinto' : g.esito === 'perdente' ? '❌ Perso' : '⏳ In attesa';
-    const importoTxt = g.esito === 'vincente' ? `+${(g.vinto||0).toFixed(2)}€` : g.esito === 'perdente' ? `-${(g.speso||0).toFixed(2)}€` : '—';
-    const importoClass = g.esito === 'vincente' ? 'pos' : g.esito === 'perdente' ? 'neg' : 'neu';
+    const _base10e = (g.speso||0) / (g.opzioneOro==='oro' ? 2 : 1);
+    const _dettaglio10e = g.opzioneOro==='oro' ? `${_base10e.toFixed(2)}€ + N.Oro 🌟 = ${(g.speso||0).toFixed(2)}€` : `${(g.speso||0).toFixed(2)}€`;
+    const importoTxt = g.esito === 'vincente' ? `+${(g.vinto||0).toFixed(2)}€` : g.esito === 'perdente' ? `-${(g.speso||0).toFixed(2)}€` : `💰 ${_dettaglio10e}`;
+    const importoClass = g.esito === 'vincente' ? 'pos' : g.esito === 'perdente' ? 'neg' : 'spe';
     const estrRef = trovaSabatoVicino10e(g.data);
     let confrontoHtml = '';
     if (estrRef) {
@@ -3569,8 +3575,10 @@ function renderMieGiocateMD() {
     const dataFmt=new Date(g.data+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
     const ec=g.esito==='vincente'?'v':g.esito==='perdente'?'p':'a';
     const et=g.esito==='vincente'?'✅ Vinto':g.esito==='perdente'?'❌ Perso':'⏳ In attesa';
-    const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:'—';
-    const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'neu';
+    const _extraMD = (g.speso||1) >= 2;
+    const _detMD = _extraMD ? `1.00€ + Extra = ${(g.speso||1).toFixed(2)}€` : `${(g.speso||1).toFixed(2)}€`;
+    const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:`💰 ${_detMD}`;
+    const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'spe';
     const estrRefMD = (() => {
       if (!mdEstrazioni.length) return null;
       const dg=new Date(g.data+'T12:00:00'); let best=null,bestDiff=Infinity;
@@ -4299,8 +4307,8 @@ function renderMieGiocateLotto() {
     const dataFmt=new Date(g.data+'T12:00:00').toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
     const ec=g.esito==='vincente'?'v':g.esito==='perdente'?'p':'a';
     const et=g.esito==='vincente'?'✅ Vinto':g.esito==='perdente'?'❌ Perso':'⏳ In attesa';
-    const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:'—';
-    const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'neu';
+    const it=g.esito==='vincente'?`+${(g.vinto||0).toFixed(2)}€`:g.esito==='perdente'?`-${(g.speso||0).toFixed(2)}€`:`💰 ${(g.speso||0).toFixed(2)}€`;
+    const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'spe';
     const estrRefLotto=(() => {
       if(!estrLottoArr.length)return null;
       const dg=new Date(g.data+'T12:00:00');let best=null,bestDiff=Infinity;
@@ -4702,10 +4710,24 @@ async function loadSuperEnalottoTab() {
       }
     } catch(e) { /* proxy non disponibile — fallback mock */ }
   }
+  // Valida i dati API: scarta entry con jolly assente, fuori range o uguale a un numero
   if (rawEstr.length > 0) {
-    seEstrazioni = rawEstr.sort((a, b) => new Date(b.data) - new Date(a.data));
-    document.getElementById('badge-txt').textContent = 'Dati reali SE ✓';
-  } else {
+    const valide = rawEstr.filter(e => {
+      if (!e.numeri || e.numeri.length !== 6) return false;
+      if (!e.jolly || e.jolly < 1 || e.jolly > 90) return false;
+      if (e.numeri.includes(e.jolly)) return false; // jolly non può essere tra i 6
+      if (new Set(e.numeri).size !== 6) return false; // niente duplicati
+      if (e.numeri.some(n => n < 1 || n > 90)) return false;
+      return true;
+    });
+    if (valide.length > 0) {
+      seEstrazioni = valide.sort((a, b) => new Date(b.data) - new Date(a.data));
+      document.getElementById('badge-txt').textContent = 'Dati reali SE ✓';
+    } else {
+      rawEstr = []; // forza fallback mock
+    }
+  }
+  if (rawEstr.length === 0) {
     // Proxy non disponibile — usa dati mock locali
     seEstrazioni = MOCK_ESTRAZIONI_SE.sort((a, b) => new Date(b.data) - new Date(a.data));
     document.getElementById('badge-txt').textContent = '📊 Dati locali SE';
