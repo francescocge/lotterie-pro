@@ -284,79 +284,249 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
     </div>
     <div style="padding:20px;max-height:70vh;overflow-y:auto">
 
-      <div style="background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.3);border-radius:10px;padding:14px 16px;margin-bottom:18px">
-        <div style="font-size:10px;color:var(--oro);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">&#9654; Prima di tutto</div>
-        <div style="font-size:12px;color:var(--testo);line-height:1.7">Premi <strong style="color:var(--oro)">&#128260; Aggiorna dati</strong> in alto a destra. L'app scarica le ultime estrazioni e aggiorna tutte le statistiche.</div>
+      <!-- PRIMO AVVIO -->
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.4);border-radius:10px;padding:14px 16px;margin-bottom:20px">
+        <div style="font-size:10px;color:var(--oro);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">&#9654; Primo avvio — fallo ogni volta che apri l'app</div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="min-width:26px;height:26px;background:var(--oro);color:#000;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div style="font-size:12px;color:var(--testo);line-height:1.7">Premi <strong style="color:var(--oro)">&#128260; Aggiorna dati</strong> in alto a destra. L'app scarica le ultime estrazioni reali e aggiorna tutte le statistiche. Senza questo passaggio i dati sono offline (mock).</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;margin-top:10px">
+          <div style="min-width:26px;height:26px;background:var(--oro);color:#000;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div style="font-size:12px;color:var(--testo);line-height:1.7">Scegli il gioco dai 4 pulsanti in alto: <strong>&#127920; 10eLotto</strong> &middot; <strong>&#128142; MillionDay</strong> &middot; <strong>&#127922; Lotto</strong> &middot; <strong>&#128176; SuperEnalotto</strong>. La barra dei tab cambia per ogni gioco.</div>
+        </div>
       </div>
 
-      <div style="margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:12px">&#127920; 10eLotto</div>
+      <!-- 10ELOTTO -->
+      <div style="margin-bottom:22px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:13px">&#127920; 10eLotto — guida completa</div>
         <div style="display:flex;flex-direction:column;gap:9px">
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#127920; Ultima</strong> &#8594; vedi l'ultima estrazione con i 20 numeri usciti e i premi pagati.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#128202; Frequenti</strong> e <strong>&#9203; Ritardi</strong> &#8594; numeri che escono spesso e numeri assenti da pi&ugrave; estrazioni.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#127942; Gioca</strong> &#8594; scegli il metodo dal menu &#8594; premi <strong style="color:var(--oro)">Genera Serie</strong>.</div></div>
-          <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.8;border:1px solid var(--bordo)">
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#127920; Ultima</strong> — vedi i 20 numeri dell'ultima estrazione, il numero Oro, la data e l'orario. Scorrendo trovi la panoramica con totale estrazioni e media uscite.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128202; Frequenti</strong> — classifica dei 20 numeri usciti pi&ugrave; volte nella storia. La barra mostra la frequenza relativa.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#9203; Ritardi</strong> — i 20 numeri assenti da pi&ugrave; estrazioni, ordinati per <strong style="color:#9b8de0">IC (Indice di Convenienza)</strong>: premia chi &egrave; sia in ritardo sia storicamente frequente.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#127942; Gioca</strong> — il pannello principale. Scegli il metodo dal menu (Frequenti / Ritardatari / Misto / Bilanciato / Personalizzato) e la dimensione della serie (1–10 numeri). Premi <strong style="color:var(--oro)">Genera Serie</strong>.</div>
+          </div>
+
+          <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.9;border:1px solid var(--bordo)">
             <strong style="color:var(--testo)">Serie generate:</strong><br>
-            <span style="color:var(--oro)">Serie A</span> &mdash; metodo scelto (frequenti / ritardatari / misto / bilanciato)<br>
-            <span style="color:var(--oro)">Serie B</span> &mdash; metodo complementare<br>
-            <span style="color:#9b8de0">&#9889; MFCSE 1&middot;2&middot;3</span> &mdash; 200.000 simulazioni filtrate e classificate
+            <span style="color:var(--oro)">&#9679; Serie A</span> — metodo scelto<br>
+            <span style="color:var(--oro)">&#9679; Serie B</span> — metodo complementare<br>
+            <span style="color:#9b8de0">&#9889; MFCSE 1·2·3</span> — 200.000 simulazioni filtrate e classificate dal motore<br>
+            <span style="color:var(--soft);font-size:9px">Clicca una carta → appare il riepilogo in basso → premi <strong style="color:var(--testo)">Salva</strong></span>
           </div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Clicca una serie &#8594; appare il <strong>riepilogo</strong> in basso &#8594; premi <strong>Salva</strong> &#8594; vai in <strong>&#128203; Le Mie</strong>.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>🧠 Avanzate</strong> → Monte Carlo per vedere le probabilità reali.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#129504; Avanzate</strong> &#8594; analisi statistica profonda: pattern, cicli, Monte Carlo. Premi <strong>Esegui analisi</strong>.</div></div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128203; Le Mie</strong> — tutte le serie salvate. Ogni carta mostra: numeri giocati, data estrazione di riferimento, esito (attesa / indovinati). Premi la carta per i dettagli.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128202; Avanzate &#8594; Backtest</strong> — l'app ricalcola le previsioni sulle ultime 20 estrazioni passate e confronta con i risultati reali. Premi <strong>Esegui Backtest</strong> per vedere l'accuratezza storica.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">7</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#129504; Avanzate &#8594; Monte Carlo</strong> — 50.000 simulazioni per calcolare la probabilità reale di indovinare N numeri. Premi <strong>Esegui analisi</strong>. I tab Hot / Cold / Coppie / Triple mostrano pattern storici approfonditi.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">8</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128197; Storico</strong> — tutte le estrazioni in ordine cronologico inverso. <strong>&#128176; Premi</strong> — tabella vincite ufficiale con quote.</div>
+          </div>
+
         </div>
       </div>
 
-      <div style="margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:12px">&#128142; MillionDay</div>
-        <div style="font-size:11px;color:var(--testo);line-height:1.7">Funziona <strong>esattamente come 10eLotto</strong> ma con 5 numeri su 55. Stessi pannelli, stessa procedura. Le serie generate sono 2 standard + 3 MFCSE.</div>
+      <!-- MILLIONDAY -->
+      <div style="margin-bottom:22px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:13px">&#128142; MillionDay — guida completa</div>
+        <div style="font-size:11px;color:var(--testo);line-height:1.7;margin-bottom:10px">Funziona esattamente come 10eLotto. Stessi pannelli, stessa procedura. Le differenze:</div>
+        <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.9;border:1px solid var(--bordo);margin-bottom:8px">
+          <span style="color:var(--testo)">&#128142; 5 numeri su 55</span> (non 20 su 90)<br>
+          Estrazioni: ogni giorno alle 13:00 e alle 20:30<br>
+          <span style="color:var(--oro)">&#9679; Serie A + B</span> + <span style="color:#9b8de0">&#9889; MFCSE 1·2·3</span> (somma Gaussiana [89–191])<br>
+          Niente Numero Oro né Backtest
+        </div>
+        <div style="font-size:11px;color:var(--testo);line-height:1.6">Le serie MFCSE per MillionDay si salvano in <strong>&#128203; Le Mie</strong> con un tap sulla carta → <strong>Salva</strong>.</div>
       </div>
 
-      <div style="margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:12px">&#127922; Lotto Classico</div>
+      <!-- LOTTO CLASSICO -->
+      <div style="margin-bottom:22px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:13px">&#127922; Lotto Classico — guida completa</div>
         <div style="display:flex;flex-direction:column;gap:9px">
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Scegli la <strong>ruota</strong> dal menu in alto: Bari &middot; Cagliari &middot; Firenze &middot; Genova &middot; Milano &middot; Napoli &middot; Palermo &middot; Roma &middot; Torino &middot; Venezia &middot; Nazionale.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#127942; Previsioni</strong> &#8594; premi <strong style="color:var(--oro)">Genera Previsioni</strong>.</div></div>
-          <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.8;border:1px solid var(--bordo)">
-            <strong style="color:var(--testo)">Serie generate (5 numeri su 90):</strong><br>
-            <span style="color:var(--oro)">Serie A</span> &mdash; bilanciata (frequenti + ritardatari)<br>
-            <span style="color:var(--oro)">Serie B</span> &mdash; orientata ai ritardatari<br>
-            <span style="color:var(--oro)">Serie C</span> &mdash; orientata ai frequenti<br>
-            <span style="color:#9b8de0">&#9889; MFCSE 1&middot;2&middot;3</span> &mdash; 200.000 simulazioni su 5 numeri filtrate e classificate
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6">Seleziona la <strong style="color:var(--oro)">ruota</strong> dal menu a tendina in cima al pannello: Bari · Cagliari · Firenze · Genova · Milano · Napoli · Palermo · Roma · Torino · Venezia · Nazionale. Ogni ruota ha le proprie statistiche indipendenti.</div>
           </div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Clicca una serie &#8594; riepilogo &#8594; premi <strong>Salva</strong>. Trovi tutto in <strong>&#128203; Le Mie</strong>.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#128290; Finali</strong> &#8594; analisi delle ultime cifre (0&ndash;9) pi&ugrave; frequenti su questa ruota.</div></div>
-          <div style="display:flex;gap:10px;align-items:flex-start"><div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div><div style="font-size:11px;color:var(--testo);line-height:1.5">Vai su <strong>&#129504; Avanzate</strong> &#8594; analisi approfondita sulla ruota selezionata.</div></div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#127922; Ultima</strong> — i 5 numeri dell'ultima estrazione sulla ruota selezionata.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128202; Frequenti</strong> e <strong>&#9203; Ritardi</strong> — stessa logica di 10eLotto ma per i numeri 1–90 sulla ruota scelta. I Ritardi usano l'IC.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#127942; Previsioni</strong> — scegli il tipo di giocata: <strong>Ambo (2 num) · Terno (3 num) · Quaterna (4 num)</strong>. Premi <strong style="color:var(--oro)">Genera Previsioni</strong>.</div>
+          </div>
+
+          <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.9;border:1px solid var(--bordo)">
+            <strong style="color:var(--testo)">Serie generate (5 numeri su 90):</strong><br>
+            <span style="color:var(--oro)">&#9679; Serie A</span> — bilanciata (frequenti + ritardatari)<br>
+            <span style="color:var(--oro)">&#9679; Serie B</span> — orientata ai ritardatari<br>
+            <span style="color:var(--oro)">&#9679; Serie C</span> — orientata ai frequenti<br>
+            <span style="color:#9b8de0">&#9889; MFCSE 1·2·3</span> — 200.000 sim. su 5 num., somma Gaussiana [143–312]
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6">Clicca una serie → appare il riepilogo → scegli <strong>ruota</strong> e <strong>tipo giocata</strong> nel riepilogo → premi <strong>Salva</strong>. La giocata va in <strong>&#128203; Le Mie</strong>.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">6</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128290; Finali</strong> — analisi delle ultime cifre (0–9): quali terminazioni escono di pi&ugrave; su questa ruota. Utile per scegliere l'ultima cifra dei numeri.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">7</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#129504; Avanzate</strong> — analisi Hot/Cold/Coppie/Triple sulla ruota. Monte Carlo con 50.000 simulazioni per la probabilit&agrave; reale di ambo, terno, quaterna.</div>
+          </div>
+
         </div>
       </div>
 
-      <div style="margin-bottom:20px">
-        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:12px">&#128176; SuperEnalotto</div>
-        <div style="font-size:11px;color:var(--testo);line-height:1.7">6 numeri su 90. Stessa procedura: Aggiorna &#8594; Previsioni &#8594; Genera &#8594; Seleziona &#8594; Salva. Usa <strong>&#128202; Frequenti</strong>, <strong>&#9203; Ritardi</strong> e <strong>&#129504; Avanzate</strong> per analisi pi&ugrave; approfondite.</div>
+      <!-- SUPERENALOTTO -->
+      <div style="margin-bottom:22px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:13px">&#128176; SuperEnalotto — guida completa</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128176; Ultima</strong> — i 6 numeri + Jolly + SuperStar dell'ultima estrazione.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#128202; Frequenti</strong> e <strong>&#9203; Ritardi</strong> — stessa logica degli altri giochi, su 6 numeri da 1 a 90.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#127942; Gioca</strong> → premi <strong style="color:var(--oro)">Genera Serie</strong>. Ottieni 3 serie standard (A, B, C) + 3 MFCSE. Clicca la serie che preferisci.</div>
+          </div>
+
+          <div style="background:var(--blu2);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--soft);line-height:1.9;border:1px solid var(--bordo)">
+            <strong style="color:var(--testo)">Serie generate (6 numeri su 90):</strong><br>
+            <span style="color:var(--oro)">&#9679; Serie A·B·C</span> — metodi bilanciato / ritardatari / frequenti<br>
+            <span style="color:#9b8de0">&#9889; MFCSE 1·2·3</span> — 200.000 sim., somma Gaussiana [181–365]<br>
+            <span style="color:#e07080">&#128311; Jolly</span> — calcolato da storico jolly (IC: ritardo × frequenza, esclusi i 6)<br>
+            <span style="color:var(--oro)">&#11088; SuperStar</span> — numero 1–90 più frequente nello storico
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">4</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6">Clicca la serie → il riepilogo mostra i 6 numeri, il <strong style="color:#e07080">Jolly suggerito</strong> e il <strong style="color:var(--oro)">SuperStar</strong> → premi <strong>Confermo — Salva giocata</strong>.</div>
+          </div>
+
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:var(--oro);color:#000;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">5</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>&#129504; Avanzate</strong> — analisi Hot/Cold dei 6 numeri + distribuzione per decine + top 8 Jolly storici.</div>
+          </div>
+
+        </div>
       </div>
 
+      <!-- MOTORE MFCSE -->
       <div style="background:linear-gradient(135deg,rgba(155,141,224,.12),rgba(42,93,191,.08));border:1px solid rgba(155,141,224,.3);border-radius:10px;padding:14px 16px;margin-bottom:18px">
-        <div style="font-size:10px;color:#9b8de0;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">&#9889; Come funziona il Motore MFCSE</div>
-        <div style="font-size:11px;color:var(--testo);line-height:1.7">
-          Genera <strong>200.000 combinazioni casuali</strong>, scarta quelle che non rispettano i filtri (equilibrio pari/dispari, distribuzione nelle decine, numeri consecutivi), poi assegna un punteggio basato su:<br><br>
-          <span style="color:var(--soft)">&#128200; Frequenza storica &middot; &#9203; Ritardo &middot; &#128290; Distribuzione decine &middot; &#128279; Coppie frequenti &middot; &#9878; Bilanciamento pari/dispari</span><br><br>
-          Le <strong>3 migliori</strong> appaiono come carte aggiuntive sotto le serie standard &mdash; cliccabili e salvabili come le altre.
+        <div style="font-size:10px;color:#9b8de0;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">&#9889; Motore MFCSE — come funziona</div>
+        <div style="font-size:11px;color:var(--testo);line-height:1.7;margin-bottom:10px">Genera <strong>200.000 combinazioni casuali</strong>, le filtra con 5 regole e assegna uno score a ognuna. Le 3 migliori diventano le carte MFCSE.</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="background:rgba(0,0,0,.2);border-radius:7px;padding:8px 11px">
+            <div style="font-size:9px;color:#9b8de0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">5 filtri — ogni combinazione deve superarli tutti</div>
+            <div style="font-size:10px;color:var(--soft);line-height:1.8">&#9726; Equilibrio pari/dispari &middot; &#9726; Equilibrio alto/basso &middot; &#9726; Max 2 numeri per decina &middot; &#9726; Max 2 consecutivi &middot; &#9726; <strong style="color:#9b8de0">Somma dentro la curva di Gauss (±1,5σ)</strong></div>
+          </div>
+          <div style="background:rgba(0,0,0,.2);border-radius:7px;padding:8px 11px">
+            <div style="font-size:9px;color:#9b8de0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Score finale</div>
+            <div style="font-size:10px;color:var(--soft);line-height:1.7"><strong style="color:var(--testo)">85%</strong> — WMA frequenza recente ×0,60 + IC ritardo ×0,40<br><strong style="color:var(--testo)">15%</strong> — coppie di numeri frequenti storicamente</div>
+          </div>
         </div>
       </div>
 
+      <!-- ALGORITMO -->
+      <div style="background:linear-gradient(135deg,rgba(201,168,76,.10),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+        <div style="font-size:10px;color:var(--oro);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">&#129513; Algoritmo — i 3 miglioramenti statistici</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+
+          <div style="background:var(--blu2);border-radius:7px;padding:9px 11px;border:1px solid var(--bordo)">
+            <div style="font-size:9px;color:#9b8de0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">IC — Indice di Convenienza (tab Ritardi)</div>
+            <div style="font-size:10px;color:var(--testo);line-height:1.6">Ordina i ritardatari per <strong style="color:var(--oro)">IC = ritardo_normalizzato × frequenza_normalizzata</strong>. Il numero con IC pi&ugrave; alto &egrave; quello che &laquo;manca da pi&ugrave; tempo ed &egrave; uscito pi&ugrave; spesso in passato&raquo;.</div>
+          </div>
+
+          <div style="background:var(--blu2);border-radius:7px;padding:9px 11px;border:1px solid var(--bordo)">
+            <div style="font-size:9px;color:#9b8de0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">WMA — Media Ponderata (Momentum e MFCSE)</div>
+            <div style="font-size:10px;color:var(--testo);line-height:1.6">Nelle ultime 10 estrazioni, la pi&ugrave; recente conta il triplo rispetto alla pi&ugrave; vecchia (peso lineare). I numeri che escono spesso <em>di recente</em> pesano di pi&ugrave; nello score.</div>
+          </div>
+
+          <div style="background:var(--blu2);border-radius:7px;padding:9px 11px;border:1px solid var(--bordo)">
+            <div style="font-size:9px;color:#9b8de0;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Filtro Gaussiano (MFCSE — Somma combinazione)</div>
+            <div style="font-size:10px;color:var(--testo);line-height:1.6">Ogni combinazione viene scartata se la somma dei numeri &egrave; fuori dal range centrale della curva teorica. Elimina le combinazioni estreme (es. tutti numeri alti o tutti bassi).</div>
+            <div style="font-size:9px;color:var(--soft);margin-top:4px">Lotto [143–312] · SuperEnalotto [181–365] · MillionDay [89–191] · 10eLotto: dinamico</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TRASFERIMENTO DATI -->
+      <div style="margin-bottom:18px">
+        <div style="font-size:11px;letter-spacing:2px;color:var(--oro);text-transform:uppercase;border-bottom:1px solid var(--bordo);padding-bottom:6px;margin-bottom:12px">&#128257; Trasferimento dati tra dispositivi</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:rgba(201,168,76,.3);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--oro)">E</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>Esporta:</strong> scorri in fondo alla pagina → sezione <em>Trasferisci dati</em> → premi <strong>Esporta</strong>. Scarica un file .json con tutte le giocate salvate.</div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="min-width:22px;height:22px;background:rgba(201,168,76,.3);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--oro)">I</div>
+            <div style="font-size:11px;color:var(--testo);line-height:1.6"><strong>Importa:</strong> sull'altro dispositivo, stessa sezione → premi <strong>Importa</strong> → seleziona il file .json. Le giocate vengono aggiunte senza cancellare quelle esistenti.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NAVIGAZIONE RAPIDA -->
       <div style="background:var(--blu2);border:1px solid var(--bordo);border-radius:10px;padding:14px 16px">
-        <div style="font-size:10px;color:var(--soft);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">&#128204; Navigazione rapida</div>
+        <div style="font-size:10px;color:var(--soft);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">&#128204; Navigazione rapida — tutti i tab</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:10px;color:var(--soft);line-height:1.6">
-          <div><span style="color:var(--testo)">&#127920; Ultima</span><br>Estrazione pi&ugrave; recente</div>
-          <div><span style="color:var(--testo)">&#127942; Gioca/Previsioni</span><br>Genera e salva serie</div>
+          <div><span style="color:var(--testo)">&#127920;&#128142;&#127922;&#128176; Ultima</span><br>Estrazione pi&ugrave; recente</div>
+          <div><span style="color:var(--testo)">&#127942; Gioca / Previsioni</span><br>Genera e salva serie</div>
           <div><span style="color:var(--testo)">&#128203; Le Mie</span><br>Serie salvate e risultati</div>
           <div><span style="color:var(--testo)">&#128202; Frequenti</span><br>Numeri pi&ugrave; usciti</div>
-          <div><span style="color:var(--testo)">&#9203; Ritardi</span><br>Assenti da pi&ugrave; tempo</div>
-          <div><span style="color:var(--testo)">🧠 Avanzate</span><br>Monte Carlo & Analisi</div>
+          <div><span style="color:var(--testo)">&#9203; Ritardi</span><br>Assenti (ordinati per IC)</div>
+          <div><span style="color:var(--testo)">&#128290; Finali</span><br>Ultima cifra (solo Lotto)</div>
+          <div><span style="color:var(--testo)">&#129504; Avanzate</span><br>Hot·Cold·Coppie·Monte Carlo</div>
           <div><span style="color:var(--testo)">&#128197; Storico</span><br>Tutte le estrazioni</div>
           <div><span style="color:var(--testo)">&#128176; Premi</span><br>Tabella vincite</div>
-          <div><span style="color:var(--testo)">&#128290; Finali</span><br>Analisi ultima cifra (Lotto)</div>
-          <div><span style="color:var(--testo)">&#129504; Avanzate</span><br>Analisi statistica profonda</div>
+          <div><span style="color:var(--testo)">&#128260; Aggiorna</span><br>Scarica dati aggiornati</div>
         </div>
       </div>
 
@@ -2043,19 +2213,29 @@ function renderFreq(stats) {
 // RENDER RITARDATARI
 // ============================================================
 function renderRitard(stats) {
-  const sorted = Object.entries(stats.ritardi)
-    .sort((a,b) => b[1]-a[1])
-    .slice(0, 20);
-  const max = sorted[0][1] || 1;
+  const maxRit  = Math.max(...Object.values(stats.ritardi)) || 1;
+  const maxFreq = Math.max(...Object.values(stats.freqMap)) || 1;
+
+  // IC = (Ritardo Normalizzato) × (Frequenza Normalizzata)
+  // Premia numeri storicamente frequenti che sono anche in ritardo
+  const scored = Object.entries(stats.ritardi).map(([num, rit]) => {
+    const ritN  = rit / maxRit;
+    const freqN = (stats.freqMap[+num] || 0) / maxFreq;
+    return { num: +num, rit, ic: ritN * freqN };
+  });
+
+  const sorted = scored.sort((a, b) => b.ic - a.ic).slice(0, 20);
+  const maxIC  = sorted[0]?.ic || 1;
 
   let html = '<div class="ritard-grid">';
-  for (const [num, giorni] of sorted) {
-    const pct = Math.round((giorni/max)*100);
-    const label = giorni === allEstrazioni.length ? 'Mai estratto' : `${giorni} est. fa`;
+  for (const { num, rit, ic } of sorted) {
+    const pct    = Math.round((ic / maxIC) * 100);
+    const label  = rit === allEstrazioni.length ? 'Mai estratto' : `${rit} est. fa`;
+    const icLabel = Math.round(ic * 100);
     html += `
       <div class="ritard-item">
         <div class="ritard-n">${num}</div>
-        <div class="ritard-info">Ritardo</div>
+        <div class="ritard-info">IC ${icLabel}%</div>
         <div class="ritard-count">${label}</div>
         <div class="ritard-prog"><div class="ritard-fill" style="width:${pct}%"></div></div>
       </div>`;
@@ -2197,20 +2377,27 @@ function calcolaStatisticheAvanzate(estrazioni) {
     }
   }
 
-  // 2. Momentum: frequenza ultimi 10 vs frequenza ultimi 30 (rapporto)
+  // 2. WMA Momentum: peso lineare decrescente sulle ultime 10 estrazioni
+  // w[0]=n10 (più recente, peso massimo) → w[n10-1]=1 (più vecchia, peso minimo)
   const n10 = Math.min(10, tot);
   const n30 = Math.min(30, tot);
-  const freqU10 = {}; const freqU30 = {};
-  for (let n = 1; n <= 90; n++) { freqU10[n] = 0; freqU30[n] = 0; }
-  estrazioni.slice(0, n10).forEach(e => e.numeri.forEach(n => { freqU10[n] = (freqU10[n]||0) + 1; }));
-  estrazioni.slice(0, n30).forEach(e => e.numeri.forEach(n => { freqU30[n] = (freqU30[n]||0) + 1; }));
+  const freqWMA = {}; const freqU30 = {};
+  for (let n = 1; n <= 90; n++) { freqWMA[n] = 0; freqU30[n] = 0; }
+  let wtTot = 0;
+  for (let i = 0; i < n10; i++) {
+    const w = n10 - i; // i=0 → peso n10; i=n10-1 → peso 1
+    wtTot += w;
+    estrazioni[i].numeri.forEach(num => { if (num >= 1 && num <= 90) freqWMA[num] += w; });
+  }
+  estrazioni.slice(0, n30).forEach(e =>
+    e.numeri.forEach(num => { freqU30[num] = (freqU30[num]||0) + 1; })
+  );
   const momentum = {};
+  const atteso   = 20 / 90;
   for (let n = 1; n <= 90; n++) {
-    const r10 = freqU10[n] / n10;
-    const r30 = freqU30[n] / n30;
-    const atteso = 20 / 90;
-    // Momentum positivo = trending up rispetto alla media di lungo periodo
-    momentum[n] = (r10 - r30) / (atteso + 0.001);
+    const rWMA = freqWMA[n] / wtTot; // probabilità ponderata per estrazione
+    const r30  = freqU30[n] / n30;   // media semplice ultimi 30
+    momentum[n] = (rWMA - r30) / (atteso + 0.001);
   }
 
   // 3. Co-occorrenza: numeri che spesso escono nella stessa estrazione dei numeri
@@ -6105,15 +6292,18 @@ function mfcseGenerateRandom(size) {
 
 function mfcseIsValid(combo, game) {
   const size = combo.length;
-  let pari = 0, alti = 0;
-  const dc = new Uint8Array(10); // conteggio per decina (0-indexed)
+  let pari = 0, alti = 0, sum = 0;
+  const dc = new Uint8Array(10);
   for (let i = 0; i < size; i++) {
     const n = combo[i];
+    sum += n;
     if (n % 2 === 0) pari++;
     if (n > 45) alti++;
     dc[Math.ceil(n / 10) - 1]++;
   }
   if (game === 'lotto') {
+    // Gaussiano: N=90, k=5 → μ=227.5, σ≈56.8 → range [143, 312]
+    if (sum < 143 || sum > 312) return false;
     // pari/dispari: non tutti pari né tutti dispari (range 1-4)
     if (pari === 0 || pari === 5) return false;
     // alti/bassi: non tutti da un lato
@@ -6129,6 +6319,12 @@ function mfcseIsValid(combo, game) {
     }
     if (mc > 2) return false;
   } else { // 10elotto — dimensione variabile (1-10 numeri)
+    // Gaussiano dinamico: N=90, k=size
+    const muG    = size * 91 / 2;
+    const sigmaG = Math.sqrt(size * 91 * (90 - size) / 12);
+    const loG    = Math.ceil(muG  - 1.5 * sigmaG);
+    const hiG    = Math.floor(muG + 1.5 * sigmaG);
+    if (sum < loG || sum > hiG) return false;
     // Soglie proporzionali alla dimensione reale
     const halfSize = size / 2;
     const tol = Math.max(1, Math.round(size * 0.2)); // tolleranza ±20%
@@ -6290,15 +6486,16 @@ function mostraToast10e(msg) {
 // ============================================================
 
 function mfcseIsValidMD(combo) {
-  // range 1-55, 5 numeri, sorted
-  let pari = 0, alti = 0;
+  // Gaussiano: N=55, k=5 → μ=140, σ≈34.2 → range [89, 191]
+  let sum = 0, pari = 0, alti = 0;
   for (let i = 0; i < 5; i++) {
+    sum += combo[i];
     if (combo[i] % 2 === 0) pari++;
-    if (combo[i] >= 28) alti++; // metà di 55 ≈ 27.5
+    if (combo[i] >= 28) alti++;
   }
-  if (pari === 0 || pari === 5) return false;   // non tutti pari/dispari
-  if (alti === 0 || alti === 5) return false;   // non tutti alti/bassi
-  // max 2 consecutivi
+  if (sum < 89 || sum > 191) return false;
+  if (pari === 0 || pari === 5) return false;
+  if (alti === 0 || alti === 5) return false;
   let mc = 1, cc = 1;
   for (let i = 1; i < 5; i++) {
     if (combo[i] === combo[i-1] + 1) { if (++cc > mc) mc = cc; } else cc = 1;
@@ -6307,22 +6504,22 @@ function mfcseIsValidMD(combo) {
 }
 
 function mfcseIsValidSE(combo) {
-  // range 1-90, 6 numeri, sorted
-  let pari = 0, alti = 0;
+  // Gaussiano: N=90, k=6 → μ=273, σ≈61.8 → range [181, 365]
+  let sum = 0, pari = 0, alti = 0;
   const dc = new Uint8Array(10);
   for (let i = 0; i < 6; i++) {
     const n = combo[i];
+    sum += n;
     if (n % 2 === 0) pari++;
     if (n > 45) alti++;
     dc[Math.ceil(n / 10) - 1]++;
   }
+  if (sum < 181 || sum > 365) return false;
   if (pari === 0 || pari === 6) return false;
   if (alti === 0 || alti === 6) return false;
-  // decine: max 2 per decina, almeno 3 diverse
   let ndec = 0;
   for (let i = 0; i < 10; i++) { if (dc[i] > 2) return false; if (dc[i] > 0) ndec++; }
   if (ndec < 3) return false;
-  // max 2 consecutivi
   let mc = 1, cc = 1;
   for (let i = 1; i < 6; i++) {
     if (combo[i] === combo[i-1] + 1) { if (++cc > mc) mc = cc; } else cc = 1;
@@ -6339,11 +6536,12 @@ function runEnhancedSimulation(game, freqMap, ritardiMap, estrazioni, nSim, size
   const maxFreq = Math.max(...Object.values(freqMap)) || 1;
   const maxRit  = Math.max(...Object.values(ritardiMap)) || 1;
 
-  // Freq recente: ultime 10 estrazioni
+  // Freq recente con WMA: peso lineare decrescente (più recente = peso massimo)
   const nRec = Math.min(10, estrazioni.length);
   const freqRecArr = new Float32Array(maxN + 1);
   for (let i = 0; i < nRec; i++) {
-    estrazioni[i].numeri.forEach(function(n) { if (n >= 1 && n <= maxN) freqRecArr[n]++; });
+    const w = nRec - i; // i=0 (più recente) → peso nRec; i=nRec-1 → peso 1
+    estrazioni[i].numeri.forEach(function(n) { if (n >= 1 && n <= maxN) freqRecArr[n] += w; });
   }
   const maxFreqRec = Math.max(...freqRecArr) || 1;
 
@@ -6458,25 +6656,80 @@ function mfcseRenderCardsSE(mfcseResult) {
       + '</div>'
       + '<div class="serie-tag">&#127922; ' + mfcseResult.valid.toLocaleString('it-IT') + ' valide su ' + mfcseResult.total.toLocaleString('it-IT') + ' &middot; pass rate ' + validPct + '%</div>'
       + '<div class="serie-balls">' + r.numeri.map(function(n) { return '<div class="serie-ball">' + n + '</div>'; }).join('') + '</div>'
-      + '<div class="serie-motivo">freq\u00b70.6 + ritardo\u00b70.4 + peso recente (ult. 10) + coppie. Filtri: pari/dispari \u00b7 alto/basso \u00b7 consecutivi \u00b7 decine.</div>'
+      + '<div class="serie-motivo">WMA freq\u00b70.6 + IC ritardo\u00b70.4 + coppie \u00b7 Filtri: pari/dispari \u00b7 alto/basso \u00b7 decine \u00b7 somma Gaussiana [181\u2013365] \u00b7 Jolly+SS calcolati da storico</div>'
       + '<div class="gioca-btn">&#9989; Gioco questa serie</div>'
       + '</div>';
   });
   return html;
 }
 
-// Apre il riepilogo SE per una serie MFCSE (senza jolly/superstar)
+// ============================================================
+// JOLLY + SUPERSTAR — calcolo statistico da storico seEstrazioni
+// Jolly:     IC = (ritardo_norm × freq_norm) — esclusi i 6 numeri della serie
+// SuperStar: numero 1-90 con frequenza storica più alta (regola reale: può coincidere)
+// ============================================================
+function calcolaJollySuperstarSE(numeriEsclusi) {
+  if (!seEstrazioni || !seEstrazioni.length) return { jolly: null, superstar: null };
+
+  const freqJ  = new Array(91).fill(0);
+  const freqSS = new Array(91).fill(0);
+  const ritJ   = new Array(91).fill(seEstrazioni.length); // ritardo jolly
+
+  seEstrazioni.forEach(function(e, idx) {
+    if (e.jolly >= 1 && e.jolly <= 90) {
+      freqJ[e.jolly]++;
+      if (ritJ[e.jolly] === seEstrazioni.length) ritJ[e.jolly] = idx; // prima occorrenza dal più recente
+    }
+    if (e.superstar >= 1 && e.superstar <= 90) {
+      freqSS[e.superstar]++;
+    }
+  });
+
+  const maxFreqJ = Math.max.apply(null, freqJ) || 1;
+  const maxRitJ  = Math.max.apply(null, ritJ)  || 1;
+
+  // IC jolly: (ritardo normalizzato) × (frequenza normalizzata) — escludi i numeri della serie
+  let bestJolly = null, bestIC = -1;
+  for (var n = 1; n <= 90; n++) {
+    if (numeriEsclusi.indexOf(n) !== -1) continue; // jolly non può coincidere con i 6 principali
+    var ic = (ritJ[n] / maxRitJ) * (freqJ[n] / maxFreqJ);
+    if (ic > bestIC) { bestIC = ic; bestJolly = n; }
+  }
+
+  // SuperStar: frequenza massima su storico (può coincidere con i 6 principali — regola reale)
+  var bestSS = null, bestFreqSS = -1;
+  for (var n = 1; n <= 90; n++) {
+    if (freqSS[n] > bestFreqSS) { bestFreqSS = freqSS[n]; bestSS = n; }
+  }
+
+  return { jolly: bestJolly, superstar: bestSS };
+}
+
+// Apre il riepilogo SE per una serie MFCSE con jolly e superstar calcolati dal motore
 function giocaSEMFCSE(numeri, nomeSerie) {
+  var js = calcolaJollySuperstarSE(numeri);
+  var jollyVal     = js.jolly     || '';
+  var superstarVal = js.superstar || '';
+
   document.querySelectorAll('#panel-se-gioca .serie-card').forEach(function(c) { c.classList.remove('selected-serie'); });
   document.getElementById('se-rie-balls').innerHTML = numeri.map(function(n) { return '<div class="rie-ball">' + n + '</div>'; }).join('');
+
+  var jollyLabel     = jollyVal     ? '<span style="background:rgba(220,53,69,.18);color:#e07080;padding:2px 8px;border-radius:12px;font-weight:700">J: ' + jollyVal     + '</span>' : '<span style="color:var(--soft)">—</span>';
+  var superstarLabel = superstarVal ? '<span style="background:rgba(201,168,76,.18);color:var(--oro);padding:2px 8px;border-radius:12px;font-weight:700">SS: ' + superstarVal + '</span>' : '<span style="color:var(--soft)">—</span>';
+
   document.getElementById('se-rie-info').innerHTML =
     '<strong>Numeri:</strong> ' + numeri.join(' \u2013 ') + '<br>'
-    + '<span style="font-size:10px;color:var(--soft)">Jolly e SuperStar: non calcolati dal motore simulativo</span><br>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap">'
+    +   '<span style="font-size:10px;color:var(--soft)">Jolly suggerito:</span> ' + jollyLabel
+    +   '&nbsp;&nbsp;<span style="font-size:10px;color:var(--soft)">SuperStar:</span> ' + superstarLabel
+    + '</div>'
+    + '<div style="font-size:9px;color:var(--soft);margin-bottom:8px">Jolly: IC (ritardo\u00d7frequenza storica), esclusi i 6 principali &middot; SuperStar: frequenza massima su storico</div>'
     + '<button class="btn" id="se-conferma-btn"'
     + ' data-numeri="' + numeri.join(',') + '"'
-    + ' data-jolly="" data-superstar=""'
+    + ' data-jolly="' + jollyVal + '"'
+    + ' data-superstar="' + superstarVal + '"'
     + ' data-nome="' + (nomeSerie || '').replace(/'/g, '') + '"'
-    + ' onclick="confermaSESerie()" style="margin-top:15px">'
+    + ' onclick="confermaSESerie()" style="margin-top:8px">'
     + '&#9989; Confermo &mdash; Salva giocata</button>'
     + '<span style="color:var(--rosso);font-size:9px;display:block;margin-top:8px">&#9888;&#65039; Nessuna strategia garantisce vincite</span>';
   document.getElementById('se-riepilogo-box').style.display = 'block';
