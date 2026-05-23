@@ -2567,9 +2567,8 @@ function generaSerieAvanzata() {
 
   html += '</div>';
 
-  document.getElementById('serie-content').innerHTML = html;
-  
-  // Aggiungo bottone "Salva Previsione per prossimo sabato"
+  const _bt10eAdv = backtestAutomatico(allEstrazioni, 90, serieA.length, 40);
+  document.getElementById('serie-content').innerHTML = renderBacktestBanner(_bt10eAdv, '10eLotto') + html;
   const _dataPrevisione = prossimaSabato();
   const _dataLabel = new Date(_dataPrevisione + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   const divPrev = document.createElement('div');
@@ -2624,6 +2623,120 @@ function salvaPrevisionePerData(serieA, serieB, data) {
 // ============================================================
 // BACKTEST — ULTIMA ESTRAZIONE + STORICO PRECEDENTE + PREVISIONI FUTURE
 // ============================================================
+// ============================================================
+// BACKTEST AUTOMATICO — integrato in tutte le 4 generate
+// Per ogni estrazione (fino a nTest), usa solo i dati precedenti
+// per generare una previsione e confronta con l'estrazione reale.
+// Restituisce statistiche di hit per Serie A e Serie B.
+// ============================================================
+function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
+  nTest = Math.min(nTest || 40, estrazioni.length - 10);
+  if (nTest < 5) return null;
+
+  var A = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
+  var B = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
+
+  for (var t = 1; t <= nTest; t++) {
+    var hist   = estrazioni.slice(t);
+    if (hist.length < 8) break;
+    var target = estrazioni[t-1].numeri.filter(function(n){ return n>=1 && n<=maxN; });
+    if (!target.length) continue;
+
+    // Scorer leggero: freq + ritardo + WMA (senza cicloMedio — veloce)
+    var freq = new Float32Array(maxN + 1);
+    var rit  = new Float32Array(maxN + 1).fill(hist.length);
+    hist.forEach(function(e, i) {
+      e.numeri.forEach(function(n) {
+        if (n>=1 && n<=maxN) { freq[n]++; if (rit[n]===hist.length) rit[n]=i; }
+      });
+    });
+    var nR = Math.min(10, hist.length), wma = new Float32Array(maxN + 1), wt = 0;
+    for (var i=0; i<nR; i++) {
+      var w = nR - i; wt += w;
+      hist[i].numeri.forEach(function(n){ if (n>=1 && n<=maxN) wma[n]+=w; });
+    }
+    var mxF = Math.max.apply(null, freq) || 1;
+    var mxR = Math.max.apply(null, rit)  || 1;
+    var mxW = (wt / nR) || 1;
+
+    // Serie A: Ritardo 60% + Frequenza 40%
+    var scA = function(n){ return (freq[n]/mxF)*0.40 + (rit[n]/mxR)*0.60; };
+    // Serie B: Momentum 35% + Ritardo 40% + Frequenza 25%
+    var scB = function(n){ return (wma[n]/mxW)*0.35 + (rit[n]/mxR)*0.40 + (freq[n]/mxF)*0.25; };
+
+    var ids = Array.from({length:maxN}, function(_,k){ return k+1; });
+    var sA  = ids.slice().sort(function(a,b){ return scA(b)-scA(a); }).slice(0, gameSize);
+    var sB  = ids.slice().sort(function(a,b){ return scB(b)-scB(a); }).slice(0, gameSize);
+
+    function countHit(serie, tgt) {
+      return serie.filter(function(n){ return tgt.indexOf(n)!==-1; }).length;
+    }
+    var hA = countHit(sA, target), hB = countHit(sB, target);
+
+    function reg(st, h) {
+      st.tot++; st.totHit+=h; if(h>st.maxHit) st.maxHit=h;
+      if(h===0)st.h0++; else if(h===1)st.h1++; else if(h===2)st.h2++; else st.h3p++;
+    }
+    reg(A, hA); reg(B, hB);
+  }
+  return { A:A, B:B, nTest: A.tot, gameSize: gameSize };
+}
+
+// Rende il banner riepilogativo del backtest — appare SOPRA le carte
+function renderBacktestBanner(bt, nomeGioco) {
+  if (!bt || bt.nTest < 5) return '';
+  var A = bt.A, B = bt.B, gs = bt.gameSize;
+
+  function pct(x, tot) { return tot ? Math.round(x/tot*100) : 0; }
+  function avg(x, tot) { return tot ? (x/tot).toFixed(1) : '0.0'; }
+
+  var pA1 = pct(A.tot - A.h0, A.tot); // % con almeno 1 hit
+  var pB1 = pct(B.tot - B.h0, B.tot);
+  var avgA = avg(A.totHit, A.tot), avgB = avg(B.totHit, B.tot);
+
+  var colA = pA1 >= 50 ? '#4CAF50' : pA1 >= 30 ? '#C9A84C' : '#e07080';
+  var colB = pB1 >= 50 ? '#4CAF50' : pB1 >= 30 ? '#C9A84C' : '#e07080';
+
+  function barCell(count, tot, label, col) {
+    var p = pct(count, tot);
+    if (!p && !count) return '';
+    return '<div style="flex:'+Math.max(p,8)+';background:'+col+';border-radius:3px;padding:2px 4px;text-align:center;font-size:8px;font-weight:700;color:#000;min-width:22px">'+label+'<br>'+p+'%</div>';
+  }
+
+  function statsBlock(st, col, label) {
+    return '<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:10px 12px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
+      +   '<span style="font-size:10px;font-weight:700;color:#ccc">'+label+'</span>'
+      +   '<span style="font-size:20px;font-weight:700;color:'+col+'">'+pct(st.tot-st.h0,st.tot)+'%</span>'
+      + '</div>'
+      + '<div style="font-size:9px;color:#888;margin-bottom:6px">volte con ≥1 numero indovinato &nbsp;|&nbsp; Media <strong style="color:#ccc">'+avg(st.totHit,st.tot)+'</strong>/'+gs+' &nbsp;|&nbsp; Record <strong style="color:'+col+'">'+st.maxHit+'</strong>/'+gs+'</div>'
+      + '<div style="display:flex;gap:3px;height:26px;align-items:stretch">'
+      +   barCell(st.h0,  st.tot, '0', 'rgba(255,255,255,.12)')
+      +   barCell(st.h1,  st.tot, '1', 'rgba(201,168,76,.55)')
+      +   barCell(st.h2,  st.tot, '2', 'rgba(40,180,100,.55)')
+      +   barCell(st.h3p, st.tot, '3+','rgba(40,180,100,.85)')
+      + '</div>'
+      + '<div style="font-size:8px;color:#666;margin-top:4px">0 = nessuno indovinato · 1 = uno · 2 = due · 3+ = tre o più</div>'
+      + '</div>';
+  }
+
+  return '<div style="background:linear-gradient(135deg,rgba(42,93,191,.14),rgba(42,93,191,.06));border:1px solid rgba(42,93,191,.35);border-radius:12px;padding:14px 16px;margin-bottom:16px">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+    +   '<span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7AACFF;font-weight:700">🔬 Backtest automatico — '+bt.nTest+' estrazioni reali</span>'
+    + '</div>'
+    + '<div style="font-size:9px;color:#888;line-height:1.7;margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,.2);border-radius:6px">'
+    +   '<strong style="color:#ccc">Come funziona:</strong> per ciascuna delle ultime '+bt.nTest+' estrazioni, il motore ha <em>fatto finta di non sapere il risultato</em>, '
+    +   'ha calcolato la previsione usando solo i dati precedenti, poi ha confrontato con l\'estrazione reale. '
+    +   'I numeri qui sotto mostrano quante volte il metodo avrebbe indovinato qualcosa. '
+    +   '<strong style="color:#C9A84C">Non è una garanzia</strong> — il gioco è casuale per natura.'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +   statsBlock(A, colA, 'Serie A — Ritardo')
+    +   statsBlock(B, colB, 'Serie B — Momentum')
+    + '</div>'
+    + '</div>';
+}
+
 function eseguiBacktest() {
   if (allEstrazioni.length < 25) {
     document.getElementById('backtest-content').innerHTML =
@@ -2995,8 +3108,8 @@ function generaSerie() {
   });
 
   html += '</div>';
-  document.getElementById('serie-content').innerHTML = html;
-  document.getElementById('riepilogo-box').classList.remove('show');
+  const _bt10eBase = backtestAutomatico(allEstrazioni, 90, quantiNumeri || 10, 40);
+  document.getElementById('serie-content').innerHTML = renderBacktestBanner(_bt10eBase, '10eLotto') + html;
   serieSelezionata = null;
 }
 
@@ -3694,7 +3807,8 @@ function renderMDSerie() {
     }
   } catch(_eMD) { console.warn('MFCSE MD:', _eMD); }
 
-  html = '<div class="serie-grid">' + htmlA + '</div>' + _mfcseHtmlMD;
+  const _btMD = backtestAutomatico(mdEstrazioni, 55, 5, 40);
+  html = renderBacktestBanner(_btMD, 'MillionDay') + '<div class="serie-grid">' + htmlA + '</div>' + _mfcseHtmlMD;
   document.getElementById('md-serie-content').innerHTML = html;
   document.getElementById('md-riepilogo-box').classList.remove('show');
 }
@@ -3750,6 +3864,8 @@ function confermaMDSerie() {
   if (!esiste) { storico.unshift(nuova); salvaMDStorico(storico); }
   renderMieGiocateMD();
   mostraToast10e('✓ Giocata MillionDay salvata');
+  // Nasconde subito la card selezionata
+  document.querySelectorAll('#panel-md-gioca .serie-card.selected-serie').forEach(c => { c.style.display = 'none'; });
   setTimeout(() => {
     const box = document.getElementById('md-riepilogo-box');
     if (box) box.classList.remove('show');
@@ -4404,8 +4520,8 @@ function generaPrevisioni() {
   } catch(_e) { console.warn('MFCSE Lotto:', _e); }
 
   html += '</div>';
-  document.getElementById('lotto-previsioni-content').innerHTML = html;
-  document.getElementById('lotto-riepilogo-box').classList.remove('show');
+  const _btLotto = backtestAutomatico(estr, 90, n, 40);
+  document.getElementById('lotto-previsioni-content').innerHTML = renderBacktestBanner(_btLotto, 'Lotto ' + lottoRuota) + html;
 }
 
 function salvaLottoSerieAdv(numeri, nome) {
@@ -4497,6 +4613,8 @@ function confermaLottoSerie() {
   if (!esiste) { storico.unshift(nuova); salvaLottoStorico(storico); }
   renderMieGiocateLotto();
   mostraToast10e('✓ Lotto salvata — ' + tipoLabel + ' ' + speso.toFixed(2) + '€');
+  // Nasconde subito la card selezionata
+  document.querySelectorAll('#panel-lotto-gioca .serie-card.selected-serie').forEach(c => { c.style.display = 'none'; });
   setTimeout(() => {
     const box = document.getElementById('lotto-riepilogo-box');
     if (box) box.classList.remove('show');
@@ -4779,7 +4897,9 @@ function confermaSerie() {
   if (!esiste) { storico.unshift(nuova); salvaStorico(storico); }
   renderMieGiocate();
   const badgeOro = opzioneOro === 'oro' ? ' 🌟 N.Oro' : '';
-  // Toast e pulizia immediata
+  // Nasconde subito la card selezionata
+  document.querySelectorAll('.serie-card.selected-serie').forEach(c => { c.style.display = 'none'; });
+  // Toast e pulizia
   mostraToast10e('✓ Giocata salvata');
   setTimeout(() => {
     const box = document.getElementById('riepilogo-box');
@@ -5582,7 +5702,8 @@ function generaPrevisioniSE() {
     }
   } catch(_eSE) { console.warn('MFCSE SE:', _eSE); }
 
-  document.getElementById('se-previsioni-content').innerHTML = html;
+  const _btSE = backtestAutomatico(seEstrazioni, 90, 6, 40);
+  document.getElementById('se-previsioni-content').innerHTML = renderBacktestBanner(_btSE, 'SuperEnalotto') + html;
   document.getElementById('se-riepilogo-box').style.display = 'none';
 
   // INDEX2: Serie B e C → Avanzate
@@ -5648,6 +5769,8 @@ function confermaSESerie() {
   
   renderSEMieGiocate();
   mostraToast10e('✓ Colonna SE salvata');
+  // Nasconde subito la card selezionata
+  document.querySelectorAll('#panel-se-gioca .serie-card.selected-serie').forEach(c => { c.style.display = 'none'; });
   setTimeout(() => {
     const box = document.getElementById('se-riepilogo-box');
     if (box) box.style.display = 'none';
