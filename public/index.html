@@ -2379,8 +2379,23 @@ function calcolaStatisticheAvanzate(estrazioni) {
     }
   }
 
-  // 2. WMA Momentum: peso lineare decrescente sulle ultime 10 estrazioni
-  const n10 = Math.min(10, tot);
+  // 1b. CV ciclo (σ/μ dei gap): basso=regolare/affidabile, alto=caotico
+  const cicloCV = {};
+  for (let n = 1; n <= 90; n++) {
+    const pos = _posizioni[n];
+    if (pos.length >= 3) {
+      const gaps = [];
+      for (let i = 0; i < pos.length - 1; i++) gaps.push(pos[i+1] - pos[i]);
+      const muG  = gaps.reduce((a,b)=>a+b,0) / gaps.length;
+      const sigG = Math.sqrt(gaps.reduce((a,b)=>a+(b-muG)*(b-muG),0) / gaps.length);
+      cicloCV[n] = muG > 0 ? sigG / muG : 1; // 0=perfettamente regolare, >1=caotico
+    } else {
+      cicloCV[n] = 1; // dati insufficienti → ciclo inaffidabile
+    }
+  }
+
+  // 2. WMA Momentum: peso lineare decrescente sulle ultime 25 estrazioni
+  const n10 = Math.min(25, tot);   // finestra ampliata 10→25
   const n30 = Math.min(30, tot);
   const freqWMA = {}; const freqU30 = {};
   for (let n = 1; n <= 90; n++) { freqWMA[n] = 0; freqU30[n] = 0; }
@@ -2418,7 +2433,7 @@ function calcolaStatisticheAvanzate(estrazioni) {
     coScore[n] = _coTot > 5 ? (_coHits[n] / _coTot) / _attesoCo - 1 : 0;
   }
 
-  return { ...base, cicloMedio, momentum, coScore, ultimi3Set };
+  return { ...base, cicloMedio, cicloCV, momentum, coScore, ultimi3Set };
 }
 
 function calcolaScoreMultiFattore(num, stats, dynPesi) {
@@ -2432,10 +2447,13 @@ function calcolaScoreMultiFattore(num, stats, dynPesi) {
     wf3 = 0.75 * (dynPesi.wFreq / dt);
   }
 
-  // F1: Ritardo relativo al ciclo personale del numero
+  // F1: Ritardo relativo al ciclo personale, modulato dall'affidabilità del ciclo (CV)
   const ritAtt = stats.ritardi[num] || 0;
-  const ciclo = Math.max(stats.cicloMedio[num] || 4.5, 1);
-  const f1 = Math.min(ritAtt / ciclo, 3) / 3;
+  const ciclo  = Math.max(stats.cicloMedio[num] || 4.5, 1);
+  const cv     = Math.min(stats.cicloCV ? (stats.cicloCV[num] || 1) : 1, 2); // CV cap a 2
+  const affid  = 1 - cv / 2;               // 0 (caotico) → 1 (ciclo regolare)
+  const f1Raw  = Math.min(ritAtt / ciclo, 3) / 3;
+  const f1     = f1Raw * (0.70 + affid * 0.30); // boost max +30% se ciclo regolare
 
   // F2: Momentum recente WMA
   const mom = stats.momentum[num] || 0;
@@ -6426,13 +6444,13 @@ function mfcseGenerateRandom(size) {
 
 // ============================================================
 // DYNAMIC WEIGHTS ENGINE
-// Mini-backtest sulle ultime 10 estrazioni: misura l'efficacia
+// Mini-backtest sulle ultime 25 estrazioni: misura l'efficacia
 // di freq, IC-ritardo e WMA-momentum. Restituisce pesi 0..1
 // ============================================================
 function calcolaPesiDinamici(estrazioni, maxN, gameSize) {
   maxN     = maxN     || 90;
   gameSize = gameSize || 5;
-  const nTest = Math.min(10, estrazioni.length - 1);
+  const nTest = Math.min(25, estrazioni.length - 1);  // ampliata 10→25
   if (nTest < 3) return { wFreq: 0.42, wRit: 0.34, wMom: 0.24 };
 
   const topN = Math.max(gameSize * 3, 20);
@@ -6548,7 +6566,7 @@ function diversificaTop(results, n, maxOverlap) {
   return sel;
 }
 
-function mfcseIsValid(combo, game) {
+function mfcseIsValid(combo, game, empLo, empHi) {
   const size = combo.length;
   let pari = 0, alti = 0, sum = 0;
   const dc = new Uint8Array(10);
@@ -6560,11 +6578,16 @@ function mfcseIsValid(combo, game) {
     dc[Math.ceil(n / 10) - 1]++;
   }
   if (game === 'lotto') {
-    // Gaussiano dinamico: funziona per ambo(2), terno(3), quaterna(4), cinquina(5)
-    const muG    = size * 91 / 2;
-    const sigmaG = Math.sqrt(size * 91 * (90 - size) / 12);
-    const loG    = Math.ceil(muG  - 1.5 * sigmaG);
-    const hiG    = Math.floor(muG + 1.5 * sigmaG);
+    // Usa range empirico se disponibile, altrimenti formula dinamica teorica
+    let loG, hiG;
+    if (empLo !== undefined) {
+      loG = empLo; hiG = empHi;
+    } else {
+      const muG    = size * 91 / 2;
+      const sigmaG = Math.sqrt(size * 91 * (90 - size) / 12);
+      loG = Math.ceil(muG  - 1.5 * sigmaG);
+      hiG = Math.floor(muG + 1.5 * sigmaG);
+    }
     if (sum < loG || sum > hiG) return false;
     // pari/dispari: non tutti pari né tutti dispari
     if (pari === 0 || pari === size) return false;
@@ -6753,15 +6776,17 @@ function mostraToast10e(msg) {
 // Gestisce: 10elotto (1-90), lotto (1-90,5n), millionday (1-55,5n), se (1-90,6n)
 // ============================================================
 
-function mfcseIsValidMD(combo) {
-  // Gaussiano: N=55, k=5 → μ=140, σ≈34.2 → range [89, 191]
+function mfcseIsValidMD(combo, empLo, empHi) {
+  // Gaussiano: usa range empirico se disponibile, altrimenti teorico [89, 191]
   let sum = 0, pari = 0, alti = 0;
   for (let i = 0; i < 5; i++) {
     sum += combo[i];
     if (combo[i] % 2 === 0) pari++;
     if (combo[i] >= 28) alti++;
   }
-  if (sum < 89 || sum > 191) return false;
+  const loG = (empLo !== undefined) ? empLo : 89;
+  const hiG = (empHi !== undefined) ? empHi : 191;
+  if (sum < loG || sum > hiG) return false;
   if (pari === 0 || pari === 5) return false;
   if (alti === 0 || alti === 5) return false;
   let mc = 1, cc = 1;
@@ -6771,8 +6796,8 @@ function mfcseIsValidMD(combo) {
   return mc <= 2;
 }
 
-function mfcseIsValidSE(combo) {
-  // Gaussiano: N=90, k=6 → μ=273, σ≈61.8 → range [181, 365]
+function mfcseIsValidSE(combo, empLo, empHi) {
+  // Gaussiano: usa range empirico se disponibile, altrimenti teorico [181, 365]
   let sum = 0, pari = 0, alti = 0;
   const dc = new Uint8Array(10);
   for (let i = 0; i < 6; i++) {
@@ -6782,7 +6807,9 @@ function mfcseIsValidSE(combo) {
     if (n > 45) alti++;
     dc[Math.ceil(n / 10) - 1]++;
   }
-  if (sum < 181 || sum > 365) return false;
+  const loG = (empLo !== undefined) ? empLo : 181;
+  const hiG = (empHi !== undefined) ? empHi : 365;
+  if (sum < loG || sum > hiG) return false;
   if (pari === 0 || pari === 6) return false;
   if (alti === 0 || alti === 6) return false;
   let ndec = 0;
@@ -6816,8 +6843,8 @@ function runEnhancedSimulation(game, freqMap, ritardiMap, estrazioni, nSim, size
   const maxFreq = Math.max(...Object.values(freqMap)) || 1;
   const maxRit  = Math.max(...Object.values(ritardiMap)) || 1;
 
-  // Freq recente con WMA: peso lineare decrescente (più recente = peso massimo)
-  const nRec = Math.min(10, estrazioni.length);
+  // Freq recente con WMA: peso lineare decrescente sulle ultime 25 estrazioni
+  const nRec = Math.min(25, estrazioni.length);  // ampliata 10→25
   const freqRecArr = new Float32Array(maxN + 1);
   for (let i = 0; i < nRec; i++) {
     const w = nRec - i;
@@ -6847,10 +6874,31 @@ function runEnhancedSimulation(game, freqMap, ritardiMap, estrazioni, nSim, size
   });
   if (maxCop > 0) for (let k = 0; k < coppieFlat.length; k++) coppieFlat[k] /= maxCop;
 
-  // Validator per gioco
-  const isValid = game === 'millionday' ? mfcseIsValidMD
-                : game === 'se'         ? mfcseIsValidSE
-                : function(c) { return mfcseIsValid(c, game); };
+  // ── Gaussiana empirica: calcola μ±1.5σ reali dalle somme storiche ──────────
+  var empLo, empHi;
+  (function() {
+    var _somme = [];
+    var _lim = Math.min(estrazioni.length, 500);
+    for (var _i = 0; _i < _lim; _i++) {
+      var _ns = estrazioni[_i].numeri.filter(function(n) { return n >= 1 && n <= maxN; });
+      if (_ns.length >= size) {
+        var _s = 0; for (var _j = 0; _j < size; _j++) _s += _ns[_j];
+        _somme.push(_s);
+      }
+    }
+    if (_somme.length >= 15) {
+      var _mu = _somme.reduce(function(a,b){return a+b},0) / _somme.length;
+      var _vS = 0; _somme.forEach(function(s){ var d=s-_mu; _vS+=d*d; });
+      var _sig = Math.sqrt(_vS / _somme.length);
+      empLo = Math.floor(_mu - 1.5 * _sig);
+      empHi = Math.ceil(_mu  + 1.5 * _sig);
+    }
+  })();
+
+  // Validator per gioco — passa range empirico
+  const isValid = game === 'millionday' ? function(c) { return mfcseIsValidMD(c, empLo, empHi); }
+                : game === 'se'         ? function(c) { return mfcseIsValidSE(c, empLo, empHi); }
+                : function(c) { return mfcseIsValid(c, game, empLo, empHi); };
 
   // Genera combo casuale nel range corretto
   const _used = new Uint8Array(maxN + 1);
