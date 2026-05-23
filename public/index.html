@@ -4510,7 +4510,7 @@ function generaPrevisioni() {
   try {
     const _estrLotto = lottoEstrazioni[lottoRuota] || [];
     if (_estrLotto.length > 0) {
-      const _mfcseLotto = runEnhancedSimulation('lotto', lottoFreqMap, lottoRitardi, _estrLotto, 200000);
+      const _mfcseLotto = runEnhancedSimulation('lotto', lottoFreqMap, lottoRitardi, _estrLotto, 200000, n);
       if (_mfcseLotto.valid > 0) {
         html += mfcseRenderCards(_mfcseLotto, 'lotto-serie', 'selezionaLottoSerie', 0);
       } else {
@@ -6560,16 +6560,21 @@ function mfcseIsValid(combo, game) {
     dc[Math.ceil(n / 10) - 1]++;
   }
   if (game === 'lotto') {
-    // Gaussiano: N=90, k=5 → μ=227.5, σ≈56.8 → range [143, 312]
-    if (sum < 143 || sum > 312) return false;
-    // pari/dispari: non tutti pari né tutti dispari (range 1-4)
-    if (pari === 0 || pari === 5) return false;
+    // Gaussiano dinamico: funziona per ambo(2), terno(3), quaterna(4), cinquina(5)
+    const muG    = size * 91 / 2;
+    const sigmaG = Math.sqrt(size * 91 * (90 - size) / 12);
+    const loG    = Math.ceil(muG  - 1.5 * sigmaG);
+    const hiG    = Math.floor(muG + 1.5 * sigmaG);
+    if (sum < loG || sum > hiG) return false;
+    // pari/dispari: non tutti pari né tutti dispari
+    if (pari === 0 || pari === size) return false;
     // alti/bassi: non tutti da un lato
-    if (alti === 0 || alti === 5) return false;
-    // decine: almeno 3 diverse, max 2 per decina
+    if (alti === 0 || alti === size) return false;
+    // decine: almeno ceil(size/2) diverse, max 2 per decina
+    const minDec = Math.max(1, Math.ceil(size / 2));
     let ndec = 0;
     for (let i = 0; i < 10; i++) { if (dc[i] > 2) return false; if (dc[i] > 0) ndec++; }
-    if (ndec < 3) return false;
+    if (ndec < minDec) return false;
     // consecutivi: max 2
     let mc = 1, cc = 1;
     for (let i = 1; i < size; i++) {
