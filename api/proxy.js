@@ -29,8 +29,7 @@ function stripHtml(str) {
 }
 
 // ============================================================
-// 10eLotto — fonte: estrazionilotto.it
-// Struttura reale: "Estrazione 10eLotto n. 99 sabato 20 giugno 2026 7 8 17 ... Numero Oro 10eLotto 90"
+// 10eLotto — fonte: estrazionilotto.it (INVARIATO - funziona)
 // ============================================================
 function parse10eLottoAnno(html) {
   const results = [];
@@ -59,36 +58,23 @@ function parse10eLottoAnno(html) {
 }
 
 // ============================================================
-// MillionDay — fonte: archiviomillionday.it
-// Struttura tabella HTML:
-//   <td>20/6/2026</td> <td>342</td> <td>13 18 25 42 43</td> <td>20 21 35 51 52</td>
-// Prendo solo estrazione sera (concorso pari = 20:30, dispari = 13:00)
-// In realtà il concorso pari corrisponde alla sera basandosi sui dati osservati:
-//   342 (20:30) = 13 18 25 42 43 → concorso pari
-//   341 (13:00) = 3 9 13 25 40   → concorso dispari
-// Quindi: concorso pari = sera, concorso dispari = mattina
+// MillionDay — fonte: archiviomillionday.it (INVARIATO - logica corretta)
 // ============================================================
 function parseMillionDay(html) {
   const results = [];
-  // Cerca righe tabella: <tr> con link alla data e numeri
   const righe = html.split(/<tr[\s>]/i);
   for (const riga of righe) {
-    // Cerca data nel formato DD/M/YYYY o D/M/YYYY nel link href o nel testo
     const dataM = riga.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     if (!dataM) continue;
     const giorno = dataM[1].padStart(2,'0');
     const mese = dataM[2].padStart(2,'0');
     const anno = dataM[3];
     const data = anno+'-'+mese+'-'+giorno;
-    // Solo sabati
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    // Cerca numero concorso
     const concorsoM = riga.match(/concorso[^0-9]*(\d+)/i);
     if (!concorsoM) continue;
     const concorso = parseInt(concorsoM[1]);
-    // Solo concorsi pari = sera (20:30)
     if (concorso % 2 !== 0) continue;
-    // Cerca numeri nella colonna "Numeri estratti": celle <td> con sequenza di numeri 1-55
     const celle = riga.match(/<td[^>]*>([\s\d]+)<\/td>/gi);
     if (!celle) continue;
     for (const cella of celle) {
@@ -104,8 +90,7 @@ function parseMillionDay(html) {
 }
 
 // ============================================================
-// Lotto — fonte: estrazionilotto.it
-// Struttura reale: "Estrazione Lotto n. 99 sabato 20 giugno 2026 ... Genova 17 24 43 89 22 ..."
+// Lotto — fonte: estrazionilotto.it (INVARIATO - funziona)
 // ============================================================
 function parseLottoAnno(html, ruota) {
   const results = [];
@@ -135,36 +120,51 @@ function parseLottoAnno(html, ruota) {
 
 // ============================================================
 // SuperEnalotto — fonte: tuttosuperenalotto.it
-// Struttura tabella HTML:
-//   | 100 | 23/06/2026 | 1 | 12 | 17 | 27 | 66 | 84 | Jolly: 61 | SS: 4 |
-// Ogni riga: <td>concorso</td><td>DD/MM/YYYY</td><td>n1</td>...<td>n6</td><td>jolly</td><td>ss</td>
+//
+// HTML reale di ogni riga:
+//   <tr>
+//     <td><a href="...?dt=20260620...">99</a></td>  ← link, NON numero nudo
+//     <td>20/06/2026</td>
+//     <td>14</td><td>59</td><td>69</td><td>71</td><td>82</td><td>89</td>
+//     <td>47</td>   ← Jolly
+//     <td>3</td>    ← SuperStar
+//   </tr>
+//
+// Strategia: cerco la data DD/MM/YYYY nel link href (?dt=YYYYMMDD) o nel testo cella,
+// poi raccolgo tutti i <td> con numero puro (senza tag figli) = 8 celle numeriche
 // ============================================================
 function parseSuperEnalottoAnno(html) {
   const results = [];
+
+  // Divide per righe <tr>
   const righe = html.split(/<tr[\s>]/i);
+
   for (const riga of righe) {
-    // Cerca data nel formato DD/MM/YYYY
-    const dataM = riga.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-    if (!dataM) continue;
-    const data = dataM[3]+'-'+dataM[2]+'-'+dataM[1];
-    // Solo sabati
+    // Cerca data nel formato ?dt=YYYYMMDD nel link
+    const dtM = riga.match(/\?dt=(\d{4})(\d{2})(\d{2})/);
+    if (!dtM) continue;
+
+    const data = dtM[1]+'-'+dtM[2]+'-'+dtM[3];
+
+    // Solo sabati (getDay() === 6)
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    // Estrai tutti i numeri dalle celle <td>
-    const celle = [...riga.matchAll(/<td[^>]*>\s*(\d{1,2})\s*<\/td>/gi)].map(m => parseInt(m[1]));
-    // La struttura attesa è: [concorso, (ignorato-già nella data), n1,n2,n3,n4,n5,n6, jolly, superstar]
-    // ma la data è in formato testo, non numero, quindi celle contiene solo numeri puri
-    // celle[0] = numero concorso (es. 99 o 100)
-    // celle[1..6] = sei numeri estrazione
-    // celle[7] = jolly
-    // celle[8] = superstar
-    if (celle.length < 9) continue;
-    const numeri = celle.slice(1,7).filter(n => n >= 1 && n <= 90);
-    const jolly = celle[7] || null;
-    const superstar = celle[8] || null;
-    if (numeri.length === 6) {
-      results.push({ data, numeri: numeri.sort((a,b)=>a-b), jolly, superstar });
-    }
+
+    // Raccogli SOLO le celle <td> che contengono esclusivamente un numero
+    // (senza tag figli come <a>) → pattern: <td>SPAZI numero SPAZI</td>
+    const numeriCelle = [...riga.matchAll(/<td[^>]*>\s*(\d{1,2})\s*<\/td>/gi)]
+      .map(m => parseInt(m[1]))
+      .filter(n => n >= 1 && n <= 90);
+
+    // Devono essere esattamente 8: 6 numeri + jolly + superstar
+    if (numeriCelle.length < 8) continue;
+
+    const numeri = numeriCelle.slice(0, 6).sort((a,b) => a-b);
+    const jolly = numeriCelle[6] || null;
+    const superstar = numeriCelle[7] || null;
+
+    results.push({ data, numeri, jolly, superstar });
   }
+
   return results;
 }
 
@@ -194,11 +194,9 @@ export default async function handler(req, res) {
       parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
 
     } else if (tipo === 'millionday') {
-      // archiviomillionday.it - archivio 2026 completo in una pagina
       const htmls = await Promise.all(
         anni.map(a => fetchUrl('https://archiviomillionday.it/archivio-million-day.php?anno='+a).catch(() => ''))
       );
-      // Fallback: pagina principale contiene sempre l'anno corrente
       if (!htmls[0]) {
         const main = await fetchUrl('https://archiviomillionday.it/archivio-million-day.php').catch(() => '');
         if (main) htmls[0] = main;
@@ -214,21 +212,16 @@ export default async function handler(req, res) {
       parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
 
     } else if (tipo === 'superenalotto') {
-      // tuttosuperenalotto.it - archivio ultimo anno sempre aggiornato
+      // Pagina "ultimo anno" sempre aggiornata — non serve passare l'anno
       const html = await fetchUrl('https://www.tuttosuperenalotto.it/superenalotto-archivio-risultati-per-anno.asp').catch(() => '');
       if (html) parsed = parseSuperEnalottoAnno(html);
-      // Se serve anche l'anno precedente
-      if (anni.length > 1) {
-        const html2 = await fetchUrl('https://www.tuttosuperenalotto.it/superenalotto-archivio-storico-dal-1997-ad-oggi.asp?anno='+(annoNum-1)).catch(() => '');
-        if (html2) parsed = parsed.concat(parseSuperEnalottoAnno(html2));
-      }
       parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
 
     } else {
       return res.status(400).json({ ok: false, error: 'Tipo non valido' });
     }
 
-    // Rimuove duplicati per data
+    // Deduplicazione per data
     const visti = new Set();
     parsed = parsed.filter(e => {
       if (visti.has(e.data)) return false;
