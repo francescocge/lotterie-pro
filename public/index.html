@@ -3058,14 +3058,7 @@ function trovaSabatoVicino10e(dataGiocata) {
     const diff = de - dg;
     if (diff >= 0 && diff < bestDiff) { bestDiff = diff; best = e; }
   });
-  if (!best) {
-    allEstrazioni.forEach(e => {
-      if (!isDrawAvvenuta(e.data)) return;
-      const de = new Date(e.data + 'T00:00:00');
-      const diff = Math.abs(de - dg);
-      if (diff < bestDiff) { bestDiff = diff; best = e; }
-    });
-  }
+  // Nessuna estrazione successiva alla giocata ancora disponibile → in attesa
   return best;
 }
 
@@ -3790,9 +3783,15 @@ function renderMieGiocateMD() {
     const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'spe';
     const estrRefMD = (() => {
       if (!mdEstrazioni.length) return null;
-      const dg=new Date(g.data+'T12:00:00'); let best=null,bestDiff=Infinity;
-      mdEstrazioni.forEach(e=>{const diff=new Date(e.data+'T12:00:00')-dg;if(diff>=0&&diff<bestDiff){bestDiff=diff;best=e;}});
-      if(!best) mdEstrazioni.forEach(e=>{const diff=Math.abs(new Date(e.data+'T12:00:00')-dg);if(diff<bestDiff){bestDiff=diff;best=e;}});
+      const now=new Date();
+      const dg=new Date(g.data+'T00:00:00'); let best=null,bestDiff=Infinity;
+      mdEstrazioni.forEach(e=>{
+        // Estrazione valida solo se le 20:30 di quel giorno sono già passate
+        const cutoff=new Date(e.data+'T00:00:00'); cutoff.setHours(20,30,0,0);
+        if(now<cutoff) return;
+        const diff=new Date(e.data+'T00:00:00')-dg;
+        if(diff>=0&&diff<bestDiff){bestDiff=diff;best=e;}
+      });
       return best;
     })();
     let confrontoHtml='';
@@ -4522,9 +4521,15 @@ function renderMieGiocateLotto() {
     const ic=g.esito==='vincente'?'pos':g.esito==='perdente'?'neg':'spe';
     const estrRefLotto=(() => {
       if(!estrLottoArr.length)return null;
-      const dg=new Date(g.data+'T12:00:00');let best=null,bestDiff=Infinity;
-      estrLottoArr.forEach(e=>{const diff=new Date(e.data+'T12:00:00')-dg;if(diff>=0&&diff<bestDiff){bestDiff=diff;best=e;}});
-      if(!best)estrLottoArr.forEach(e=>{const diff=Math.abs(new Date(e.data+'T12:00:00')-dg);if(diff<bestDiff){bestDiff=diff;best=e;}});
+      const now=new Date();
+      const dg=new Date(g.data+'T00:00:00');let best=null,bestDiff=Infinity;
+      estrLottoArr.forEach(e=>{
+        // Estrazione valida solo se le 20:30 di quel giorno sono già passate
+        const cutoff=new Date(e.data+'T00:00:00'); cutoff.setHours(20,30,0,0);
+        if(now<cutoff) return;
+        const diff=new Date(e.data+'T00:00:00')-dg;
+        if(diff>=0&&diff<bestDiff){bestDiff=diff;best=e;}
+      });
       return best;
     })();
     let confrontoHtml='';
@@ -5276,14 +5281,7 @@ function trovaSabatoVicinoSE(dataGiocata) {
     const diff = de - dg;
     if (diff >= 0 && diff < bestDiff) { bestDiff = diff; best = e; }
   });
-  if (!best) {
-    seEstrazioni.forEach(e => {
-      if (!isDrawSEAvvenuta(e.data)) return;
-      const de = new Date(e.data + 'T00:00:00');
-      const diff = Math.abs(de - dg);
-      if (diff < bestDiff) { bestDiff = diff; best = e; }
-    });
-  }
+  // Nessuna estrazione successiva alla giocata ancora disponibile → in attesa
   return best;
 }
 
