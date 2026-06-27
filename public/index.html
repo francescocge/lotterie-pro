@@ -2552,49 +2552,57 @@ function renderBacktestBanner(bt, nomeGioco) {
   function pct(x, tot) { return tot ? Math.round(x/tot*100) : 0; }
   function avg(x, tot) { return tot ? (x/tot).toFixed(1) : '0.0'; }
 
-  var pA1 = pct(A.tot - A.h0, A.tot); // % con almeno 1 hit
+  var pA1 = pct(A.tot - A.h0, A.tot);
   var pB1 = pct(B.tot - B.h0, B.tot);
-  var avgA = avg(A.totHit, A.tot), avgB = avg(B.totHit, B.tot);
 
-  var colA = pA1 >= 50 ? '#4CAF50' : pA1 >= 30 ? '#C9A84C' : '#e07080';
-  var colB = pB1 >= 50 ? '#4CAF50' : pB1 >= 30 ? '#C9A84C' : '#e07080';
+  var colA = pA1 >= 50 ? '#3DEC7A' : pA1 >= 30 ? '#F5C842' : '#FF6B6B';
+  var colB = pB1 >= 50 ? '#3DEC7A' : pB1 >= 30 ? '#F5C842' : '#FF6B6B';
 
-  function barCell(count, tot, label, col) {
+  function barRow(count, tot, emoji, label, bg, textCol) {
     var p = pct(count, tot);
-    if (!p && !count) return '';
-    return '<div style="flex:'+Math.max(p,8)+';background:'+col+';border-radius:3px;padding:2px 4px;text-align:center;font-size:8px;font-weight:700;color:#000;min-width:22px">'+label+'<br>'+p+'%</div>';
-  }
-
-  function statsBlock(st, col, label) {
-    return '<div style="background:rgba(0,0,0,.25);border-radius:8px;padding:10px 12px">'
-      + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
-      +   '<span style="font-size:10px;font-weight:700;color:#ccc">'+label+'</span>'
-      +   '<span style="font-size:20px;font-weight:700;color:'+col+'">'+pct(st.tot-st.h0,st.tot)+'%</span>'
+    if (!count) return '';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      + '<div style="width:24px;font-size:14px;text-align:center">' + emoji + '</div>'
+      + '<div style="width:60px;font-size:12px;font-weight:700;color:#e0e0e0">' + label + '</div>'
+      + '<div style="flex:1;background:rgba(255,255,255,.08);border-radius:5px;height:22px;overflow:hidden">'
+      +   '<div style="background:' + bg + ';height:100%;width:' + Math.max(p,3) + '%;border-radius:5px"></div>'
       + '</div>'
-      + '<div style="font-size:9px;color:#888;margin-bottom:6px">volte con ≥1 numero indovinato &nbsp;|&nbsp; Media <strong style="color:#ccc">'+avg(st.totHit,st.tot)+'</strong>/'+gs+' &nbsp;|&nbsp; Record <strong style="color:'+col+'">'+st.maxHit+'</strong>/'+gs+'</div>'
-      + '<div style="display:flex;gap:3px;height:26px;align-items:stretch">'
-      +   barCell(st.h0,  st.tot, '0', 'rgba(255,255,255,.12)')
-      +   barCell(st.h1,  st.tot, '1', 'rgba(201,168,76,.55)')
-      +   barCell(st.h2,  st.tot, '2', 'rgba(40,180,100,.55)')
-      +   barCell(st.h3p, st.tot, '3+','rgba(40,180,100,.85)')
-      + '</div>'
-      + '<div style="font-size:8px;color:#666;margin-top:4px">0 = nessuno indovinato · 1 = uno · 2 = due · 3+ = tre o più</div>'
+      + '<div style="width:44px;text-align:right;font-size:14px;font-weight:800;color:' + textCol + '">' + p + '%</div>'
+      + '<div style="width:34px;text-align:right;font-size:11px;color:#888">(' + count + ')</div>'
       + '</div>';
   }
 
-  return '<div style="background:linear-gradient(135deg,rgba(42,93,191,.14),rgba(42,93,191,.06));border:1px solid rgba(42,93,191,.35);border-radius:12px;padding:14px 16px;margin-bottom:16px">'
-    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
-    +   '<span style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#7AACFF;font-weight:700">🔬 Backtest automatico — '+bt.nTest+' estrazioni reali</span>'
+  function statsBlock(st, col, label, icon) {
+    var p1 = pct(st.tot - st.h0, st.tot);
+    return '<div style="background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.10);border-radius:11px;padding:14px 16px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      +   '<span style="font-size:13px;font-weight:700;color:#ffffff">' + icon + ' ' + label + '</span>'
+      +   '<span style="font-size:28px;font-weight:800;color:' + col + ';line-height:1">' + p1 + '%</span>'
+      + '</div>'
+      + '<div style="display:flex;gap:14px;margin-bottom:12px">'
+      +   '<span style="font-size:12px;color:#aaa">Media: <strong style="color:#fff;font-size:13px">' + avg(st.totHit,st.tot) + '</strong><span style="color:#666">/' + gs + '</span></span>'
+      +   '<span style="font-size:12px;color:#aaa">Record: <strong style="color:' + col + ';font-size:13px">' + st.maxHit + '</strong><span style="color:#666">/' + gs + '</span></span>'
+      +   '<span style="font-size:12px;color:#aaa">Test: <strong style="color:#ccc;font-size:13px">' + st.tot + '</strong></span>'
+      + '</div>'
+      + barRow(st.h0,  st.tot, '⚪', '0 indov.', 'rgba(180,180,180,.30)', '#aaa')
+      + barRow(st.h1,  st.tot, '🟡', '1 indov.', 'linear-gradient(90deg,#8B6914,#F5C842)', '#F5C842')
+      + barRow(st.h2,  st.tot, '🟢', '2 indov.', 'linear-gradient(90deg,#1A8A45,#3DEC7A)', '#3DEC7A')
+      + barRow(st.h3p, st.tot, '🏆', '3+ indov.','linear-gradient(90deg,#0D5C2E,#3DEC7A)', '#3DEC7A')
+      + '</div>';
+  }
+
+  return '<div style="background:linear-gradient(135deg,rgba(20,35,70,.95),rgba(10,20,45,.95));border:1px solid rgba(122,172,255,.40);border-radius:14px;padding:16px 18px;margin-bottom:18px">'
+    + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+    +   '<span style="font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#7AACFF;font-weight:700">🔬 Backtest — ' + bt.nTest + ' estrazioni reali · ' + nomeGioco + '</span>'
     + '</div>'
-    + '<div style="font-size:9px;color:#888;line-height:1.7;margin-bottom:10px;padding:8px 10px;background:rgba(0,0,0,.2);border-radius:6px">'
-    +   '<strong style="color:#ccc">Come funziona:</strong> per ciascuna delle ultime '+bt.nTest+' estrazioni, il motore ha <em>fatto finta di non sapere il risultato</em>, '
-    +   'ha calcolato la previsione usando solo i dati precedenti, poi ha confrontato con l\'estrazione reale. '
-    +   'I numeri qui sotto mostrano quante volte il metodo avrebbe indovinato qualcosa. '
-    +   '<strong style="color:#C9A84C">Non è una garanzia</strong> — il gioco è casuale per natura.'
+    + '<div style="font-size:12px;color:#b0b8cc;line-height:1.7;margin-bottom:14px;padding:10px 12px;background:rgba(0,0,0,.25);border-radius:8px;border-left:3px solid rgba(122,172,255,.5)">'
+    +   'Per ogni estrazione il motore ha simulato la previsione <strong style="color:#fff">usando solo i dati precedenti</strong>, poi ha confrontato con il risultato reale. '
+    +   'La % grande = quante volte avrebbe indovinato <strong style="color:#fff">almeno 1 numero</strong>. '
+    +   '<span style="color:#F5C842">Non garantisce vincite</span> — il gioco è casuale.'
     + '</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +   statsBlock(A, colA, 'Serie A — Ritardo')
-    +   statsBlock(B, colB, 'Serie B — Momentum')
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
+    +   statsBlock(A, colA, 'Serie A', '🎯')
+    +   statsBlock(B, colB, 'Serie B', '⚡')
     + '</div>'
     + '</div>';
 }
