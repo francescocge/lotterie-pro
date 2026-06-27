@@ -1472,15 +1472,8 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
   <div class="card">
     <div class="card-title">🧠 Avanzate SuperEnalotto</div>
     <p style="font-size:10px;color:var(--soft);margin-bottom:16px;line-height:1.7">
-      Serie B e C (ritardatari e frequenti) appaiono qui dopo aver premuto <strong style="color:var(--testo)">Genera Colonne</strong> in Previsioni. Puoi salvarle direttamente.
+      Analisi statistica avanzata: frequenze, ritardi, distribuzione per decina, Jolly più frequenti.
     </p>
-
-    <!-- Serie B e C iniettate da generaPrevisioniSE() -->
-    <div id="se-adv-colonne">
-      <div style="font-size:11px;color:var(--soft);text-align:center;padding:20px;border:1px dashed var(--bordo);border-radius:10px">
-        Vai su 🎯 Previsioni → Genera Colonne Consigliate per vedere Serie B e C qui.
-      </div>
-    </div>
 
     <!-- Analisi statistica SE -->
     <div style="margin-top:20px">
@@ -5532,20 +5525,22 @@ function generaPrevisioniSE() {
     },
   ];
   
+  // Tutte e 3 le serie in Gioca (A=bilanciata, B=ritardatari, C=frequenti)
+  const clsSerie = ['col-a', 'col-b', ''];
   let html = '<div class="serie-grid">';
-  // INDEX2: solo Serie A in Previsioni
-  const vA = varianti[0];
-  const scA = calcolaScoreSerie(vA.numeri, vA.pF, vA.pR);
-  html += '<div class="serie-card col-a" id="se-serie-0" onclick="selezionaSESerie(0,[' + vA.numeri.join(',') + '],' + vA.jolly + ',' + vA.superstar + ',\'' + vA.nome.replace(/'/g,'') + '\')">'
-        + '<div class="selected-check">&#10003;</div>'
-        + '<div class="serie-header"><div class="serie-titolo">' + vA.nome + '</div>'
-        + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + scA + '%"></div></div>Score ' + scA + '%</div></div>'
-        + '<div class="serie-tag">' + vA.tag + ' · SuperEnalotto 2026</div>'
-        + '<div class="serie-balls">' + vA.numeri.map(nm => '<div class="serie-ball">' + nm + '</div>').join('') + '</div>'
-        + '<div style="margin-top:10px;font-size:11px;color:var(--soft)"><strong>Jolly:</strong> <span style="background:#DC3545;color:#fff;padding:2px 8px;border-radius:4px">' + vA.jolly + '</span> | <strong>SuperStar:</strong> <span style="background:#007BFF;color:#fff;padding:2px 8px;border-radius:4px">' + vA.superstar + '</span></div>'
-        + '<div class="serie-motivo">' + vA.desc + '</div>'
-        + '<div class="gioca-btn">&#9989; Gioco questa serie</div>'
-        + '</div>';
+  varianti.forEach((v, i) => {
+    const sc = calcolaScoreSerie(v.numeri, v.pF, v.pR);
+    html += '<div class="serie-card ' + clsSerie[i] + '" id="se-serie-' + i + '" onclick="selezionaSESerie(' + i + ',[' + v.numeri.join(',') + '],' + v.jolly + ',' + v.superstar + ',\'' + v.nome.replace(/'/g,'') + '\')">'
+          + '<div class="selected-check">&#10003;</div>'
+          + '<div class="serie-header"><div class="serie-titolo">' + v.nome + '</div>'
+          + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + sc + '%"></div></div>Score ' + sc + '%</div></div>'
+          + '<div class="serie-tag">' + v.tag + ' · SuperEnalotto 2026</div>'
+          + '<div class="serie-balls">' + v.numeri.map(nm => '<div class="serie-ball">' + nm + '</div>').join('') + '</div>'
+          + '<div style="margin-top:10px;font-size:11px;color:var(--soft)"><strong>Jolly:</strong> <span style="background:#DC3545;color:#fff;padding:2px 8px;border-radius:4px">' + v.jolly + '</span> | <strong>SuperStar:</strong> <span style="background:#007BFF;color:#fff;padding:2px 8px;border-radius:4px">' + v.superstar + '</span></div>'
+          + '<div class="serie-motivo">' + v.desc + '</div>'
+          + '<div class="gioca-btn">&#9989; Gioco questa serie</div>'
+          + '</div>';
+  });
   html += '</div>';
 
   // ── MFCSE Enhanced per SuperEnalotto ───────────────────────
@@ -5573,26 +5568,7 @@ function generaPrevisioniSE() {
   document.getElementById('se-previsioni-content').innerHTML = renderBacktestBanner(_btSE, 'SuperEnalotto') + html;
   document.getElementById('se-riepilogo-box').style.display = 'none';
 
-  // INDEX2: Serie B e C → Avanzate
-  let advHtmlSE = '<div class="serie-grid">';
-  varianti.slice(1).forEach((v, i) => {
-    const sc = calcolaScoreSerie(v.numeri, v.pF, v.pR);
-    const cls = i === 0 ? 'col-b' : '';
-    const ns = v.numeri.join(',');
-    advHtmlSE += '<div class="serie-card ' + cls + '">'
-      + '<div class="selected-check">&#10003;</div>'
-      + '<div class="serie-header"><div class="serie-titolo">' + v.nome + '</div>'
-      + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + sc + '%"></div></div>Score ' + sc + '%</div></div>'
-      + '<div class="serie-tag">' + v.tag + ' · SuperEnalotto 2026</div>'
-      + '<div class="serie-balls">' + v.numeri.map(nm => '<div class="serie-ball">' + nm + '</div>').join('') + '</div>'
-      + '<div style="margin-top:10px;font-size:11px;color:var(--soft)"><strong>Jolly:</strong> <span style="background:#DC3545;color:#fff;padding:2px 8px;border-radius:4px">' + v.jolly + '</span> | <strong>SuperStar:</strong> <span style="background:#007BFF;color:#fff;padding:2px 8px;border-radius:4px">' + v.superstar + '</span></div>'
-      + '<div class="serie-motivo">' + v.desc + '</div>'
-      + '<button onclick="salvaSerieABSE([' + ns + '],' + v.jolly + ',' + v.superstar + ',\'' + v.nome.replace(/'/g,'') + '\')" style="width:100%;margin-top:10px;padding:9px;background:linear-gradient(135deg,var(--oro),var(--oro2));color:#000;border:none;border-radius:8px;font-family:\'DM Mono\',monospace;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer">&#128190; Salva in Le Mie</button>'
-      + '</div>';
-  });
-  advHtmlSE += '</div>';
-  const seAdvDiv = document.getElementById('se-adv-colonne');
-  if (seAdvDiv) seAdvDiv.innerHTML = advHtmlSE;
+  // Serie A/B/C sono ora tutte in Gioca — Avanzate mostra solo analisi statistica
 }
 
 function selezionaSESerie(idx, numeri, jolly, superstar, nomeSerie) {
