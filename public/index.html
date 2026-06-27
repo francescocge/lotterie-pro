@@ -2462,7 +2462,7 @@ function generaSerieAvanzata() {
 function prossimaSabato() {
   const oggi = new Date();
   const dow = oggi.getDay(); // 0=dom … 6=sab
-  const giorniMancanti = dow === 6 ? 7 : (6 - dow);
+  const giorniMancanti = dow === 6 ? 0 : (6 - dow);
   const prossimo = new Date(oggi);
   prossimo.setDate(oggi.getDate() + giorniMancanti);
   return prossimo.toISOString().split('T')[0];
