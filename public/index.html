@@ -181,22 +181,22 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .mia-giocata.perdente{border-color:rgba(217,85,85,.2);background:rgba(40,22,22,.5);opacity:.85}
 .mia-giocata.inattesa{border-color:rgba(201,168,76,.3)}
 .mia-giocata.attesa{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05)}
-.mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;flex-wrap:wrap;gap:4px}
-.mg-data{font-size:9px;color:var(--soft);letter-spacing:1px}
-.mg-esito{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:500}
+.mg-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.mg-data{font-size:12px;color:var(--soft);letter-spacing:1px;font-weight:600}
+.mg-esito{font-size:11px;padding:4px 11px;border-radius:10px;font-weight:600}
 .mg-esito.v{background:rgba(61,184,122,.15);color:var(--verde);border:1px solid rgba(61,184,122,.3)}
 .mg-esito.p{background:rgba(217,85,85,.1);color:var(--rosso);border:1px solid rgba(217,85,85,.2)}
 .mg-esito.a{background:rgba(201,168,76,.1);color:var(--oro);border:1px solid rgba(201,168,76,.2)}
-.mg-balls{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px}
-.mg-ball{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.mg-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
-.mg-importo{font-size:11px;font-family:'Playfair Display',serif}.mg-importo.spe{color:var(--oro);opacity:.85}
+.mg-balls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.mg-ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C9A84C,#7A5C10);color:#000;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.mg-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.mg-importo{font-size:14px;font-family:'Playfair Display',serif}.mg-importo.spe{color:var(--oro);opacity:.85}
 .mg-importo.pos{color:var(--verde)}
 .mg-importo.neg{color:var(--rosso)}
 .mg-importo.neu{color:var(--soft)}
-.mg-del{background:none;border:1px solid rgba(217,85,85,.2);border-radius:5px;color:var(--rosso);font-size:8px;padding:3px 8px;cursor:pointer;transition:all .2s}
+.mg-del{background:none;border:1px solid rgba(217,85,85,.2);border-radius:6px;color:var(--rosso);font-size:10px;padding:5px 11px;cursor:pointer;transition:all .2s}
 .mg-del:hover{background:rgba(217,85,85,.1)}
-.mg-aggiungi-ris{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:5px;color:var(--oro);font-size:8px;padding:3px 10px;cursor:pointer;letter-spacing:1px;transition:all .2s}
+.mg-aggiungi-ris{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:6px;color:var(--oro);font-size:10px;padding:5px 13px;cursor:pointer;letter-spacing:1px;transition:all .2s}
 .mg-aggiungi-ris:hover{background:rgba(201,168,76,.2)}
 /* Griglia card — 1 col mobile, 2 col tablet, 3 col desktop */
 .mg-grid{display:grid;grid-template-columns:1fr;gap:8px}
@@ -234,9 +234,9 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .sez-passate .mg-sez-titolo{color:var(--soft)}
 .sez-passate .mg-sez-badge{background:rgba(122,138,170,.12);color:var(--soft);border:1px solid rgba(122,138,170,.25)}
 /* Card nuova — più visibile */
-.mg-card-nuova{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:10px;padding:11px 13px;margin-bottom:0;position:relative}
+.mg-card-nuova{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:16px 18px;margin-bottom:0;position:relative}
 /* Card già giocata — più compatta */
-.mg-card-passata{background:rgba(20,28,45,.7);border:1px solid var(--bordo);border-radius:10px;padding:10px 13px;margin-bottom:0;position:relative;opacity:.88}
+.mg-card-passata{background:rgba(20,28,45,.7);border:1px solid var(--bordo);border-radius:12px;padding:15px 18px;margin-bottom:0;position:relative;opacity:.88}
 .mg-card-passata.vinta{opacity:1;background:rgba(22,44,33,.65);border-color:rgba(61,184,122,.25)}
 .mg-card-passata.persa{background:rgba(40,22,22,.55);border-color:rgba(217,85,85,.2)}
 .mg-badge-nuova{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.06));border:1px solid rgba(201,168,76,.4);border-radius:8px;padding:2px 8px;font-size:8px;color:var(--oro);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-left:6px}
@@ -249,7 +249,7 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
 .md-ball:hover{transform:scale(1.1)}
 .md-serie-ball{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#C5A028,#8B6914);color:#000;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(197,160,40,.35);transition:transform .15s}
 .md-serie-ball:hover{transform:scale(1.08)}
-.md-mg-ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C5A028,#8B6914);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.md-mg-ball{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#C5A028,#8B6914);color:#000;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .md-rie-ball{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#C5A028,#8B6914);color:#000;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
 </style>
 </head>
@@ -665,15 +665,17 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
       <input type="date" id="man10e-data"
         style="width:100%;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:9px 12px;font-family:'DM Mono',monospace;font-size:13px">
     </div>
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:11px;color:var(--testo);flex:1;min-width:140px">
-        <input type="checkbox" id="man10e-oro" onchange="aggiornaCosto10e()" style="accent-color:var(--oro);width:16px;height:16px">
-        🌟 Numero Oro <span style="color:var(--soft);font-size:10px;margin-left:4px">(+1€)</span>
-      </label>
-
+    <div style="margin-bottom:14px">
+      <div class="sec-label" style="margin-bottom:6px">🌟 Opzione Oro</div>
+      <select id="man10e-oro" onchange="aggiornaCosto10e()"
+        style="width:100%;background:var(--blu);color:var(--testo);border:1px solid rgba(201,168,76,.4);border-radius:8px;padding:10px 12px;font-size:13px;font-weight:bold">
+        <option value="nessuno">Nessuno (base)</option>
+        <option value="oro">🌟 Numero Oro (×2)</option>
+        <option value="doppio-oro">⭐⭐ Doppio Oro (×3)</option>
+      </select>
     </div>
     <div id="man10e-costo" style="font-size:12px;color:var(--soft);margin-bottom:12px;padding:8px 12px;background:var(--bordo);border-radius:8px">
-      Costo totale: <strong style="color:var(--oro)">2€</strong>
+      Costo totale: <strong style="color:var(--oro)">1€</strong>
     </div>
     <div id="man10e-preview" style="min-height:38px;margin-bottom:10px"></div>
     <button class="btn" onclick="salvaManuale10e()" style="background:linear-gradient(135deg,#2A5DBF,#1A3D8F);color:#fff">💾 Salva nelle mie giocate</button>
@@ -1377,14 +1379,14 @@ body{background:var(--blu);color:var(--testo);font-family:'DM Mono',monospace;mi
         </div>
         <div>
           <div class="sec-label" style="margin-bottom:6px">SuperStar (1–90)</div>
-          <input type="number" id="seSuperstar" placeholder="SS (opz.)" min="1" max="90"
+          <input type="number" id="seSuperstar" placeholder="SS (opz.)" min="1" max="90" onchange="aggiornaCostoSE()" oninput="aggiornaCostoSE()"
             style="background:var(--blu);color:#fff;border:2px solid #007BFF;border-radius:6px;padding:10px;text-align:center;font-size:15px;font-weight:bold;width:100%">
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
-        <label style="font-size:11px;color:var(--soft)">💶 Costo colonna (€):</label>
-        <input type="number" id="se-costo-fantasia" value="1" min="0.5" max="100" step="0.5"
-          style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid var(--oro);border-radius:6px;padding:8px;text-align:center;font-size:14px;font-weight:bold">
+        <label style="font-size:11px;color:var(--soft)">💶 Costo colonna:</label>
+        <span id="se-costo-fantasia" style="font-size:15px;font-weight:bold;color:var(--oro)">1.00€</span>
+        <span id="se-costo-dettaglio" style="font-size:10px;color:var(--soft)"></span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <label style="font-size:11px;color:var(--soft)">📅 Data giocata:</label>
@@ -3001,12 +3003,14 @@ function selezionaSerie(idx, numeri, nomeSerieParam) {
         style="width:80px;background:var(--bordo);color:var(--testo);border:1px solid #253550;border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:14px;text-align:center">
       <span style="font-size:10px;color:var(--soft)">€ per giocata</span>
     </div>
-    <div style="margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Opzioni Oro</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:7px 12px;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:11px;color:var(--testo)">
-        <input type="checkbox" id="rie-oro" onchange="aggiornaCostoSerie()" style="accent-color:var(--oro)"> 🌟 N.Oro <span style="color:var(--soft);font-size:10px">(+1€)</span>
-      </label>
-
+    <div style="margin-bottom:6px;font-size:10px;color:var(--soft);letter-spacing:1px;text-transform:uppercase">Opzione Oro</div>
+    <div style="margin-bottom:10px">
+      <select id="rie-oro" onchange="aggiornaCostoSerie()"
+        style="width:100%;background:var(--blu);color:var(--testo);border:1px solid rgba(201,168,76,.4);border-radius:8px;padding:9px 10px;font-size:13px;font-weight:bold">
+        <option value="nessuno">Nessuno (base)</option>
+        <option value="oro">🌟 Numero Oro (×2)</option>
+        <option value="doppio-oro">⭐⭐ Doppio Oro (×3)</option>
+      </select>
     </div>
     <div id="rie-costo" style="font-size:12px;color:var(--soft);margin-bottom:10px;padding:7px 10px;background:var(--bordo);border-radius:8px">
       Costo totale: <strong style="color:var(--oro)">2€</strong>
@@ -3090,8 +3094,9 @@ function renderMieGiocate() {
     const dataFmt = new Date(g.data + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'2-digit', year:'numeric'});
     const esitoClass = g.esito === 'vincente' ? 'v' : g.esito === 'perdente' ? 'p' : 'a';
     const esitoTxt = g.esito === 'vincente' ? '✅ Vinto' : g.esito === 'perdente' ? '❌ Perso' : '⏳ In attesa';
-    const _base10e = (g.speso||0) / (g.opzioneOro==='oro' ? 2 : 1);
-    const _dettaglio10e = g.opzioneOro==='oro' ? `${_base10e.toFixed(2)}€ + N.Oro 🌟 = ${(g.speso||0).toFixed(2)}€` : `${(g.speso||0).toFixed(2)}€`;
+    const _molt10e = g.opzioneOro==='doppio-oro' ? 3 : g.opzioneOro==='oro' ? 2 : 1;
+    const _base10e = (g.speso||0) / _molt10e;
+    const _dettaglio10e = g.opzioneOro==='doppio-oro' ? `${_base10e.toFixed(2)}€ + ⭐⭐ Doppio Oro = ${(g.speso||0).toFixed(2)}€` : g.opzioneOro==='oro' ? `${_base10e.toFixed(2)}€ + N.Oro 🌟 = ${(g.speso||0).toFixed(2)}€` : `${(g.speso||0).toFixed(2)}€`;
     const importoTxt = g.esito === 'vincente' ? `+${(g.vinto||0).toFixed(2)}€` : g.esito === 'perdente' ? `-${(g.speso||0).toFixed(2)}€` : `💰 ${_dettaglio10e}`;
     const importoClass = g.esito === 'vincente' ? 'pos' : g.esito === 'perdente' ? 'neg' : 'spe';
     const estrRef = trovaSabatoVicino10e(g.data);
@@ -4731,20 +4736,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function aggiornaCosto10e() {
   const base = parseFloat(document.getElementById('man10e-puntata').value) || 1;
-  const oro = document.getElementById('man10e-oro')?.checked || false;
-  const moltiplicatore = oro ? 2 : 1;
+  const opz = document.getElementById('man10e-oro')?.value || 'nessuno';
+  const moltiplicatore = opz === 'doppio-oro' ? 3 : opz === 'oro' ? 2 : 1;
   const totale = base * moltiplicatore;
-  const desc = oro ? ' × 2 (Numero Oro)' : '';
+  const desc = opz === 'doppio-oro' ? ' × 3 (Doppio Oro)' : opz === 'oro' ? ' × 2 (Numero Oro)' : '';
   const el = document.getElementById('man10e-costo');
   if (el) el.innerHTML = 'Costo totale: <strong style="color:var(--oro)">' + totale.toFixed(2) + '€</strong><span style="color:var(--soft);font-size:10px"> (' + base.toFixed(2) + '€ base' + desc + ')</span>';
 }
 
 function aggiornaCostoSerie() {
-  const oro = document.getElementById('rie-oro')?.checked || false;
+  const opz = document.getElementById('rie-oro')?.value || 'nessuno';
   const base = parseFloat(document.getElementById('rie-puntata')?.value) || 1;
-  const moltiplicatore = oro ? 2 : 1;
+  const moltiplicatore = opz === 'doppio-oro' ? 3 : opz === 'oro' ? 2 : 1;
   const totale = base * moltiplicatore;
-  const desc = oro ? ' × 2 (Numero Oro)' : '';
+  const desc = opz === 'doppio-oro' ? ' × 3 (Doppio Oro)' : opz === 'oro' ? ' × 2 (Numero Oro)' : '';
   const el = document.getElementById('rie-costo');
   if (el) el.innerHTML = 'Costo totale: <strong style="color:var(--oro)">' + totale.toFixed(2) + '€</strong><span style="color:var(--soft);font-size:10px"> (' + base.toFixed(2) + '€ base' + desc + ')</span>';
 }
@@ -4754,11 +4759,11 @@ function confermaSerie() {
   if (!btn) return;
   const numeri = btn.dataset.numeri.split(',').map(Number);
   const nomeSerie = btn.dataset.nome || 'Serie consigliata';
-  const oro = document.getElementById('rie-oro')?.checked || false;
+  const opz = document.getElementById('rie-oro')?.value || 'nessuno';
   const base = parseFloat(document.getElementById('rie-puntata')?.value) || 1;
-  const moltiplicatore = oro ? 2 : 1;
+  const moltiplicatore = opz === 'doppio-oro' ? 3 : opz === 'oro' ? 2 : 1;
   const speso = base * moltiplicatore;
-  const opzioneOro = oro ? 'oro' : 'nessuno';
+  const opzioneOro = opz;
   const oggi = new Date().toISOString().split('T')[0];
   const nuova = {
     id: Date.now(), data: oggi,
@@ -4771,7 +4776,7 @@ function confermaSerie() {
   const esiste = storico.find(g => g.data === oggi && JSON.stringify(g.numeri) === JSON.stringify(numeri));
   if (!esiste) { storico.unshift(nuova); salvaStorico(storico); }
   renderMieGiocate();
-  const badgeOro = opzioneOro === 'oro' ? ' 🌟 N.Oro' : '';
+  const badgeOro = opzioneOro === 'doppio-oro' ? ' ⭐⭐ Doppio Oro' : opzioneOro === 'oro' ? ' 🌟 N.Oro' : '';
   // Nasconde subito la card selezionata
   document.querySelectorAll('.serie-card.selected-serie').forEach(c => { c.style.display = 'none'; });
   // Toast e pulizia
@@ -4789,10 +4794,10 @@ function salvaManuale10e() {
   if (numeri.length < 1) { alert('Inserisci almeno 1 numero tra 1 e 90.'); return; }
   if (numeri.length > 10) { alert('Massimo 10 numeri per il 10eLotto.'); return; }
   const base = parseFloat(document.getElementById('man10e-puntata').value) || 1;
-  const oro = document.getElementById('man10e-oro')?.checked || false;
-  const moltiplicatore = oro ? 2 : 1;
+  const opz = document.getElementById('man10e-oro')?.value || 'nessuno';
+  const moltiplicatore = opz === 'doppio-oro' ? 3 : opz === 'oro' ? 2 : 1;
   const speso = base * moltiplicatore;
-  const opzioneOro = oro ? 'oro' : 'nessuno';
+  const opzioneOro = opz;
   const nome = document.getElementById('man10e-nome').value.trim() || 'Giocata manuale';
   const dataInput = document.getElementById('man10e-data').value;
   const data = dataInput || new Date().toISOString().split('T')[0];
@@ -4810,9 +4815,9 @@ function salvaManuale10e() {
   document.getElementById('man10e-nome').value = '';
   document.getElementById('man10e-data').value = '';
   document.getElementById('man10e-preview').innerHTML = '';
-  if (document.getElementById('man10e-oro')) document.getElementById('man10e-oro').checked = false;
+  if (document.getElementById('man10e-oro')) document.getElementById('man10e-oro').value = 'nessuno';
   aggiornaCosto10e();
-  const badgeOro = opzioneOro==='oro'?' 🌟 N.Oro':'';
+  const badgeOro = opzioneOro==='doppio-oro'?' ⭐⭐ Doppio Oro':opzioneOro==='oro'?' 🌟 N.Oro':'';
   alert(`✅ Salvato! ${numeri.length} numeri — ${speso.toFixed(2)}€${badgeOro}`);
 }
 
@@ -5225,6 +5230,17 @@ function displaySuperEnalottoRitardi() {
 // ============================================================
 // MIE GIOCATE SUPERENALOTTO - SALVATAGGIO
 // ============================================================
+// Calcola automaticamente il costo: 1€ base, +0,50€ se SuperStar inserito
+function aggiornaCostoSE() {
+  const superstarRaw = document.getElementById('seSuperstar')?.value;
+  const haSuperstar = superstarRaw && parseInt(superstarRaw) >= 1 && parseInt(superstarRaw) <= 90;
+  const costo = haSuperstar ? 1.50 : 1.00;
+  const el = document.getElementById('se-costo-fantasia');
+  if (el) el.textContent = costo.toFixed(2) + '€';
+  const det = document.getElementById('se-costo-dettaglio');
+  if (det) det.textContent = haSuperstar ? '(1.00€ base + 0.50€ SuperStar)' : '(1.00€ base)';
+}
+
 // Salva colonna a fantasia dal form
 function salvaSEColonnaFantasia() {
   const nums = [];
@@ -5240,7 +5256,7 @@ function salvaSEColonnaFantasia() {
   const superstar = superstarRaw ? parseInt(superstarRaw) : null;
   if (jolly !== null && (jolly < 1 || jolly > 90)) { alert('⚠️ Jolly non valido (1-90)'); return; }
   if (superstar !== null && (superstar < 1 || superstar > 90)) { alert('⚠️ SuperStar non valido (1-90)'); return; }
-  const costo = parseFloat(document.getElementById('se-costo-fantasia').value) || 1;
+  const costo = superstar !== null ? 1.50 : 1.00;
   const dataInput = document.getElementById('se-data-fantasia').value;
   const data = dataInput || new Date().toISOString().split('T')[0];
 
@@ -5257,6 +5273,7 @@ function salvaSEColonnaFantasia() {
   document.getElementById('seJolly').value = '';
   document.getElementById('seSuperstar').value = '';
   document.getElementById('se-data-fantasia').value = '';
+  aggiornaCostoSE();
 }
 
 // Vecchia funzione mantenuta per compatibilità
