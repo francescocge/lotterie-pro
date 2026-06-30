@@ -25,7 +25,7 @@ function fetchUrl(url) {
 }
 
 function stripHtml(str) {
-  return str.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+  return str.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/·/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 // ============================================================
