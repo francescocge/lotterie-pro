@@ -6590,7 +6590,7 @@ function mfcseRenderCards(mfcseResult, idPrefix, onclickFn, startIdx) {
     ? `F${Math.round(pesi.wFreq*100)}% R${Math.round(pesi.wRit*100)}% M${Math.round(pesi.wMom*100)}%`
     : '';
   let html = '';
-  mfcseResult.top.slice(0, 3).forEach((r, i) => {
+  mfcseResult.top.slice(0, 2).forEach((r, i) => {
     const idx = startIdx + i;
     const sc  = Math.round(r.score * 100);
     const ns  = r.numeri.join(',');
@@ -6830,10 +6830,7 @@ function mfcseRenderCardsMD(mfcseResult) {
     ? 'F' + Math.round(pesi.wFreq*100) + '% R' + Math.round(pesi.wRit*100) + '% M' + Math.round(pesi.wMom*100) + '%'
     : '';
   let html = '';
-  mfcseResult.top.slice(0, 3).forEach(function(r, i) {
-    const sc = Math.round(r.score * 100);
-    const ns = r.numeri.join(',');
-    html += '<div class="serie-card" style="border-left:3px solid rgba(155,141,224,0.7);background:linear-gradient(135deg,rgba(155,141,224,0.07),transparent)">'
+  mfcseResult.top.slice(0, 2).forEach(function(r, i) {
       + '<div class="serie-header">'
       + '<div class="serie-titolo"><span style="background:#9b8de0;color:#000;font-size:8px;padding:1px 6px;border-radius:3px;margin-right:6px;font-weight:700;letter-spacing:1px;vertical-align:middle">AVANZATO</span>&#9889; MFCSE &mdash; Serie ' + (i+1) + '</div>'
       + '<div class="serie-score"><div class="score-bar"><div class="score-fill" style="width:' + sc + '%"></div></div>Score ' + sc + '%</div>'
@@ -6855,10 +6852,7 @@ function mfcseRenderCardsSE(mfcseResult) {
     ? 'F' + Math.round(pesi.wFreq*100) + '% R' + Math.round(pesi.wRit*100) + '% M' + Math.round(pesi.wMom*100) + '%'
     : '';
   let html = '';
-  mfcseResult.top.slice(0, 3).forEach(function(r, i) {
-    const sc = Math.round(r.score * 100);
-    const ns = r.numeri.join(',');
-    html += '<div class="serie-card" onclick="giocaSEMFCSE([' + ns + '],\'MFCSE Serie ' + (i+1) + '\')"'
+  mfcseResult.top.slice(0, 2).forEach(function(r, i) {
       + ' style="border-left:3px solid rgba(155,141,224,0.7);background:linear-gradient(135deg,rgba(155,141,224,0.07),transparent)">'
       + '<div class="selected-check">&#10003;</div>'
       + '<div class="serie-header">'
