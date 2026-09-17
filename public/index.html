@@ -2436,7 +2436,7 @@ function generaSerieAvanzata() {
 
   html += '</div>';
 
-  const _bt10eAdv = backtestAutomatico(allEstrazioni, 90, serieA.length, 40);
+  const _bt10eAdv = backtestAutomatico(allEstrazioni, 90, serieA.length, 60);
   document.getElementById('serie-content').innerHTML = renderBacktestBanner(_bt10eAdv, '10eLotto') + html;
   const _dataPrevisione = prossimaSabato();
   const _dataLabel = new Date(_dataPrevisione + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
@@ -2498,9 +2498,51 @@ function salvaPrevisionePerData(serieA, serieB, data) {
 // per generare una previsione e confronta con l'estrazione reale.
 // Restituisce statistiche di hit per Serie A e Serie B.
 // ============================================================
+// ── Ottimizza pesi (pF, pR, pM) sulle ultime nOpt estrazioni ─────────────────
+function ottimizzaPesi(estrazioni, maxN, gameSize, nOpt) {
+  nOpt = Math.min(nOpt || 30, estrazioni.length - 5);
+  if (nOpt < 5) return { wF: 0.40, wR: 0.60, wM: 0.35 };
+
+  // Griglia 5×5×5 su wF, wR, wM (normalizzati a somma 1)
+  var candidati = [];
+  for (var f = 1; f <= 5; f++) {
+    for (var r = 1; r <= 5; r++) {
+      for (var m = 1; m <= 5; m++) {
+        var tot = f + r + m;
+        candidati.push({ wF: f/tot, wR: r/tot, wM: m/tot });
+      }
+    }
+  }
+
+  var best = null, bestHit = -1;
+  candidati.forEach(function(p) {
+    var hit = 0;
+    for (var t = 1; t <= nOpt; t++) {
+      var hist = estrazioni.slice(t);
+      if (hist.length < 5) break;
+      var target = estrazioni[t-1].numeri.filter(function(n){ return n>=1 && n<=maxN; });
+      if (!target.length) continue;
+      var freq = new Float32Array(maxN+1), rit = new Float32Array(maxN+1).fill(hist.length);
+      hist.forEach(function(e,i){ e.numeri.forEach(function(n){ if(n>=1&&n<=maxN){ freq[n]++; if(rit[n]===hist.length) rit[n]=i; } }); });
+      var nR=Math.min(8,hist.length), wma=new Float32Array(maxN+1), wt=0;
+      for(var i=0;i<nR;i++){ var w=nR-i; wt+=w; hist[i].numeri.forEach(function(n){ if(n>=1&&n<=maxN) wma[n]+=w; }); }
+      var mxF=Math.max.apply(null,freq)||1, mxR=Math.max.apply(null,rit)||1, mxW=(wt/nR)||1;
+      var ids=Array.from({length:maxN},function(_,k){ return k+1; });
+      var sc=function(n){ return (freq[n]/mxF)*p.wF + (rit[n]/mxR)*p.wR + (wma[n]/mxW)*p.wM; };
+      var serie=ids.slice().sort(function(a,b){ return sc(b)-sc(a); }).slice(0,gameSize);
+      hit += serie.filter(function(n){ return target.indexOf(n)!==-1; }).length;
+    }
+    if (hit > bestHit) { bestHit = hit; best = p; }
+  });
+  return best || { wF: 0.40, wR: 0.60, wM: 0.35 };
+}
+
 function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
-  nTest = Math.min(nTest || 40, estrazioni.length - 10);
+  nTest = Math.min(nTest || 60, estrazioni.length - 10);
   if (nTest < 5) return null;
+
+  // ── Auto-ottimizzazione pesi sulle prime 30 estrazioni disponibili ──────────
+  var pOtt = ottimizzaPesi(estrazioni, maxN, gameSize, 30);
 
   var A = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
   var B = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
@@ -2511,7 +2553,6 @@ function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
     var target = estrazioni[t-1].numeri.filter(function(n){ return n>=1 && n<=maxN; });
     if (!target.length) continue;
 
-    // Scorer leggero: freq + ritardo + WMA (senza cicloMedio — veloce)
     var freq = new Float32Array(maxN + 1);
     var rit  = new Float32Array(maxN + 1).fill(hist.length);
     hist.forEach(function(e, i) {
@@ -2528,10 +2569,17 @@ function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
     var mxR = Math.max.apply(null, rit)  || 1;
     var mxW = (wt / nR) || 1;
 
-    // Serie A: Ritardo 60% + Frequenza 40%
-    var scA = function(n){ return (freq[n]/mxF)*0.40 + (rit[n]/mxR)*0.60; };
-    // Serie B: Momentum 35% + Ritardo 40% + Frequenza 25%
-    var scB = function(n){ return (wma[n]/mxW)*0.35 + (rit[n]/mxR)*0.40 + (freq[n]/mxF)*0.25; };
+    // ── BOOST ANTI-FREDDO: numeri oltre 2× il ciclo medio ricevono +20% ──────
+    var cicloMedio = (maxN / (gameSize || 1));
+    var antiFreddo = new Float32Array(maxN + 1);
+    for (var n = 1; n <= maxN; n++) {
+      antiFreddo[n] = (rit[n] > cicloMedio * 2) ? 1.20 : 1.0;
+    }
+
+    // Serie A: pesi auto-ottimizzati
+    var scA = function(n){ return ((freq[n]/mxF)*pOtt.wF + (rit[n]/mxR)*pOtt.wR + (wma[n]/mxW)*pOtt.wM) * antiFreddo[n]; };
+    // Serie B: più peso al ritardo puro + anti-freddo
+    var scB = function(n){ return ((wma[n]/mxW)*0.30 + (rit[n]/mxR)*0.50 + (freq[n]/mxF)*0.20) * antiFreddo[n]; };
 
     var ids = Array.from({length:maxN}, function(_,k){ return k+1; });
     var sA  = ids.slice().sort(function(a,b){ return scA(b)-scA(a); }).slice(0, gameSize);
@@ -2548,7 +2596,7 @@ function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
     }
     reg(A, hA); reg(B, hB);
   }
-  return { A:A, B:B, nTest: A.tot, gameSize: gameSize };
+  return { A:A, B:B, nTest: A.tot, gameSize: gameSize, pesi: pOtt };
 }
 
 // Rende il banner riepilogativo del backtest — appare SOPRA le carte
@@ -3010,7 +3058,7 @@ function generaSerie() {
   });
 
   html += '</div>';
-  const _bt10eBase = backtestAutomatico(allEstrazioni, 90, quantiNumeri || 10, 40);
+  const _bt10eBase = backtestAutomatico(allEstrazioni, 90, quantiNumeri || 10, 60);
   document.getElementById('serie-content').innerHTML = renderBacktestBanner(_bt10eBase, '10eLotto') + html;
   serieSelezionata = null;
 }
@@ -3709,7 +3757,7 @@ function renderMDSerie() {
     }
   } catch(_eMD) { console.warn('MFCSE MD:', _eMD); }
 
-  const _btMD = backtestAutomatico(mdEstrazioni, 55, 5, 40);
+  const _btMD = backtestAutomatico(mdEstrazioni, 55, 5, 60);
   html = renderBacktestBanner(_btMD, 'MillionDay') + '<div class="serie-grid">' + htmlA + '</div>' + _mfcseHtmlMD;
   document.getElementById('md-serie-content').innerHTML = html;
   document.getElementById('md-riepilogo-box').classList.remove('show');
@@ -4349,8 +4397,11 @@ function generaPrevisioni() {
     if (usaAdvLotto) return advLottoData.allScores[num] || 0;
     const fNorm = Math.min((lottoFreqMap[num]||0) / (freqAttesa * 2), 1);
     const rNorm = Math.min((lottoRitardi[num]||0) / 20, 1);
+    // Boost anti-freddo: numeri oltre 2× ciclo medio ricevono +20%
+    const cicloMedio = 90 / 5; // 5 numeri su 90
+    const boost = (lottoRitardi[num]||0) > cicloMedio * 2 ? 1.20 : 1.0;
     const jitter = 1 + (Math.random() * 0.06 - 0.03);
-    return (fNorm * pF + rNorm * pR) * jitter;
+    return (fNorm * pF + rNorm * pR) * boost * jitter;
   }
 
   function calcolaScoreSerie(numeri, pF, pR) {
@@ -4418,7 +4469,7 @@ function generaPrevisioni() {
   } catch(_e) { console.warn('MFCSE Lotto:', _e); }
 
   html += '</div>';
-  const _btLotto = backtestAutomatico(estr, 90, n, 40);
+  const _btLotto = backtestAutomatico(estr, 90, n, 60);
   document.getElementById('lotto-previsioni-content').innerHTML = renderBacktestBanner(_btLotto, 'Lotto ' + lottoRuota) + html;
 }
 
@@ -5491,8 +5542,11 @@ function generaPrevisioniSE() {
   function scoreNum(num, pF, pR) {
     const fNorm = Math.min((freq[num] || 0) / (freqAttesa * 2), 1);
     const rNorm = Math.min((ritardi[num] || 0) / 20, 1);
+    // Boost anti-freddo: numeri oltre 2× ciclo medio ricevono +20%
+    const cicloMedio = 90 / 6; // 6 numeri su 90
+    const boost = (ritardi[num] || 0) > cicloMedio * 2 ? 1.20 : 1.0;
     const jitter = 1 + (Math.random() * 0.06 - 0.03);
-    return (fNorm * pF + rNorm * pR) * jitter;
+    return (fNorm * pF + rNorm * pR) * boost * jitter;
   }
   
   function calcolaScoreSerie(numeri, pF, pR) {
@@ -5588,7 +5642,7 @@ function generaPrevisioniSE() {
     }
   } catch(_eSE) { console.warn('MFCSE SE:', _eSE); }
 
-  const _btSE = backtestAutomatico(seEstrazioni, 90, 6, 40);
+  const _btSE = backtestAutomatico(seEstrazioni, 90, 6, 60);
   document.getElementById('se-previsioni-content').innerHTML = renderBacktestBanner(_btSE, 'SuperEnalotto') + html;
   document.getElementById('se-riepilogo-box').style.display = 'none';
 
