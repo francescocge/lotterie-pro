@@ -25,30 +25,24 @@ function fetchUrl(url) {
 }
 
 function stripHtml(str) {
-  return str.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/·/g, ' ').replace(/\s+/g, ' ').trim();
+  return str.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// ============================================================
-// 10eLotto — fonte: estrazionilotto.it (INVARIATO - funziona)
-// ============================================================
+// 10eLotto
 function parse10eLottoAnno(html) {
   const results = [];
   const testo = stripHtml(html);
-  const mesi = {
-    gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',
-    maggio:'05',giugno:'06',luglio:'07',agosto:'08',
-    settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'
-  };
-  const blocchi = testo.split(/Estrazione\s+10eLotto\s+n\.\s*\d+/i);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+  const blocchi = testo.split(/Estrazione\s+(?:10\s*e\s*Lotto|10eLotto)\s+n\.\s*\d+/i);
   for (const blocco of blocchi) {
     const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
     if (!dataM) continue;
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    const oroM = blocco.match(/Numero\s+Oro\s+10eLotto\s+(\d{1,2})/i);
+    const oroM = blocco.match(/Numero Oro 10eLotto[^0-9]*(\d{1,2})/);
     const oro = oroM ? parseInt(oroM[1]) : null;
-    const partePrima = oroM ? blocco.substring(0, blocco.search(/Numero\s+Oro\s+10eLotto/i)) : blocco;
-    const nums = [...partePrima.matchAll(/\b([1-9]|[1-8][0-9]|90)\b/g)].map(m => parseInt(m[1])).filter(n => n >= 1 && n <= 90);
+    const nums = [...blocco.matchAll(/\b(\d{1,2})\b/g)].map(m => parseInt(m[1])).filter(n => n >= 1 && n <= 90);
     const unici = [...new Set(nums)];
     if (unici.length >= 20) {
       results.push({ data, numeri: unici.slice(0,20).sort((a,b)=>a-b), oro, extra: [] });
@@ -57,31 +51,32 @@ function parse10eLottoAnno(html) {
   return results;
 }
 
-// ============================================================
-// MillionDay — fonte: archiviomillionday.it (INVARIATO - logica corretta)
-// ============================================================
+// MillionDay — restituisce ENTRAMBE le estrazioni per ogni sabato (13:00 e 20:30)
+// Fonte: archiviomillionday.it — ogni riga <tr> ha: data, concorso, numeri mattina, numeri sera
+// Struttura: <td>DD/MM/YYYY</td> <td>concorso</td> <td>n1 n2 n3 n4 n5</td> <td>n1 n2 n3 n4 n5</td>
+// concorso dispari = mattina (13:00), concorso pari = sera (20:30)
 function parseMillionDay(html) {
   const results = [];
   const righe = html.split(/<tr[\s>]/i);
   for (const riga of righe) {
     const dataM = riga.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     if (!dataM) continue;
-    const giorno = dataM[1].padStart(2,'0');
-    const mese = dataM[2].padStart(2,'0');
-    const anno = dataM[3];
-    const data = anno+'-'+mese+'-'+giorno;
+    const data = dataM[3]+'-'+dataM[2].padStart(2,'0')+'-'+dataM[1].padStart(2,'0');
+    // Solo sabati
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    const concorsoM = riga.match(/concorso[^0-9]*(\d+)/i);
-    if (!concorsoM) continue;
-    const concorso = parseInt(concorsoM[1]);
-    if (concorso % 2 !== 0) continue;
+    // Estrai numero concorso
+    const concM = riga.match(/concorso[^0-9]*(\d+)/i);
+    if (!concM) continue;
+    const concorso = parseInt(concM[1]);
+    const orario = concorso % 2 === 0 ? '20:30' : '13:00';
+    // Estrai celle <td> con sequenza di 5 numeri
     const celle = riga.match(/<td[^>]*>([\s\d]+)<\/td>/gi);
     if (!celle) continue;
     for (const cella of celle) {
-      const testo = stripHtml(cella);
-      const nums = testo.trim().split(/\s+/).map(n => parseInt(n)).filter(n => n >= 1 && n <= 55);
+      const testo = cella.replace(/<[^>]+>/g,' ').trim();
+      const nums = testo.split(/\s+/).map(n=>parseInt(n)).filter(n=>n>=1&&n<=55);
       if (nums.length === 5) {
-        results.push({ data, numeri: nums.sort((a,b)=>a-b), extra: [], orario: '20:30' });
+        results.push({ data, numeri: nums.sort((a,b)=>a-b), extra: [], orario, concorso });
         break;
       }
     }
@@ -89,24 +84,19 @@ function parseMillionDay(html) {
   return results;
 }
 
-// ============================================================
-// Lotto — fonte: estrazionilotto.it (INVARIATO - funziona)
-// ============================================================
+// Lotto
 function parseLottoAnno(html, ruota) {
   const results = [];
   const testo = stripHtml(html);
-  const mesi = {
-    gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',
-    maggio:'05',giugno:'06',luglio:'07',agosto:'08',
-    settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'
-  };
-  const blocchi = testo.split(/Estrazione\s+Lotto\s+n\.\s*\d+/i);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+  const blocchi = testo.split(/Estrazione Lotto n\.\s*\d+/i);
   for (const blocco of blocchi) {
     const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
     if (!dataM) continue;
     const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-    const re = new RegExp(ruota+'\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})','i');
+    const re = new RegExp(ruota + '\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})\\s+(\\d{1,2})', 'i');
     const m = blocco.match(re);
     if (m) {
       const numeri = [m[1],m[2],m[3],m[4],m[5]].map(n=>parseInt(n)).filter(n=>n>=1&&n<=90);
@@ -118,59 +108,32 @@ function parseLottoAnno(html, ruota) {
   return results;
 }
 
-// ============================================================
-// SuperEnalotto — fonte: tuttosuperenalotto.it
-//
-// HTML reale di ogni riga:
-//   <tr>
-//     <td><a href="...?dt=20260620...">99</a></td>  ← link, NON numero nudo
-//     <td>20/06/2026</td>
-//     <td>14</td><td>59</td><td>69</td><td>71</td><td>82</td><td>89</td>
-//     <td>47</td>   ← Jolly
-//     <td>3</td>    ← SuperStar
-//   </tr>
-//
-// Strategia: cerco la data DD/MM/YYYY nel link href (?dt=YYYYMMDD) o nel testo cella,
-// poi raccolgo tutti i <td> con numero puro (senza tag figli) = 8 celle numeriche
-// ============================================================
+// SuperEnalotto — NUOVO
 function parseSuperEnalottoAnno(html) {
   const results = [];
-
-  // Divide per righe <tr>
-  const righe = html.split(/<tr[\s>]/i);
-
-  for (const riga of righe) {
-    // Cerca data nel formato ?dt=YYYYMMDD nel link
-    const dtM = riga.match(/\?dt=(\d{4})(\d{2})(\d{2})/);
-    if (!dtM) continue;
-
-    const data = dtM[1]+'-'+dtM[2]+'-'+dtM[3];
-
-    // Solo sabati (getDay() === 6)
+  const testo = stripHtml(html);
+  const mesi = {gennaio:'01',febbraio:'02',marzo:'03',aprile:'04',maggio:'05',giugno:'06',
+    luglio:'07',agosto:'08',settembre:'09',ottobre:'10',novembre:'11',dicembre:'12'};
+  const blocchi = testo.split(/Estrazione\s+(?:SuperEnalotto|Super\s*Enalotto)\s+n\.\s*\d+/i);
+  for (const blocco of blocchi) {
+    const dataM = blocco.match(/(?:lunedì|martedì|mercoledì|giovedì|venerdì|sabato|domenica)\s+(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)\s+(\d{4})/i);
+    if (!dataM) continue;
+    const data = dataM[3]+'-'+mesi[dataM[2].toLowerCase()]+'-'+dataM[1].padStart(2,'0');
     if (new Date(data+'T12:00:00').getDay() !== 6) continue;
-
-    // Raccogli SOLO le celle <td> che contengono esclusivamente un numero
-    // (senza tag figli come <a>) → pattern: <td>SPAZI numero SPAZI</td>
-    const numeriCelle = [...riga.matchAll(/<td[^>]*>\s*(\d{1,2})\s*<\/td>/gi)]
-      .map(m => parseInt(m[1]))
-      .filter(n => n >= 1 && n <= 90);
-
-    // Devono essere esattamente 8: 6 numeri + jolly + superstar
-    if (numeriCelle.length < 8) continue;
-
-    const numeri = numeriCelle.slice(0, 6).sort((a,b) => a-b);
-    const jolly = numeriCelle[6] || null;
-    const superstar = numeriCelle[7] || null;
-
-    results.push({ data, numeri, jolly, superstar });
+    const nums = [...blocco.matchAll(/\b(\d{1,2})\b/g)].map(m => parseInt(m[1])).filter(n => n >= 1 && n <= 90);
+    const unici = [...new Set(nums)];
+    if (unici.length >= 6) {
+      const numeri = unici.slice(0,6).sort((a,b)=>a-b);
+      const jollyM = blocco.match(/Jolly[^0-9]*(\d{1,2})/i);
+      const jolly = jollyM ? parseInt(jollyM[1]) : null;
+      const superstarM = blocco.match(/SuperStar[^0-9]*(\d{1,2})/i);
+      const superstar = superstarM ? parseInt(superstarM[1]) : null;
+      results.push({ data, numeri, jolly, superstar });
+    }
   }
-
   return results;
 }
 
-// ============================================================
-// HANDLER
-// ============================================================
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -187,47 +150,28 @@ export default async function handler(req, res) {
     let parsed = [];
 
     if (tipo === '10elotto') {
-      const htmls = await Promise.all(
-        anni.map(a => fetchUrl('https://www.estrazionilotto.it/10-e-lotto/archivio-storico/'+a).catch(() => ''))
-      );
+      const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/10-e-lotto/archivio-storico/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parse10eLottoAnno(html));
-      parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'millionday') {
-      const htmls = await Promise.all(
-        anni.map(a => fetchUrl('https://archiviomillionday.it/archivio-million-day.php?anno='+a).catch(() => ''))
-      );
-      if (!htmls[0]) {
-        const main = await fetchUrl('https://archiviomillionday.it/archivio-million-day.php').catch(() => '');
-        if (main) htmls[0] = main;
-      }
+      const htmls = await Promise.all(anni.map(a => fetchUrl('https://milliondaylotto.it/archivio/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parseMillionDay(html));
-      parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'lotto') {
-      const htmls = await Promise.all(
-        anni.map(a => fetchUrl('https://www.estrazionilotto.it/lotto/archivio-storico/'+a).catch(() => ''))
-      );
+      const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/lotto/archivio-storico/' + a).catch(() => '')));
       for (const html of htmls) if (html) parsed = parsed.concat(parseLottoAnno(html, ruota));
-      parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else if (tipo === 'superenalotto') {
-      // Pagina "ultimo anno" sempre aggiornata — non serve passare l'anno
-      const html = await fetchUrl('https://www.tuttosuperenalotto.it/superenalotto-archivio-risultati-per-anno.asp').catch(() => '');
-      if (html) parsed = parseSuperEnalottoAnno(html);
-      parsed.sort((a,b) => new Date(b.data)-new Date(a.data));
+      const htmls = await Promise.all(anni.map(a => fetchUrl('https://www.estrazionilotto.it/superenalotto/archivio-storico/' + a).catch(() => '')));
+      for (const html of htmls) if (html) parsed = parsed.concat(parseSuperEnalottoAnno(html));
+      parsed.sort((a,b) => new Date(b.data) - new Date(a.data));
 
     } else {
       return res.status(400).json({ ok: false, error: 'Tipo non valido' });
     }
-
-    // Deduplicazione per data
-    const visti = new Set();
-    parsed = parsed.filter(e => {
-      if (visti.has(e.data)) return false;
-      visti.add(e.data);
-      return true;
-    });
 
     return res.status(200).json({
       ok: parsed.length > 0,
@@ -235,7 +179,6 @@ export default async function handler(req, res) {
       count: parsed.length,
       estrazioni: parsed
     });
-
   } catch (err) {
     return res.status(503).json({ ok: false, error: err.message, tipo, anno: annoNum });
   }
