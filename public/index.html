@@ -2235,7 +2235,7 @@ function renderAll(stats) {
 function renderUltima() {
   if (!allEstrazioni.length) return;
   const e = allEstrazioni[0];
-  const data = new Date(e.data).toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const data = new Date(e.data + 'T12:00:00').toLocaleDateString('it-IT', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
   let html = `
     <div class="estraz-meta">
@@ -2418,7 +2418,7 @@ function renderStorico() {
   <div class="storico-list">`;
 
   for (const e of allEstrazioni) {
-    const data = new Date(e.data).toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'});
+    const data = new Date(e.data + 'T12:00:00').toLocaleDateString('it-IT', {day:'2-digit',month:'2-digit',year:'numeric'});
     html += `
       <div class="storico-row">
         <div class="storico-data">📅 ${data}</div>
@@ -3665,6 +3665,13 @@ function simula() {
 // ============================================================
 // INIT
 // ============================================================
+// Carica mock immediatamente — la schermata non è mai vuota
+allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.slice().sort((a,b) => new Date(b.data) - new Date(a.data));
+if (allEstrazioni.length) {
+  const _statsMockInit = calcolaStatistiche(allEstrazioni);
+  renderAll(_statsMockInit);
+}
+
 window.onload = () => {
   renderMieGiocate();
   renderMieGiocateLotto();
@@ -3691,7 +3698,7 @@ function switchGioco(gioco) {
   document.getElementById('gsw-se').classList.toggle('active', gioco === 'superenalotto');
 
   if (gioco === '10elotto') {
-    document.getElementById('hdr-title').textContent = '10eLotto PRO';
+    document.getElementById('hdr-title').textContent = '🎰 10eLotto PRO';
     document.getElementById('hdr-sub').textContent = 'Centro Statistiche — Solo Sabati Sera · Ultimo Anno';
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = '');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
@@ -3703,7 +3710,7 @@ function switchGioco(gioco) {
     document.querySelectorAll('.nav-tab-se').forEach(t => t.style.display = 'none');
     showPanel('ultima');
   } else if (gioco === 'millionday') {
-    document.getElementById('hdr-title').textContent = 'MillionDay PRO';
+    document.getElementById('hdr-title').textContent = '💎 MillionDay PRO';
     document.getElementById('hdr-sub').textContent = 'Centro Statistiche — Solo Sabati Sera 20:30 · Ultimo Anno';
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = '');
@@ -3717,7 +3724,7 @@ function switchGioco(gioco) {
     if (!mdEstrazioni.length) loadMDData();
   } else if (gioco === 'lotto') {
     // Lotto classico
-    document.getElementById('hdr-title').textContent = 'Lotto Classico';
+    document.getElementById('hdr-title').textContent = '🎲 Lotto Classico';
     document.getElementById('hdr-sub').textContent = 'Previsioni & Statistiche — Ruota di Genova · Sabati';
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
@@ -3735,7 +3742,7 @@ function switchGioco(gioco) {
     if (!lottoEstrazioni[lottoRuota]) loadLottoData();
   } else if (gioco === 'superenalotto') {
     // SuperEnalotto
-    document.getElementById('hdr-title').textContent = 'SuperEnalotto PRO';
+    document.getElementById('hdr-title').textContent = '💰 SuperEnalotto PRO';
     document.getElementById('hdr-sub').textContent = 'Archivio Estrazioni & Verifiche — 2026';
     document.querySelectorAll('.panel-10e').forEach(p => p.style.display = 'none');
     document.querySelectorAll('.panel-md').forEach(p => p.style.display = 'none');
