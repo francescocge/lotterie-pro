@@ -2544,8 +2544,8 @@ function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
   // ── Auto-ottimizzazione pesi sulle prime 30 estrazioni disponibili ──────────
   var pOtt = ottimizzaPesi(estrazioni, maxN, gameSize, 30);
 
-  var A = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
-  var B = { h0:0, h1:0, h2:0, h3p:0, tot:0, totHit:0, maxHit:0 };
+  var A = { h0:0, h1:0, h2:0, h3:0, h4:0, h5p:0, tot:0, totHit:0, maxHit:0 };
+  var B = { h0:0, h1:0, h2:0, h3:0, h4:0, h5p:0, tot:0, totHit:0, maxHit:0 };
 
   for (var t = 1; t <= nTest; t++) {
     var hist   = estrazioni.slice(t);
@@ -2590,9 +2590,42 @@ function backtestAutomatico(estrazioni, maxN, gameSize, nTest) {
     }
     var hA = countHit(sA, target), hB = countHit(sB, target);
 
+    // ── Coppie frequenti: bonus se la coppia (n1,n2) è uscita ≥3 volte ─────
+    var coppieMap = {};
+    hist.slice(0, 20).forEach(function(e) {
+      var nums = e.numeri.filter(function(n){ return n>=1 && n<=maxN; });
+      for (var a=0; a<nums.length; a++) {
+        for (var b=a+1; b<nums.length; b++) {
+          var key = nums[a] < nums[b] ? nums[a]+'-'+nums[b] : nums[b]+'-'+nums[a];
+          coppieMap[key] = (coppieMap[key]||0) + 1;
+        }
+      }
+    });
+    var coppieBonus = new Float32Array(maxN + 1);
+    Object.keys(coppieMap).forEach(function(k) {
+      if (coppieMap[k] >= 3) {
+        var pp = k.split('-');
+        var na = parseInt(pp[0]), nb = parseInt(pp[1]);
+        if (na>=1&&na<=maxN) coppieBonus[na] += 0.05 * Math.min(coppieMap[k]-2, 3);
+        if (nb>=1&&nb<=maxN) coppieBonus[nb] += 0.05 * Math.min(coppieMap[k]-2, 3);
+      }
+    });
+
+    // Aggiorna scorer con bonus coppie
+    var scAOld = scA, scBOld = scB;
+    scA = function(n){ return scAOld(n) + coppieBonus[n]; };
+    scB = function(n){ return scBOld(n) + coppieBonus[n]; };
+    sA  = ids.slice().sort(function(a,b){ return scA(b)-scA(a); }).slice(0, gameSize);
+    sB  = ids.slice().sort(function(a,b){ return scB(b)-scB(a); }).slice(0, gameSize);
+
     function reg(st, h) {
       st.tot++; st.totHit+=h; if(h>st.maxHit) st.maxHit=h;
-      if(h===0)st.h0++; else if(h===1)st.h1++; else if(h===2)st.h2++; else st.h3p++;
+      if(h===0) st.h0++;
+      else if(h===1) st.h1++;
+      else if(h===2) st.h2++;
+      else if(h===3) st.h3++;
+      else if(h===4) st.h4++;
+      else st.h5p++;
     }
     reg(A, hA); reg(B, hB);
   }
@@ -2611,77 +2644,69 @@ function renderBacktestBanner(bt, nomeGioco) {
   var colA = pA>=50?'#3DEC7A':pA>=30?'#F5C842':'#FF6B6B';
   var colB = pB>=50?'#3DEC7A':pB>=30?'#F5C842':'#FF6B6B';
 
-  function semaforo(p) {
-    if (p>=50) return '🟢';
-    if (p>=30) return '🟡';
-    return '🔴';
+  function rigaBarra(emoji, label, count, tot, bg, col) {
+    var p = pct(count, tot);
+    if (!count) return '';
+    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+      + '<div style="font-size:14px;width:22px;text-align:center;flex-shrink:0">' + emoji + '</div>'
+      + '<div style="width:90px;font-size:12px;font-weight:600;color:#ddd;flex-shrink:0">' + label + '</div>'
+      + '<div style="flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:20px;overflow:hidden">'
+      +   '<div style="background:' + bg + ';width:' + Math.max(p,2) + '%;height:100%;border-radius:4px"></div>'
+      + '</div>'
+      + '<div style="width:40px;text-align:right;font-size:13px;font-weight:800;color:' + col + '">' + p + '%</div>'
+      + '<div style="width:30px;text-align:right;font-size:10px;color:#777">(' + count + ')</div>'
+      + '</div>';
   }
 
   function blocco(st, col, titolo, metodo) {
     var p = pct(st.tot-st.h0, st.tot);
-    var p0 = pct(st.h0, st.tot);
-    var p1 = pct(st.h1, st.tot);
-    var p2 = pct(st.h2, st.tot);
-    var p3 = pct(st.h3p, st.tot);
-    return '<div style="background:rgba(0,0,0,.30);border:2px solid '+col+';border-radius:14px;padding:16px;flex:1;min-width:0">'
-      // Titolo + % grande
-      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+    return '<div style="background:rgba(0,0,0,.32);border:2px solid ' + col + ';border-radius:14px;padding:16px;flex:1;min-width:0">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
       +   '<div>'
-      +     '<div style="font-size:13px;font-weight:800;color:#fff">'+titolo+'</div>'
-      +     '<div style="font-size:10px;color:#aaa;margin-top:2px">'+metodo+'</div>'
+      +     '<div style="font-size:13px;font-weight:800;color:#fff">' + titolo + '</div>'
+      +     '<div style="font-size:10px;color:#aaa;margin-top:2px">' + metodo + '</div>'
       +   '</div>'
       +   '<div style="text-align:center">'
-      +     '<div style="font-size:36px;font-weight:900;color:'+col+';line-height:1">'+p+'%</div>'
-      +     '<div style="font-size:10px;color:#aaa">almeno 1 indov.</div>'
+      +     '<div style="font-size:34px;font-weight:900;color:' + col + ';line-height:1">' + p + '%</div>'
+      +     '<div style="font-size:10px;color:#aaa">≥1 indovinato</div>'
       +   '</div>'
       + '</div>'
-      // Riga stats compatta
-      + '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'
-      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 10px;text-align:center;flex:1">'
-      +     '<div style="font-size:18px;font-weight:800;color:#fff">'+avg(st.totHit,st.tot)+'</div>'
-      +     '<div style="font-size:9px;color:#aaa">media/giocata</div>'
+      + '<div style="display:flex;gap:6px;margin-bottom:12px">'
+      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 8px;text-align:center;flex:1">'
+      +     '<div style="font-size:16px;font-weight:800;color:#fff">' + avg(st.totHit,st.tot) + '</div>'
+      +     '<div style="font-size:9px;color:#aaa">media</div>'
       +   '</div>'
-      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 10px;text-align:center;flex:1">'
-      +     '<div style="font-size:18px;font-weight:800;color:'+col+'">'+st.maxHit+'</div>'
+      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 8px;text-align:center;flex:1">'
+      +     '<div style="font-size:16px;font-weight:800;color:' + col + '">' + st.maxHit + '</div>'
       +     '<div style="font-size:9px;color:#aaa">record</div>'
       +   '</div>'
-      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 10px;text-align:center;flex:1">'
-      +     '<div style="font-size:18px;font-weight:800;color:#ccc">'+st.tot+'</div>'
+      +   '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:6px 8px;text-align:center;flex:1">'
+      +     '<div style="font-size:16px;font-weight:800;color:#ccc">' + st.tot + '</div>'
       +     '<div style="font-size:9px;color:#aaa">test</div>'
       +   '</div>'
       + '</div>'
-      // Barre orizzontali semplificate
-      + rigaBarra('⚪ Nessuno', p0, 'rgba(150,150,150,.35)', '#999')
-      + rigaBarra('🟡 1 indovinato', p1, 'rgba(245,200,66,.5)', '#F5C842')
-      + rigaBarra('🟢 2 indovinati', p2, 'rgba(61,236,122,.5)', '#3DEC7A')
-      + rigaBarra('🏆 3 o più', p3, 'rgba(61,236,122,.8)', '#3DEC7A')
-      + '</div>';
-  }
-
-  function rigaBarra(label, p, bg, col) {
-    if (!p) return '';
-    return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">'
-      + '<div style="font-size:12px;width:110px;color:#ccc;flex-shrink:0">'+label+'</div>'
-      + '<div style="flex:1;background:rgba(255,255,255,.07);border-radius:4px;height:18px;overflow:hidden">'
-      +   '<div style="background:'+bg+';width:'+Math.max(p,2)+'%;height:100%;border-radius:4px"></div>'
-      + '</div>'
-      + '<div style="font-size:13px;font-weight:800;color:'+col+';width:36px;text-align:right">'+p+'%</div>'
+      + rigaBarra('⚪', '0 indovinati', st.h0,  st.tot, 'rgba(150,150,150,.35)', '#888')
+      + rigaBarra('🟡', '1 indovinato', st.h1,  st.tot, 'linear-gradient(90deg,#8B6914,#F5C842)', '#F5C842')
+      + rigaBarra('🟢', '2 indovinati', st.h2,  st.tot, 'linear-gradient(90deg,#1A8A45,#3DEC7A)', '#3DEC7A')
+      + rigaBarra('✅', '3 indovinati', st.h3,  st.tot, 'linear-gradient(90deg,#0D6B35,#3DEC7A)', '#3DEC7A')
+      + rigaBarra('🎯', '4 indovinati', st.h4,  st.tot, 'linear-gradient(90deg,#C9A84C,#FFE066)', '#FFE066')
+      + rigaBarra('🏆', '5 o più',      st.h5p, st.tot, 'linear-gradient(90deg,#9B4DCA,#D67BFF)', '#D67BFF')
       + '</div>';
   }
 
   return '<div style="background:linear-gradient(135deg,rgba(15,25,55,.95),rgba(10,18,40,.95));border:1px solid rgba(122,172,255,.3);border-radius:16px;padding:16px;margin-bottom:18px">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
-    +   '<div style="font-size:13px;font-weight:800;color:#7AACFF;letter-spacing:1px">🔬 BACKTEST · '+nomeGioco+'</div>'
-    +   '<div style="font-size:11px;color:#aaa">'+bt.nTest+' estrazioni reali testate</div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">'
+    +   '<div style="font-size:13px;font-weight:800;color:#7AACFF;letter-spacing:1px">🔬 BACKTEST · ' + nomeGioco + '</div>'
+    +   '<div style="font-size:11px;color:#aaa">' + bt.nTest + ' estrazioni reali testate</div>'
     + '</div>'
     + '<div style="font-size:12px;color:#b0b8cc;padding:10px 12px;background:rgba(255,255,255,.04);border-radius:8px;border-left:3px solid #7AACFF;margin-bottom:14px;line-height:1.6">'
-    +   'Il motore ha simulato le previsioni su estrazioni <strong style="color:#fff">già avvenute</strong>, '
-    +   'senza guardare il risultato. La <strong style="color:#fff">% grande</strong> = quante volte avrebbe indovinato almeno 1 numero. '
+    +   'Previsioni simulate su estrazioni <strong style="color:#fff">già avvenute</strong>. '
+    +   'La <strong style="color:#fff">% grande</strong> = quante volte avrebbe indovinato almeno 1 numero. '
     +   '<span style="color:#F5C842">Non garantisce vincite future.</span>'
     + '</div>'
     + '<div style="display:flex;gap:12px;flex-wrap:wrap">'
-    +   blocco(A, colA, '🎯 Serie A', 'Ritardo + Frequenza')
-    +   blocco(B, colB, '⚡ Serie B', 'Momentum + Ritardo')
+    +   blocco(A, colA, '🎯 Serie A', 'Pesi ottimizzati + Anti-freddo + Coppie')
+    +   blocco(B, colB, '⚡ Serie B', 'Momentum + Ritardo + Coppie')
     + '</div>'
     + '</div>';
 }
