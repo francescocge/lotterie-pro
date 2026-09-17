@@ -2164,15 +2164,20 @@ async function loadAllData() {
   document.getElementById('last-upd').textContent = 'Caricamento in corso...';
 
   // ── STEP 1: Mostra SUBITO i mock data ──────────────────────
-  allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
-    .sort((a, b) => new Date(b.data) - new Date(a.data));
-  const statsMock = calcolaStatistiche(allEstrazioni);
-  lastUpdate = new Date();
-  renderAll(statsMock);
-  document.getElementById('badge-txt').textContent = '📊 Dati offline';
-  document.getElementById('last-upd').textContent =
-    '⚠️ Dati offline — ultima estrazione mock: ' + allEstrazioni[0].data
-    + ' — per dati reali aprire l\'app da server web';
+  try {
+    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
+      .slice()
+      .sort((a, b) => new Date(b.data+'T12:00:00') - new Date(a.data+'T12:00:00'));
+    const statsMock = calcolaStatistiche(allEstrazioni);
+    lastUpdate = new Date();
+    renderAll(statsMock);
+    document.getElementById('badge-txt').textContent = '📊 Dati offline';
+    document.getElementById('last-upd').textContent =
+      '⚠️ Dati offline — ultima estrazione mock: ' + allEstrazioni[0].data
+      + ' — per dati reali aprire l\'app da server web';
+  } catch(e) {
+    console.error('Step1 error:', e);
+  }
 
   // ── STEP 2: Prova API in background (max 4 sec) ─────────────
   try {
@@ -3665,17 +3670,24 @@ function simula() {
 // ============================================================
 // INIT
 // ============================================================
-// Carica mock immediatamente — la schermata non è mai vuota
-allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO.slice().sort((a,b) => new Date(b.data) - new Date(a.data));
-if (allEstrazioni.length) {
-  const _statsMockInit = calcolaStatistiche(allEstrazioni);
-  renderAll(_statsMockInit);
-}
-
 window.onload = () => {
-  renderMieGiocate();
-  renderMieGiocateLotto();
-  renderPremi10e();
+  try {
+    // Mostra subito i mock — sempre, prima di tutto
+    allEstrazioni = MOCK_ESTRAZIONI_10ELOTTO
+      .slice()
+      .sort((a,b) => new Date(b.data+'T12:00:00') - new Date(a.data+'T12:00:00'));
+    const _sm = calcolaStatistiche(allEstrazioni);
+    renderAll(_sm);
+    renderMieGiocate();
+    renderMieGiocateLotto();
+    renderPremi10e();
+    document.getElementById('badge-txt').textContent = '📊 Dati offline';
+    document.getElementById('last-upd').textContent =
+      'Dati mock caricati — premi Aggiorna per i dati reali';
+  } catch(e) {
+    console.error('Init error:', e);
+  }
+  // Poi prova i dati reali in background
   loadAllData();
 };
 // ============================================================
