@@ -3920,28 +3920,30 @@ function renderMDUltima() {
   const eMattina = mdEstrazioni13.find(e => e.data === eSera.data);
   
   function bloccoEstrazione(e, orario, label) {
-    if (!e) return `<div style="background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.1);border-radius:12px;padding:16px;text-align:center;color:var(--soft);font-size:12px">Estrazione ${orario} non disponibile</div>`;
-    const concorsoStr = e.concorso ? `<div style="font-size:10px;color:var(--soft);margin-bottom:8px">Concorso #${e.concorso}</div>` : '';
-    return \`<div style="background:rgba(0,0,0,.25);border:1px solid rgba(46,204,113,.2);border-radius:12px;padding:16px">
-      <div style="font-size:11px;font-weight:700;color:var(--verde);letter-spacing:1px;margin-bottom:6px">\${label} · \${orario}</div>
-      \${concorsoStr}
-      <div class="balls-wrap">\${e.numeri.map(n=>\`<div class="md-ball" style="width:38px;height:38px;font-size:13px">\${n}</div>\`).join('')}</div>
-      \${e.extra&&e.extra.length?\`<div style="font-size:10px;color:var(--soft);margin-top:10px;margin-bottom:4px">Extra MillionDay</div><div class="balls-wrap">\${e.extra.map(n=>\`<div class="ball n">\${n}</div>\`).join('')}</div>\`:''}
-    </div>\`;
+    if (!e) return '<div style="background:rgba(255,255,255,.04);border:1px dashed rgba(255,255,255,.1);border-radius:12px;padding:16px;text-align:center;color:var(--soft);font-size:12px">Estrazione ' + orario + ' non disponibile</div>';
+    const concorsoStr = e.concorso ? '<div style="font-size:10px;color:var(--soft);margin-bottom:8px">Concorso #' + e.concorso + '</div>' : '';
+    const ballsHtml = e.numeri.map(function(n){ return '<div class="md-ball" style="width:38px;height:38px;font-size:13px">' + n + '</div>'; }).join('');
+    const extraHtml = (e.extra && e.extra.length) ? '<div style="font-size:10px;color:var(--soft);margin-top:10px;margin-bottom:4px">Extra MillionDay</div><div class="balls-wrap">' + e.extra.map(function(n){ return '<div class="ball n">' + n + '</div>'; }).join('') + '</div>' : '';
+    return '<div style="background:rgba(0,0,0,.25);border:1px solid rgba(46,204,113,.2);border-radius:12px;padding:16px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--verde);letter-spacing:1px;margin-bottom:6px">' + label + ' · ' + orario + '</div>'
+      + concorsoStr
+      + '<div class="balls-wrap">' + ballsHtml + '</div>'
+      + extraHtml
+      + '</div>';
   }
 
-  document.getElementById('md-ultima-content').innerHTML = \`
-    <div class="estraz-meta">
-      <div class="estraz-data">\${dataSera}</div>
-      <div class="estraz-num">MillionDay — Ultimo Sabato</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
-      \${bloccoEstrazione(eMattina, '13:00', '☀️ Mattina')}
-      \${bloccoEstrazione(eSera,    '20:30', '🌙 Sera')}
-    </div>
-    <div style="font-size:10px;color:var(--soft);margin-top:12px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;border-left:2px solid rgba(46,204,113,.3)">
-      📊 Statistiche, previsioni e backtest usano solo l'estrazione delle 20:30
-    </div>\`;
+  document.getElementById('md-ultima-content').innerHTML =
+    '<div class="estraz-meta">'
+    + '<div class="estraz-data">' + dataSera + '</div>'
+    + '<div class="estraz-num">MillionDay — Ultimo Sabato</div>'
+    + '</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">'
+    + bloccoEstrazione(eMattina, '13:00', '☀️ Mattina')
+    + bloccoEstrazione(eSera,    '20:30', '🌙 Sera')
+    + '</div>'
+    + '<div style="font-size:10px;color:var(--soft);margin-top:12px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:8px;border-left:2px solid rgba(46,204,113,.3)">'
+    + '📊 Statistiche, previsioni e backtest usano solo l\'estrazione delle 20:30'
+    + '</div>';
 }
 
 function renderMDOverview() {
